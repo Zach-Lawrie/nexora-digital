@@ -286,3 +286,6 @@ footer nav a:hover{color:#fff}
 .cta-band h2{max-width:14em}
 
 .page-hero .lede + .btn{margin-top:28px}
+
+.earn .ticks{grid-template-columns:1fr}
+section[id]{scroll-margin-top:72px}
