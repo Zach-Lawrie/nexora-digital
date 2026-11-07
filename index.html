@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nexora Digital | Websites for Zimbabwe businesses</title>
+<meta name="description" content="Nexora Digital builds websites for Zimbabwe businesses. See a free sample first, then $300 to build and $40 a month for domain, hosting and updates.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBF9FF;
+  --ink:#231942;
+  --ink-soft:#5A5175;
+  --violet:#6C4CF1;
+  --violet-deep:#4E30D0;
+  --sun:#FFC63D;
+  --sun-soft:#FFF1C9;
+  --teal:#00A8B5;
+  --blush:#FFE6DA;
+  --line:#E7E1F5;
+  --white:#FFFFFF;
+  --radius-lg:28px;
+  --radius-md:16px;
+  --radius-sm:10px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.6 "Figtree",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+img,svg{display:block}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--violet);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1160px,100% - 40px);margin-inline:auto}
+h1,h2,h3{font-family:"Bricolage Grotesque",sans-serif;line-height:1.05;margin:0;letter-spacing:-.02em}
+h1{font-size:clamp(2.6rem,6.4vw,4.9rem);font-weight:800}
+h2{font-size:clamp(2rem,4.2vw,3.1rem);font-weight:800}
+h3{font-size:1.3rem;font-weight:700;letter-spacing:-.01em}
+p{margin:0}
+.lede{font-size:1.2rem;color:var(--ink-soft);max-width:34em}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:.55em;padding:.85em 1.4em;border-radius:999px;font:600 1rem "Figtree",sans-serif;text-decoration:none;border:2px solid transparent;cursor:pointer;transition:transform .15s ease,background .15s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn-main{background:var(--violet);color:#fff}
+.btn-main:hover{background:var(--violet-deep)}
+.btn-wa{background:#1FAF5A;color:#fff}
+.btn-wa:hover{background:#178a47}
+.btn-ghost{border-color:var(--ink);color:var(--ink);background:transparent}
+.btn svg{width:20px;height:20px}
+
+/* nav */
+header.top{position:sticky;top:0;z-index:20;background:rgba(251,249,255,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:72px;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand svg{width:40px;height:40px}
+.brand b{font:800 1.3rem "Bricolage Grotesque",sans-serif;letter-spacing:-.02em}
+.brand span span{font:600 .95rem "Figtree",sans-serif;color:var(--teal);margin-left:3px}
+.brand > span{color:var(--ink)}
+footer .brand > span{color:#fff}
+.nav ul{display:flex;gap:28px;list-style:none;margin:0;padding:0}
+.nav ul a{text-decoration:none;font-weight:500;color:var(--ink-soft)}
+.nav ul a:hover{color:var(--ink)}
+.nav .btn{padding:.6em 1.1em}
+@media (max-width:860px){.nav ul{display:none}}
+@media (max-width:480px){.nav .btn .long{display:none}.namebox{border-radius:22px}.namebox .btn{width:100%;justify-content:center}}
+
+/* hero */
+.hero{padding:64px 0 88px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;width:620px;height:620px;right:-140px;top:-120px;background:var(--sun-soft);border-radius:50%;z-index:-1}
+.hero-grid{display:grid;grid-template-columns:1.02fr 1fr;gap:56px;align-items:center}
+@media (max-width:960px){.hero-grid{grid-template-columns:1fr;gap:40px}}
+.hero h1{margin:18px 0 22px}
+.hello{display:inline-flex;align-items:center;gap:10px;background:var(--white);border:1px solid var(--line);padding:6px 14px 6px 8px;border-radius:999px;font-weight:600;font-size:.95rem}
+.hello i{width:26px;height:26px;border-radius:50%;background:var(--sun);display:grid;place-items:center;font-style:normal}
+.hero .lede{margin-bottom:30px}
+.namebox{display:flex;gap:10px;flex-wrap:wrap;background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:6px;max-width:520px}
+.namebox label{position:absolute;left:-9999px}
+.namebox input{flex:1;min-width:180px;border:0;background:transparent;font:500 1.05rem "Figtree",sans-serif;padding:.6em 1em;color:var(--ink)}
+.namebox input:focus{outline:none}
+.namebox:focus-within{box-shadow:0 0 0 4px rgba(108,76,241,.25)}
+.hint{font-size:.92rem;color:var(--ink-soft);margin-top:12px}
+.facts{display:flex;flex-wrap:wrap;gap:28px;margin-top:36px}
+.facts div{font-size:.95rem;color:var(--ink-soft)}
+.facts strong{display:block;font:800 1.6rem "Bricolage Grotesque",sans-serif;color:var(--ink)}
+
+/* the live sample */
+.sample{position:relative}
+.browser{background:var(--white);border-radius:var(--radius-lg);box-shadow:0 30px 60px -28px rgba(35,25,66,.45);overflow:hidden;border:1px solid var(--line);transform:rotate(1.4deg)}
+.bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:#F3EFFC;border-bottom:1px solid var(--line)}
+.bar i{width:11px;height:11px;border-radius:50%;background:#D9D1EE}
+.url{flex:1;margin-left:8px;background:var(--white);border-radius:999px;padding:5px 14px;font-size:.85rem;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.url b{color:var(--ink);font-weight:600}
+.site{padding:22px 22px 26px;transition:background .3s ease}
+.site-nav{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;margin-bottom:22px}
+.site-nav .logo{font:800 1rem "Bricolage Grotesque",sans-serif;display:flex;align-items:center;gap:8px}
+.site-nav .logo i{width:22px;height:22px;border-radius:7px;display:block}
+.site-nav span{opacity:.7;margin-left:12px}
+.site-hero{border-radius:18px;padding:26px 22px;min-height:178px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
+.site-hero h4{font:800 1.65rem/1.05 "Bricolage Grotesque",sans-serif;margin:0 0 6px;max-width:12em;position:relative}
+.site-hero p{font-size:.88rem;opacity:.85;position:relative}
+.site-hero .blob{position:absolute;right:-30px;top:-30px;width:150px;height:150px;border-radius:50%;opacity:.55}
+.site-hero .tag{position:relative;align-self:flex-start;margin-top:14px;font-size:.78rem;font-weight:700;padding:6px 12px;border-radius:999px;background:var(--white);color:var(--ink)}
+.site-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.site-row div{border-radius:12px;padding:12px;font-size:.78rem;font-weight:600;min-height:66px;display:flex;align-items:flex-end}
+.pickers{display:flex;gap:8px;flex-wrap:wrap;margin-top:26px;justify-content:center}
+.pickers button{font:600 .92rem "Figtree",sans-serif;padding:.55em 1em;border-radius:999px;border:1.5px solid var(--line);background:var(--white);color:var(--ink);cursor:pointer}
+.pickers button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sticker{position:absolute;left:-22px;top:-34px;background:var(--sun);color:var(--ink);font:800 1rem/1.1 "Bricolage Grotesque",sans-serif;padding:14px 16px;border-radius:18px;transform:rotate(-6deg);box-shadow:0 12px 24px -12px rgba(35,25,66,.5);max-width:150px}
+@media (max-width:600px){.sticker{left:auto;right:6px;top:-40px}.browser{transform:none}}
+
+/* sections */
+section{padding:96px 0}
+.head{max-width:640px;margin-bottom:48px}
+.head p{margin-top:16px;color:var(--ink-soft);font-size:1.12rem}
+
+/* included */
+.included{display:grid;grid-template-columns:repeat(3,1fr);gap:44px 48px}
+@media (max-width:860px){.included{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.included{grid-template-columns:1fr}}
+.included .ic{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;margin-bottom:16px}
+.included .ic svg{width:26px;height:26px}
+.included p{color:var(--ink-soft);margin-top:8px}
+
+/* price */
+.price-sec{background:var(--ink);color:#fff;border-radius:40px;margin-inline:12px;padding:88px 0}
+.price-sec .head p{color:#C9C1E3}
+.price-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:stretch}
+@media (max-width:900px){.price-grid{grid-template-columns:1fr}}
+.price-card{background:#fff;color:var(--ink);border-radius:var(--radius-lg);padding:36px}
+.amounts{display:flex;gap:36px;flex-wrap:wrap;align-items:flex-end;padding-bottom:26px;border-bottom:1px dashed var(--line);margin-bottom:24px}
+.amount .num{font:800 4rem/1 "Bricolage Grotesque",sans-serif;letter-spacing:-.03em}
+.amount .num sup{font-size:.45em;vertical-align:.9em;margin-right:2px}
+.amount .what{color:var(--ink-soft);font-weight:500;margin-top:6px}
+.amount.month .num{color:var(--violet)}
+.plus{font:700 2rem "Bricolage Grotesque",sans-serif;color:var(--ink-soft);padding-bottom:28px}
+.ticks{list-style:none;padding:0;margin:0 0 28px;display:grid;grid-template-columns:1fr 1fr;gap:12px 22px}
+@media (max-width:560px){.ticks{grid-template-columns:1fr}}
+.ticks li{display:flex;gap:10px;align-items:flex-start}
+.ticks li::before{content:"";flex:none;width:22px;height:22px;margin-top:2px;border-radius:50%;background:var(--sun) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23231942' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/14px no-repeat}
+.free-card{background:var(--sun);color:var(--ink);border-radius:var(--radius-lg);padding:36px;display:flex;flex-direction:column;justify-content:space-between;gap:24px}
+.free-card h3{font-size:2rem;line-height:1.05}
+.free-card p{font-size:1.05rem}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:28px;counter-reset:s}
+@media (max-width:900px){.steps{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.steps{grid-template-columns:1fr}}
+.steps li{counter-increment:s;position:relative;padding-top:74px}
+.steps li::before{content:counter(s);position:absolute;top:0;left:0;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font:800 1.5rem "Bricolage Grotesque",sans-serif;background:var(--blush);color:var(--ink)}
+.steps li:nth-child(2)::before{background:var(--sun-soft)}
+.steps li:nth-child(3)::before{background:#DDF5F7}
+.steps li:nth-child(4)::before{background:#E9E2FF}
+.steps li:not(:last-child)::after{content:"";position:absolute;top:28px;left:68px;right:-16px;border-top:2px dashed var(--line)}
+@media (max-width:900px){.steps li::after{display:none}}
+.steps p{color:var(--ink-soft);margin-top:8px}
+
+/* local */
+.local{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+@media (max-width:900px){.local{grid-template-columns:1fr;gap:36px}}
+.local-list{display:grid;gap:22px}
+.local-list > div{display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:start}
+.local-list .dot{width:44px;height:44px;border-radius:14px;background:var(--white);border:1px solid var(--line);display:grid;place-items:center}
+.local-list .dot svg{width:22px;height:22px}
+.local-list p{color:var(--ink-soft);margin-top:4px}
+.chat{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);padding:26px;display:grid;gap:12px;box-shadow:0 24px 48px -30px rgba(35,25,66,.35)}
+.bubble{max-width:82%;padding:12px 16px;border-radius:18px;font-size:.98rem}
+.bubble.them{background:#F1EEF9;border-bottom-left-radius:6px}
+.bubble.us{background:#DCF8C6;justify-self:end;border-bottom-right-radius:6px}
+.chat small{font-size:.75rem;color:var(--ink-soft);display:block;margin-top:4px}
+
+/* partner */
+.partner{background:var(--blush);border-radius:40px;margin-inline:12px}
+.partner-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:center}
+@media (max-width:900px){.partner-grid{grid-template-columns:1fr;gap:36px}}
+.partner .lede{margin:18px 0 28px}
+.earn{background:var(--white);border-radius:var(--radius-lg);padding:30px}
+.earn-row{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--line);gap:12px}
+.earn-row:last-of-type{border-bottom:0}
+.earn-row b{font:800 1.7rem "Bricolage Grotesque",sans-serif;color:var(--violet);white-space:nowrap}
+.calc{margin-top:18px;padding:20px;background:var(--paper);border-radius:var(--radius-md)}
+.calc label{font-weight:600;display:flex;justify-content:space-between}
+.calc input[type=range]{width:100%;margin:14px 0 10px;accent-color:var(--violet)}
+.calc .out{font-size:1.05rem}
+.calc .out strong{font:800 1.4rem "Bricolage Grotesque",sans-serif}
+
+/* faq */
+.faq{max-width:820px}
+.faq details{border-bottom:1px solid var(--line);padding:6px 0}
+.faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:18px 0;font:700 1.2rem "Bricolage Grotesque",sans-serif}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";flex:none;width:34px;height:34px;border-radius:50%;background:var(--sun-soft);display:grid;place-items:center;font:600 1.4rem "Figtree",sans-serif;transition:transform .2s ease}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq details p{padding:0 50px 20px 0;color:var(--ink-soft)}
+
+/* contact */
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:56px}
+@media (max-width:900px){.contact{grid-template-columns:1fr}}
+.contact-ways{display:grid;gap:14px;margin-top:28px}
+.way{display:flex;align-items:center;gap:16px;padding:18px 20px;background:var(--white);border:1px solid var(--line);border-radius:var(--radius-md);text-decoration:none}
+.way:hover{border-color:var(--violet)}
+.way .dot{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:none}
+.way small{display:block;color:var(--ink-soft)}
+.way b{font-weight:600}
+form{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);padding:32px;display:grid;gap:16px}
+form label{font-weight:600;font-size:.95rem;display:grid;gap:6px}
+form input,form select,form textarea{font:400 1rem "Figtree",sans-serif;padding:.8em 1em;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);color:var(--ink);width:100%}
+form input:focus,form select:focus,form textarea:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(108,76,241,.18)}
+form textarea{min-height:110px;resize:vertical}
+form .btn{justify-self:start}
+.form-note{font-size:.9rem;color:var(--ink-soft)}
+
+/* footer */
+footer{background:var(--ink);color:#C9C1E3;padding:56px 0 40px;margin-top:40px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:32px;align-items:flex-start}
+footer .brand b{color:#fff}
+footer p{max-width:30em;margin-top:14px}
+footer nav{display:flex;gap:22px;flex-wrap:wrap}
+footer nav a{text-decoration:none}
+footer nav a:hover{color:#fff}
+.copy{border-top:1px solid rgba(255,255,255,.12);margin-top:36px;padding-top:22px;font-size:.9rem}
+
+/* floating whatsapp */
+.wa-float{position:fixed;right:20px;bottom:20px;z-index:30;width:58px;height:58px;border-radius:50%;background:#1FAF5A;display:grid;place-items:center;box-shadow:0 12px 26px -10px rgba(0,0,0,.45)}
+.wa-float svg{width:30px;height:30px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="Nexora Digital home">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,4 89.8,27 89.8,73 50,96 10.2,73 10.2,27" fill="#6C4CF1"/><polygon points="50,14 81.2,32 81.2,68 50,86 18.8,68 18.8,32" fill="none" stroke="#00C2D1" stroke-width="3.7"/><path d="M35.3 66.9V33.1l29.4 33.8V33.1" fill="none" stroke="#fff" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="64.7" cy="33.1" r="5" fill="#00C2D1"/></svg>
+      <span><b>Nexora</b><span>Digital</span></span>
+    </a>
+    <ul>
+      <li><a href="#included">What you get</a></li>
+      <li><a href="#price">Price</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#partner">Sell with us</a></li>
+      <li><a href="#faq">Questions</a></li>
+    </ul>
+    <a class="btn btn-main" href="#contact">Free sample</a>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="hello"><i aria-hidden="true">👋</i>Websites for Zimbabwe businesses</span>
+      <h1>Your business, open online every hour of the day.</h1>
+      <p class="lede">We build a friendly, fast website for your shop, salon, church, school or company. You see a free sample first, and only pay when you love it.</p>
+      <form class="namebox" onsubmit="event.preventDefault();document.getElementById('contact').scrollIntoView();document.getElementById('f-biz').value=document.getElementById('bizname').value;">
+        <label for="bizname">Your business name</label>
+        <input id="bizname" type="text" placeholder="Type your business name" maxlength="40" autocomplete="organization">
+        <button class="btn btn-main" type="submit">Build my sample</button>
+      </form>
+      <p class="hint">Type your name and watch the sample website change.</p>
+      <div class="facts">
+        <div><strong>$300</strong>to build your site</div>
+        <div><strong>$40/mo</strong>domain, hosting and updates</div>
+        <div><strong>Free</strong>sample before you pay</div>
+      </div>
+    </div>
+
+    <div class="sample" aria-label="Example website preview">
+      <div class="browser">
+        <div class="bar"><i></i><i></i><i></i><div class="url">https://<b id="s-url">tendaisbakery</b>.co.zw</div></div>
+        <div class="site" id="s-site">
+          <div class="site-nav">
+            <div class="logo"><i id="s-logo"></i><span id="s-name" style="margin:0;opacity:1">Tendai's Bakery</span></div>
+            <div><span>Menu</span><span>About</span><span>Contact</span></div>
+          </div>
+          <div class="site-hero" id="s-hero">
+            <div class="blob" id="s-blob"></div>
+            <h4 id="s-head">Fresh bread every morning in Avondale.</h4>
+            <p id="s-sub">Order by WhatsApp and collect on your way to work.</p>
+            <span class="tag" id="s-tag">Order on WhatsApp</span>
+          </div>
+          <div class="site-row">
+            <div id="s-c1">Bread &amp; rolls</div>
+            <div id="s-c2">Birthday cakes</div>
+            <div id="s-c3">Find us</div>
+          </div>
+        </div>
+      </div>
+      <div class="sticker">Free sample. Pay only when you're happy.</div>
+      <div class="pickers" role="group" aria-label="Try a different business type">
+        <button type="button" data-kind="bakery" aria-pressed="true">Bakery</button>
+        <button type="button" data-kind="salon" aria-pressed="false">Salon</button>
+        <button type="button" data-kind="hardware" aria-pressed="false">Hardware</button>
+        <button type="button" data-kind="school" aria-pressed="false">School</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="included">
+  <div class="wrap">
+    <div class="head">
+      <h2>Everything you need to be found online</h2>
+      <p>No tech talk, no hidden extras. We set it all up and keep it running, so you can get on with your business.</p>
+    </div>
+    <div class="included">
+      <div>
+        <div class="ic" style="background:var(--sun-soft)"><svg viewBox="0 0 24 24" fill="none" stroke="#231942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M7 13h5M7 16h8"/></svg></div>
+        <h3>A website made for you</h3>
+        <p>Your colours, your photos, your words. Built to look good on phones, where most of your customers will see it.</p>
+      </div>
+      <div>
+        <div class="ic" style="background:#DDF5F7"><svg viewBox="0 0 24 24" fill="none" stroke="#231942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+        <h3>Your own domain</h3>
+        <p>We register a name like yourbusiness.co.zw or .com for you, so customers can find and remember you.</p>
+      </div>
+      <div>
+        <div class="ic" style="background:#E9E2FF"><svg viewBox="0 0 24 24" fill="none" stroke="#231942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="2"/><rect x="4" y="14" width="16" height="6" rx="2"/><path d="M8 7h.01M8 17h.01"/></svg></div>
+        <h3>Fast, safe hosting</h3>
+        <p>Your site stays online and loads quickly, even on slower mobile data. Secure padlock (HTTPS) included.</p>
+      </div>
+      <div>
+        <div class="ic" style="background:var(--blush)"><svg viewBox="0 0 24 24" fill="none" stroke="#231942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+        <h3>Updates when you need them</h3>
+        <p>New prices, new photos, a new special? Send us a WhatsApp and we'll change it for you.</p>
+      </div>
+      <div>
+        <div class="ic" style="background:var(--sun-soft)"><svg viewBox="0 0 24 24" fill="none" stroke="#231942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 20l1.3-5.1A8.5 8.5 0 1 1 21 11.5Z"/></svg></div>
+        <h3>WhatsApp buttons</h3>
+        <p>Customers tap once to message or call you straight from your website. Orders come to your phone.</p>
+      </div>
+      <div>
+        <div class="ic" style="background:#DDF5F7"><svg viewBox="0 0 24 24" fill="none" stroke="#231942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
+        <h3>Show up on Google</h3>
+        <p>We set up your site so Google can find it, and link it to your Google Maps listing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="price-sec" id="price">
+  <div class="wrap">
+    <div class="head">
+      <h2>One simple price</h2>
+      <p>Paid in US dollars. No surprise costs later.</p>
+    </div>
+    <div class="price-grid">
+      <div class="price-card">
+        <div class="amounts">
+          <div class="amount"><div class="num"><sup>$</sup>300</div><div class="what">once, to build your site</div></div>
+          <div class="plus" aria-hidden="true">+</div>
+          <div class="amount month"><div class="num"><sup>$</sup>40</div><div class="what">a month to keep it running</div></div>
+        </div>
+        <ul class="ticks">
+          <li>Custom design for your business</li>
+          <li>Works on phones, tablets and computers</li>
+          <li>Your domain name registered for you</li>
+          <li>Hosting with secure HTTPS</li>
+          <li>Updates and changes on request</li>
+          <li>WhatsApp and call buttons</li>
+          <li>Google and Google Maps setup</li>
+          <li>We keep your site online and backed up</li>
+        </ul>
+        <a class="btn btn-main" href="#contact">Get my free sample</a>
+      </div>
+      <div class="free-card">
+        <div>
+          <h3>See it before you pay a cent.</h3>
+          <p style="margin-top:14px">Tell us about your business and we'll build a sample of your website. If you like it, you pay and we finish it. If not, you've lost nothing.</p>
+        </div>
+        <a class="btn btn-wa" href="https://wa.me/61433427505?text=Hi%20Nexora%2C%20I%27d%20like%20a%20free%20sample%20website" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2.1 1.3 2.4 1.4.3.2.5.1.6 0l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg>
+          Ask on WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="head">
+      <h2>How it works</h2>
+      <p>From first chat to live website, usually within two weeks.</p>
+    </div>
+    <ol class="steps">
+      <li><h3>Tell us about your business</h3><p>A quick chat on WhatsApp: what you sell, who your customers are, and a few photos.</p></li>
+      <li><h3>See your free sample</h3><p>We build a sample of your site and send you the link. Ask for any changes you like.</p></li>
+      <li><h3>Pay and go live</h3><p>Happy with it? Pay $300, we register your domain and your site goes online.</p></li>
+      <li><h3>We look after it</h3><p>For $40 a month we keep it online, safe and up to date. Just message us when something changes.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section style="padding-top:24px">
+  <div class="wrap local">
+    <div>
+      <div class="head" style="margin-bottom:32px">
+        <h2>Made for doing business in Zimbabwe</h2>
+      </div>
+      <div class="local-list">
+        <div><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#6C4CF1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20M6 15h3"/></svg></span><div><h3>Pay in USD</h3><p>Simple pricing in US dollars, with easy payment options agreed with you.</p></div></div>
+        <div><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#6C4CF1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 9 16l10-10"/></svg></span><div><h3>Light on data</h3><p>Pages are kept small so they open quickly on Econet and NetOne mobile data.</p></div></div>
+        <div><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#6C4CF1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 20l1.3-5.1A8.5 8.5 0 1 1 21 11.5Z"/></svg></span><div><h3>Help on WhatsApp</h3><p>No call centres or tickets. Message us like you'd message a friend, and get a real reply.</p></div></div>
+        <div><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#6C4CF1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><div><h3>.co.zw or .com</h3><p>We'll help you choose and register the right domain name for your business.</p></div></div>
+      </div>
+    </div>
+    <div class="chat" aria-label="Example WhatsApp conversation">
+      <div class="bubble them">Hi Nexora, can you change our Saturday hours on the website? We now close at 4.<small>Rufaro's Salon · 09:12</small></div>
+      <div class="bubble us">Morning Rufaro! Done. Saturday now shows 8am to 4pm. Anything else?<small>Nexora · 09:20</small></div>
+      <div class="bubble them">That was quick, thank you 🙏<small>Rufaro's Salon · 09:21</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="partner" id="partner">
+  <div class="wrap partner-grid">
+    <div>
+      <h2>Know people who need a website? Earn with us.</h2>
+      <p class="lede">Become a Nexora sales partner. You find the clients and close the deal. We design, build and host the sites. You earn on every site, and every month after.</p>
+      <a class="btn btn-ghost" href="https://wa.me/61433427505?text=Hi%20Nexora%2C%20I%27d%20like%20to%20become%20a%20sales%20partner" target="_blank" rel="noopener">Become a partner</a>
+    </div>
+    <div class="earn">
+      <div class="earn-row"><span>For every site you sell</span><b>$120</b></div>
+      <div class="earn-row"><span>Every month, per client on hosting</span><b>$10</b></div>
+      <div class="calc">
+        <label for="sites">Sites you sell <output id="sites-out">10</output></label>
+        <input id="sites" type="range" min="1" max="50" value="10">
+        <p class="out">You earn <strong id="earn-once">$1,200</strong> upfront, plus <strong id="earn-month">$100</strong> every month while they stay.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="head"><h2>Questions people ask us</h2></div>
+    <div class="faq">
+      <details><summary>Do I really get to see my website before I pay?</summary><p>Yes. We build a sample of your site first and send you the link. You only pay the $300 when you're happy with how it looks.</p></details>
+      <details><summary>What does the $40 a month cover?</summary><p>Your domain name, hosting, security, backups and updates. When you want to change prices, photos or opening hours, send us a WhatsApp and we'll do it.</p></details>
+      <details><summary>How long does it take?</summary><p>Most sample sites are ready within a few days of getting your details and photos. Once you approve and pay, your site can be live soon after.</p></details>
+      <details><summary>I don't have a logo or good photos. Can you still help?</summary><p>Yes. We can work with photos from your phone, and help you put together a simple logo if you don't have one.</p></details>
+      <details><summary>Can I bring my existing domain?</summary><p>Yes. If you already own a domain name, we can connect your new website to it.</p></details>
+      <details><summary>What if I stop paying the monthly fee?</summary><p>The monthly fee keeps your site online. If you stop, the site goes offline, but we can bring it back when you're ready.</p></details>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap contact">
+    <div>
+      <h2>Let's get your business online</h2>
+      <p class="lede" style="margin-top:16px">Tell us a little about your business and we'll get started on your free sample.</p>
+      <div class="contact-ways">
+        <a class="way" href="https://wa.me/61433427505" target="_blank" rel="noopener"><span class="dot" style="background:#DCF8C6"><svg width="22" height="22" viewBox="0 0 24 24" fill="#1FAF5A" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Z"/></svg></span><span><small>WhatsApp</small><b>+61 433 427 505</b></span></a>
+        <a class="way" href="mailto:lorensomumba@gmail.com"><span class="dot" style="background:var(--sun-soft)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#231942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span><span><small>Email</small><b>lorensomumba@gmail.com</b></span></a>
+      </div>
+    </div>
+    <form id="lead">
+      <label>Your name<input id="f-name" required autocomplete="name"></label>
+      <label>Business name<input id="f-biz" required autocomplete="organization"></label>
+      <label>What kind of business?
+        <select id="f-type"><option>Shop or retail</option><option>Salon or beauty</option><option>Food or catering</option><option>Church or school</option><option>Company or professional service</option><option>Something else</option></select>
+      </label>
+      <label>Anything we should know?<textarea id="f-msg" placeholder="What you sell, where you are, colours you like..."></textarea></label>
+      <button class="btn btn-wa" type="submit">Send on WhatsApp</button>
+      <p class="form-note">This opens WhatsApp with your details filled in, ready to send.</p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="brand" href="#top"><svg viewBox="0 0 100 100" width="40" height="40" aria-hidden="true"><polygon points="50,4 89.8,27 89.8,73 50,96 10.2,73 10.2,27" fill="#6C4CF1"/><polygon points="50,14 81.2,32 81.2,68 50,86 18.8,68 18.8,32" fill="none" stroke="#00C2D1" stroke-width="3.7"/><path d="M35.3 66.9V33.1l29.4 33.8V33.1" fill="none" stroke="#fff" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="64.7" cy="33.1" r="5" fill="#00C2D1"/></svg><span><b>Nexora</b><span>Digital</span></span></a>
+        <p>Friendly websites for Zimbabwe businesses. Designed, built, hosted and looked after for you.</p>
+      </div>
+      <nav aria-label="Footer">
+        <a href="#included">What you get</a><a href="#price">Price</a><a href="#how">How it works</a><a href="#partner">Sell with us</a><a href="#contact">Contact</a>
+      </nav>
+    </div>
+    <div class="copy">© <span id="yr">2026</span> Nexora Digital. A SENATOR INVST company.</div>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/61433427505" target="_blank" rel="noopener" aria-label="Chat with Nexora on WhatsApp"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2.1 1.3 2.4 1.4.3.2.5.1.6 0l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg></a>
+
+<script>
+(function(){
+  var kinds={
+    bakery:{name:"Tendai's Bakery",head:"Fresh bread every morning in Avondale.",sub:"Order by WhatsApp and collect on your way to work.",tag:"Order on WhatsApp",cards:["Bread & rolls","Birthday cakes","Find us"],bg:"#FFF6E8",hero:"#FFC63D",blob:"#FF9F5A",ink:"#3B2208",c:["#FFE3B8","#FFD6C4","#F3E8D6"]},
+    salon:{name:"Rufaro's Salon",head:"Braids, wigs and nails in Borrowdale.",sub:"Book your chair in two taps. Walk-ins welcome.",tag:"Book a chair",cards:["Braids","Nails","Prices"],bg:"#FFF1F5",hero:"#F27BA4",blob:"#FFD1E0",ink:"#3D0F22",c:["#FFD6E4","#F9E2FF","#FFE9DD"]},
+    hardware:{name:"Moyo Hardware",head:"Cement, roofing and tools in Bulawayo.",sub:"Get a quote today. Delivery across the city.",tag:"Ask for a quote",cards:["Building","Plumbing","Delivery"],bg:"#F1F7F4",hero:"#2E8B57",blob:"#9BE3B8",ink:"#0E2A1A",c:["#D6F0E2","#E3EEE8","#FFF0C7"]},
+    school:{name:"Sunrise Academy",head:"Small classes. Big futures. Gweru.",sub:"Enrolling now for Form 1 and ECD.",tag:"Apply for 2027",cards:["Admissions","Fees","Contact"],bg:"#EFF4FF",hero:"#4C6EF5",blob:"#A9C1FF",ink:"#0F1B4D",c:["#DCE6FF","#E9E2FF","#DDF5F7"]}
+  };
+  var $=function(id){return document.getElementById(id)};
+  var current="bakery", typed="";
+  function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,"").slice(0,24)||"yourbusiness"}
+  function render(){
+    var k=kinds[current], name=typed||k.name;
+    $("s-name").textContent=name;
+    $("s-url").textContent=slug(name);
+    $("s-head").textContent=k.head; $("s-sub").textContent=k.sub; $("s-tag").textContent=k.tag;
+    $("s-site").style.background=k.bg; $("s-site").style.color=k.ink;
+    $("s-hero").style.background=k.hero; $("s-hero").style.color=(current==="bakery")?k.ink:"#fff";
+    $("s-blob").style.background=k.blob; $("s-logo").style.background=k.hero;
+    ["s-c1","s-c2","s-c3"].forEach(function(id,i){$(id).textContent=k.cards[i];$(id).style.background=k.c[i]});
+  }
+  document.querySelectorAll(".pickers button").forEach(function(b){
+    b.addEventListener("click",function(){
+      current=b.dataset.kind;
+      document.querySelectorAll(".pickers button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false")});
+      render();
+    });
+  });
+  $("bizname").addEventListener("input",function(e){typed=e.target.value.trim();render()});
+  render();
+
+  var r=$("sites");
+  function calc(){var n=+r.value;$("sites-out").textContent=n;$("earn-once").textContent="$"+(n*120).toLocaleString();$("earn-month").textContent="$"+(n*10).toLocaleString()}
+  r.addEventListener("input",calc);calc();
+
+  $("lead").addEventListener("submit",function(e){
+    e.preventDefault();
+    var t="Hi Nexora, I'd like a free sample website.\n\nName: "+$("f-name").value+"\nBusiness: "+$("f-biz").value+"\nType: "+$("f-type").value+($("f-msg").value?"\n\n"+$("f-msg").value:"");
+    window.open("https://wa.me/61433427505?text="+encodeURIComponent(t),"_blank","noopener");
+  });
+  $("yr").textContent=new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
