@@ -50,8 +50,8 @@
       var n = +$("sites").value;
       var web = $("c-web") ? +$("c-web").value : 180, host = $("c-host") ? +$("c-host").value : 15;
       $("sites-out").textContent = n;
-      $("earn-once").textContent = money(n * web * 0.4);
-      $("earn-month").textContent = money(n * host * 0.25);
+      $("earn-once").textContent = money(n * web * 0.3);
+      $("earn-month").textContent = money(n * host * 0.2);
     };
     ["sites", "c-web", "c-host"].forEach(function (id) { if ($(id)) $(id).addEventListener("input", calc); });
     calc();
