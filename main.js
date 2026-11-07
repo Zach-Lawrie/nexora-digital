@@ -31,7 +31,7 @@
     CAKES.calendar = '<svg viewBox="0 0 100 100"><rect x="18" y="24" width="64" height="62" rx="9" fill="#fff" stroke="#C99A2E" stroke-width="4"/><path d="M18 33a9 9 0 0 1 9-9h46a9 9 0 0 1 9 9v9H18z" fill="#F2C14E"/><path d="M34 16v14M66 16v14" stroke="#C99A2E" stroke-width="5" stroke-linecap="round"/><circle cx="38" cy="58" r="5" fill="#2F4A8A"/><circle cx="62" cy="58" r="5" fill="#C99A2E"/><circle cx="38" cy="74" r="5" fill="#C99A2E"/><circle cx="62" cy="74" r="5" fill="#2F4A8A"/></svg>';
     CAKES.heart = '<svg viewBox="0 0 100 100"><path d="M50 84C20 62 14 46 22 34c8-11 22-9 28 2 6-11 20-13 28-2 8 12 2 28-28 50z" fill="#4CAF7A"/></svg>';
     kinds.church = { name: "Great Hope SDA Church", head: "Welcome home. Worship with us this Sabbath.", sub: "Sabbath School at 9am, Divine Service at 11am. Everyone is welcome.", tag: "Plan your visit", cards: ["Sermons", "Events", "Give"], bg: "#F3F6FB", hero: "#2F4A8A", blob: "#F2C14E", ink: "#14213D", light: true, c: ["#E3EAF7", "#FFF3D1", "#E6F4EA"], pics: ["mic", "calendar", "heart"], heroPic: "chapel", logoPic: "chapelLogo" };
-    var current = "cakes", typed = "";
+    var current = "salon", typed = "";
     var slug = function (s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 24) || "yourbusiness"; };
     var render = function () {
       var k = kinds[current], name = typed || k.name;
