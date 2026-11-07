@@ -329,3 +329,11 @@ footer nav a:hover{color:var(--ink)}
 .work-body p{color:var(--ink-soft)}
 .work-body .go{font-weight:700;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px;text-decoration-color:var(--teal);margin-top:6px}
 @media (max-width:1040px) and (min-width:861px){.nav ul{gap:18px}}
+
+/* cake pictures in the sample site */
+.site-row div{flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:6px}
+.card-pic svg{width:52px;height:52px;display:block}
+.hero-pic{position:absolute;right:10px;bottom:-4px;width:150px;height:150px}
+.hero-pic svg{width:100%;height:100%}
+.hero-pic:not(:empty) ~ h4,.hero-pic:not(:empty) ~ p{max-width:calc(100% - 140px)}
+@media (max-width:480px){.hero-pic{width:104px;height:104px}.hero-pic:not(:empty) ~ h4,.hero-pic:not(:empty) ~ p{max-width:calc(100% - 92px)}}

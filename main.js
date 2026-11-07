@@ -15,12 +15,17 @@
   // Home: live sample website
   if ($("s-site")) {
     var kinds = {
-      bakery: { name: "Tendai's Bakery", head: "Fresh bread every morning in Avondale.", sub: "Order by WhatsApp and collect on your way to work.", tag: "Order on WhatsApp", cards: ["Bread & rolls", "Birthday cakes", "Find us"], bg: "#FFF6E8", hero: "#FFC63D", blob: "#FF9F5A", ink: "#3B2208", light: false, c: ["#FFE3B8", "#FFD6C4", "#F3E8D6"] },
+      cakes: { name: "Eunice's Cakes", head: "Cakes for every celebration.", sub: "Weddings, birthdays, baby showers and more. Order on WhatsApp.", tag: "Order a cake", cards: ["Wedding cakes", "Birthday cakes", "Cupcakes"], bg: "#FFF4F7", hero: "#FFB3C8", blob: "#FFD9E4", ink: "#4A1530", light: false, c: ["#FFE4EC", "#FFF1D6", "#E3F4FE"], pics: ["wedding", "birthday", "cupcake"], heroPic: "birthday" },
       salon: { name: "Rufaro's Salon", head: "Braids, wigs and nails in Borrowdale.", sub: "Book your chair in two taps. Walk-ins welcome.", tag: "Book a chair", cards: ["Braids", "Nails", "Prices"], bg: "#FFF1F5", hero: "#E0638F", blob: "#FFD1E0", ink: "#3D0F22", light: true, c: ["#FFD6E4", "#F9E2FF", "#FFE9DD"] },
       hardware: { name: "Moyo Hardware", head: "Cement, roofing and tools in Bulawayo.", sub: "Get a quote today. Delivery across the city.", tag: "Ask for a quote", cards: ["Building", "Plumbing", "Delivery"], bg: "#F1F7F4", hero: "#2E8B57", blob: "#9BE3B8", ink: "#0E2A1A", light: true, c: ["#D6F0E2", "#E3EEE8", "#FFF0C7"] },
       school: { name: "Sunrise Academy", head: "Small classes. Big futures. Gweru.", sub: "Enrolling now for Form 1 and ECD.", tag: "Apply for 2027", cards: ["Admissions", "Fees", "Contact"], bg: "#EFF4FF", hero: "#4C6EF5", blob: "#A9C1FF", ink: "#0F1B4D", light: true, c: ["#DCE6FF", "#E9E2FF", "#DDF5F7"] }
     };
-    var current = "bakery", typed = "";
+    var CAKES = {
+      wedding: '<svg viewBox="0 0 100 100"><rect x="12" y="88" width="76" height="5" rx="2.5" fill="#E7C9D4"/><rect x="18" y="66" width="64" height="23" rx="5" fill="#fff"/><rect x="26" y="46" width="48" height="21" rx="5" fill="#FFF8F0"/><rect x="34" y="28" width="32" height="19" rx="5" fill="#fff"/><path d="M18 73h64M26 53h48M34 35h32" stroke="#FF8FB1" stroke-width="3"/><circle cx="30" cy="80" r="2.5" fill="#FF8FB1"/><circle cx="50" cy="80" r="2.5" fill="#FF8FB1"/><circle cx="70" cy="80" r="2.5" fill="#FF8FB1"/><path d="M50 27c-3-6-12-3-8 3l8 7 8-7c4-6-5-9-8-3z" fill="#FF5C8A"/></svg>',
+      birthday: '<svg viewBox="0 0 100 100"><rect x="12" y="86" width="76" height="5" rx="2.5" fill="#E7C9D4"/><rect x="20" y="50" width="60" height="37" rx="7" fill="#8A4B33"/><path d="M20 58q0-8 8-8h44q8 0 8 8v3q-4 7-8 0-4 9-8 0-4 7-8 0-4 9-8 0-4 7-8 0-4 9-8 0-4 7-8 0z" fill="#FFD3E0"/><rect x="34" y="32" width="5" height="18" rx="2" fill="#7CC8F8"/><rect x="47.5" y="30" width="5" height="20" rx="2" fill="#B6EE3A"/><rect x="61" y="32" width="5" height="18" rx="2" fill="#7CC8F8"/><ellipse cx="36.5" cy="27" rx="3" ry="5" fill="#FFC43D"/><ellipse cx="50" cy="25" rx="3" ry="5" fill="#FFC43D"/><ellipse cx="63.5" cy="27" rx="3" ry="5" fill="#FFC43D"/><g fill="#fff"><rect x="28" y="72" width="5" height="2" rx="1" transform="rotate(30 30 73)"/><rect x="44" y="76" width="5" height="2" rx="1" transform="rotate(-25 46 77)"/><rect x="60" y="72" width="5" height="2" rx="1" transform="rotate(20 62 73)"/><rect x="68" y="79" width="5" height="2" rx="1" transform="rotate(-35 70 80)"/></g></svg>',
+      cupcake: '<svg viewBox="0 0 100 100"><path d="M30 58h40l-6 30H36z" fill="#9AD0F5"/><path d="M38 58l3 30M50 58v30M62 58l-3 30" stroke="#fff" stroke-width="2.5" opacity=".7"/><circle cx="38" cy="54" r="11" fill="#FFB5CB"/><circle cx="62" cy="54" r="11" fill="#FFB5CB"/><circle cx="50" cy="44" r="13" fill="#FFC9D8"/><path d="M50 30q3-8 9-9" stroke="#3E8E2F" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="50" cy="31" r="5.5" fill="#E8335D"/></svg>'
+    };
+    var current = "cakes", typed = "";
     var slug = function (s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 24) || "yourbusiness"; };
     var render = function () {
       var k = kinds[current], name = typed || k.name;
@@ -30,7 +35,13 @@
       $("s-site").style.background = k.bg; $("s-site").style.color = k.ink;
       $("s-hero").style.background = k.hero; $("s-hero").style.color = k.light ? "#fff" : k.ink;
       $("s-blob").style.background = k.blob; $("s-logo").style.background = k.hero;
-      ["s-c1", "s-c2", "s-c3"].forEach(function (id, i) { $(id).textContent = k.cards[i]; $(id).style.background = k.c[i]; });
+      ["s-c1", "s-c2", "s-c3"].forEach(function (id, i) {
+        var el = $(id); el.textContent = "";
+        if (k.pics) { var pic = document.createElement("span"); pic.className = "card-pic"; pic.innerHTML = CAKES[k.pics[i]]; el.appendChild(pic); }
+        el.appendChild(document.createTextNode(k.cards[i])); el.style.background = k.c[i];
+      });
+      $("s-pic").innerHTML = k.heroPic ? CAKES[k.heroPic] : "";
+      $("s-blob").style.display = k.heroPic ? "none" : "";
     };
     document.querySelectorAll(".pickers button").forEach(function (b) {
       b.addEventListener("click", function () {
