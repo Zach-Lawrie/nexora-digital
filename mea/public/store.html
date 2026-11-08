@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MEA Store</title>
+<meta name="description" content="MEA Store: PLCs, instrumentation, motor control, electrical and training equipment for Zimbabwe and Australia.">
+<link rel="icon" href="/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@600;700&display=swap">
+<link rel="stylesheet" href="/app.css">
+<style>
+.shop{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+@media (max-width:920px){.shop{grid-template-columns:1fr}}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.filters input{max-width:280px}
+.chip{font:600 13px var(--f-body);padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--charcoal);color:var(--on-charcoal);border-color:var(--charcoal)}
+.prod{display:flex;flex-direction:column;gap:8px}
+.prod .cat{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.prod .price{font:700 20px var(--f-head);font-variant-numeric:tabular-nums}
+.prod .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cart{position:sticky;top:76px}
+.line{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.qty{display:flex;align-items:center;gap:4px}
+.qty button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font-weight:700}
+.total{display:flex;justify-content:space-between;font:700 18px var(--f-head);padding-top:10px}
+.hero{background:var(--charcoal);color:var(--on-charcoal);border-radius:18px;padding:24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:22px}
+.hero p{color:#b8c3d3;margin-top:6px;max-width:60ch}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/logo.png" alt="MEA"><div><b>MEA Store</b><span>Industrial equipment and spares</span></div></a>
+  <nav class="topnav" id="topnav" aria-label="Main"></nav>
+</div></header>
+<main class="wrap">
+  <div class="hero"><div><h1>Equipment for plants, panels and classrooms</h1><p>PLCs, instruments, drives, electrical gear and training kits. Order online, pay by bank transfer, EcoCash or PayID, and collect or have it delivered.</p></div>
+    <button class="btn ghost" id="trackBtn" style="color:#fff;border-color:#fff">Track an order</button></div>
+  <div class="shop">
+    <section>
+      <div class="filters"><label style="flex:1;min-width:200px"><span class="small muted">Search</span><input id="q" type="search" placeholder="Search part number, brand or name"></label></div>
+      <div class="filters" id="cats"></div>
+      <div id="list"><p class="muted">Loading products…</p></div>
+    </section>
+    <aside class="card cart" id="cart"></aside>
+  </div>
+</main>
+<footer class="foot"><div class="wrap">Can't find a part? <a href="/#contact">Send a part request</a> with the model number and MEA will source it.</div></footer>
+<script src="/app.js"></script>
+<script>
+(function () {
+  const { $, $$, esc, api, toast, dialog, formData, submit, money } = MEA;
+  let products = [], cat = 'All', cart = {};
+  try { cart = JSON.parse(localStorage.getItem('mea-cart') || '{}') || {}; } catch (e) { cart = {}; }
+  const save = () => { try { localStorage.setItem('mea-cart', JSON.stringify(cart)); } catch (e) {} };
+
+  api('/me').then((r) => MEA.header(r.user, 'store')).catch(() => MEA.header(null));
+  load();
+  async function load() {
+    try { products = (await api('/products')).products; }
+    catch (e) { $('#list').innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
+    Object.keys(cart).forEach((id) => { if (!products.some((p) => p.id == id)) delete cart[id]; });
+    renderCats(); renderList(); renderCart();
+  }
+  function renderCats() {
+    const cats = ['All', ...new Set(products.map((p) => p.category))];
+    $('#cats').innerHTML = cats.map((c) => `<button class="chip" type="button" aria-pressed="${c === cat}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
+    $$('[data-c]').forEach((b) => b.addEventListener('click', () => { cat = b.dataset.c; renderCats(); renderList(); }));
+  }
+  $('#q').addEventListener('input', renderList);
+  function renderList() {
+    const q = $('#q').value.trim().toLowerCase();
+    const list = products.filter((p) => (cat === 'All' || p.category === cat) && (!q || [p.name, p.sku, p.brand, p.description].join(' ').toLowerCase().includes(q)));
+    if (!products.length) { $('#list').innerHTML = `<div class="card stack"><h2>The shop is being stocked</h2><p class="muted">Products will appear here soon. Need something now? Send MEA a part request with the model number.</p><div><a class="btn" href="/#contact">Request a part</a></div></div>`; return; }
+    $('#list').innerHTML = list.length ? `<div class="grid">${list.map((p) => `<div class="card prod">
+      <span class="cat">${esc(p.category)}${p.brand ? ' · ' + esc(p.brand) : ''}</span>
+      <h3>${esc(p.name)}</h3><span class="small muted">Part no. ${esc(p.sku)}</span>
+      ${p.description ? `<p class="small muted">${esc(p.description)}</p>` : ''}
+      <div class="foot"><span class="price">${money(p.price)}</span>
+        ${p.stock > 0 ? `<button class="btn sm" data-add="${p.id}">Add to cart</button>` : '<span class="pill grey">Out of stock</span>'}</div>
+      <span class="small muted">${p.stock > 0 ? (p.stock <= 5 ? 'Only ' + p.stock + ' left' : 'In stock') : 'Ask us for a lead time'}</span>
+    </div>`).join('')}</div>` : '<p class="muted">No products match. Try another word or category.</p>';
+    $$('[data-add]').forEach((b) => b.addEventListener('click', () => {
+      const p = products.find((x) => x.id == b.dataset.add);
+      const q = (cart[p.id] || 0) + 1;
+      if (q > p.stock) return toast(`Only ${p.stock} in stock`, true);
+      cart[p.id] = q; save(); renderCart(); toast(p.name + ' added');
+    }));
+  }
+  function lines() { return Object.entries(cart).map(([id, q]) => ({ p: products.find((x) => x.id == id), q })).filter((l) => l.p); }
+  function renderCart() {
+    const ls = lines(), total = ls.reduce((s, l) => s + l.p.price * l.q, 0);
+    $('#cart').innerHTML = `<h2>Your cart</h2>${ls.length ? ls.map((l) => `<div class="line"><span><b>${esc(l.p.name)}</b><br><span class="small muted">${esc(l.p.sku)} · ${money(l.p.price)} each</span></span>
+      <span class="qty"><button type="button" data-d="${l.p.id}" aria-label="One less">−</button><b class="num">${l.q}</b><button type="button" data-i="${l.p.id}" aria-label="One more">+</button></span></div>`).join('')
+      + `<div class="total"><span>Total</span><span class="num">${money(total)}</span></div><p class="small muted">Prices in USD. Delivery is quoted separately.</p><button class="btn" id="checkout" style="width:100%;margin-top:10px">Check out</button>`
+      : '<p class="muted small" style="margin-top:8px">Your cart is empty. Add products to order them.</p>'}`;
+    $$('[data-i]').forEach((b) => b.addEventListener('click', () => { const p = products.find((x) => x.id == b.dataset.i); if (cart[p.id] + 1 > p.stock) return toast(`Only ${p.stock} in stock`, true); cart[p.id]++; save(); renderCart(); }));
+    $$('[data-d]').forEach((b) => b.addEventListener('click', () => { cart[b.dataset.d]--; if (cart[b.dataset.d] <= 0) delete cart[b.dataset.d]; save(); renderCart(); }));
+    const c = $('#checkout'); if (c) c.addEventListener('click', checkout);
+  }
+  function checkout() {
+    const ls = lines(), total = ls.reduce((s, l) => s + l.p.price * l.q, 0);
+    dialog(`<h2>Check out</h2><p class="muted">${ls.length} item${ls.length > 1 ? 's' : ''} · <b>${money(total)}</b></p>
+      <form class="form" id="coForm">
+        <div class="two"><label>Full name<input name="name" autocomplete="name" required></label><label>Phone (WhatsApp)<input name="phone" type="tel" autocomplete="tel" required></label></div>
+        <div class="two"><label>Email<input name="email" type="email" autocomplete="email" required></label><label>Country<select name="country"><option>Zimbabwe</option><option>Australia</option><option>Other</option></select></label></div>
+        <label>How do you want it?<select name="delivery" id="dl"><option value="collect">Collect from MEA</option><option value="deliver">Deliver to me (delivery quoted)</option></select></label>
+        <label id="addr" hidden>Delivery address<textarea name="address" rows="2"></textarea></label>
+        <label>Notes for MEA (optional)<textarea name="notes" rows="2" placeholder="Company name, order reference, urgency"></textarea></label>
+        <p class="err" id="coErr"></p>
+        <div class="actions"><button class="btn ghost" type="button" data-close>Back to cart</button><button class="btn" type="submit">Place order</button></div>
+      </form>`, (d) => {
+      $('#dl', d).onchange = (e) => { $('#addr', d).hidden = e.target.value !== 'deliver'; };
+      $('#coForm', d).addEventListener('submit', (e) => {
+        e.preventDefault();
+        submit(e.submitter, async () => {
+          const r = await api('/orders', { ...formData(e.target), items: ls.map((l) => ({ id: l.p.id, qty: l.q })) });
+          cart = {}; save(); d.close(); load();
+          dialog(`<h2>Order placed</h2><p>Your order number is</p><div class="secret">${esc(r.order.number)}</div>
+            <p>Total <b>${money(r.order.total)}</b>. MEA will contact you on WhatsApp or email to confirm stock and send payment details (bank transfer, EcoCash or PayID). Your order is reserved while we wait for payment.</p>
+            <p class="small muted">Keep the order number to track your order here.</p><div class="actions"><button class="btn" data-close>Done</button></div>`);
+        }, $('#coErr', d));
+      });
+    });
+  }
+  $('#trackBtn').addEventListener('click', () => dialog(`<h2>Track an order</h2>
+    <form class="form" id="tkForm"><label>Order number<input name="number" placeholder="MEA-261108-ABCD" required></label><label>Email used for the order<input name="email" type="email" required></label>
+    <p class="err" id="tkErr"></p><div id="tkOut"></div><div class="actions"><button class="btn ghost" type="button" data-close>Close</button><button class="btn" type="submit">Find order</button></div></form>`,
+    (d) => $('#tkForm', d).addEventListener('submit', (e) => {
+      e.preventDefault();
+      submit(e.submitter, async () => {
+        const { order: o } = await api('/orders/lookup', formData(e.target));
+        $('#tkOut', d).innerHTML = `<div class="card stack"><div class="cardhead" style="margin:0"><b>${esc(o.number)}</b>${MEA.pill(o.status)}</div>
+          ${o.items.map((i) => `<div class="small">${i.qty} × ${esc(i.name)}</div>`).join('')}<b>Total ${money(o.total)}</b><span class="small muted">Placed ${MEA.date(o.created_at)}</span></div>`;
+      }, $('#tkErr', d));
+    })));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MEA Portal</title>
+<meta name="description" content="Sign in to the MEA portal: students, teachers and MEA departments.">
+<link rel="icon" href="/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@600;700&display=swap">
+<link rel="stylesheet" href="/app.css">
+<style>
+.course{display:grid;gap:10px}
+.course .meta{display:flex;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.enrol{display:grid;gap:10px}
+.enrol .row{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.results{font-size:14px;display:grid;gap:4px}
+.results div{display:flex;justify-content:space-between;gap:10px;border-top:1px dashed var(--line);padding-top:4px}
+.cert{border:6px double var(--charcoal);padding:34px 28px;text-align:center;display:grid;gap:10px;background:#fff;color:#1b1f26}
+.cert img{height:70px;margin:0 auto}
+.cert h2{font-size:28px;letter-spacing:.02em}
+.cert .name{font:700 26px var(--f-head);border-bottom:1px solid #999;padding-bottom:6px;margin:6px 30px}
+.cert small{color:#555}
+.inline{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.inline input[type=range]{width:120px;padding:0}
+.inline input[type=number]{width:74px}
+@media print{body.pc main,body.pc .top,body.pc footer{display:none!important} body.pc dialog{box-shadow:none;max-width:none;width:100%} body.pc .dlg .actions{display:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/logo.png" alt="MEA"><div><b>MEA Portal</b><span>Students · Teachers · Departments</span></div></a>
+  <nav class="topnav" id="topnav" aria-label="Main"></nav>
+</div></header>
+<main class="wrap" id="root"><p class="muted">Loading…</p></main>
+<footer class="foot"><div class="wrap">MEA · Mechanical, Electrical &amp; Automation · Australia | Zimbabwe</div></footer>
+<script src="/app.js"></script>
+<script>
+(function () {
+  const { $, $$, esc, api, toast, dialog, formData, submit, table, pill, money, date, label, DEPTS } = MEA;
+  const root = $('#root');
+  let me = null, tab = null;
+
+  async function boot() {
+    try { me = (await api('/me')).user; } catch (e) { me = null; }
+    MEA.header(me, 'portal');
+    if (!me) return authView();
+    if (me.must_change) return MEA.changePasswordView(root, me, boot);
+    render();
+  }
+
+  /* ---------- sign in / sign up ---------- */
+  function authView(mode) {
+    mode = mode || (location.hash === '#signup' ? 'signup' : 'signin');
+    root.innerHTML = `<div class="authbox"><div class="card stack">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" data-m="signin" aria-selected="${mode === 'signin'}">Sign in</button>
+        <button type="button" role="tab" data-m="signup" aria-selected="${mode === 'signup'}">New student</button>
+      </div>
+      ${mode === 'signin' ? `
+      <h1>Sign in</h1>
+      <p class="muted">Students, teachers and MEA staff all sign in here. Staff use their @mea.co.zw email.</p>
+      <form class="form" id="authForm">
+        <label>Email<input name="email" type="email" autocomplete="username" required></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+        <p class="err" id="authErr"></p>
+        <button class="btn" type="submit">Sign in</button>
+        <p class="small muted">Forgot your password? Staff: ask MEA admin to reset it. Students: contact MEA on +263 783 017 505 or 0433 427 505.</p>
+      </form>` : `
+      <h1>Create a student account</h1>
+      <p class="muted">Sign up to apply for MEA Automation Academy courses, follow your progress and collect your certificates.</p>
+      <form class="form" id="authForm">
+        <label>Full name<input name="name" autocomplete="name" required></label>
+        <label>Email<input name="email" type="email" autocomplete="email" required></label>
+        <label>Phone (WhatsApp)<input name="phone" type="tel" autocomplete="tel"></label>
+        <label>Password (8 or more characters)<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+        <p class="err" id="authErr"></p>
+        <button class="btn" type="submit">Create account</button>
+      </form>`}
+    </div></div>`;
+    $$('[data-m]').forEach((b) => b.addEventListener('click', () => authView(b.dataset.m)));
+    $('#authForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      submit(e.submitter, async () => {
+        const r = await api(mode === 'signin' ? '/auth/login' : '/auth/signup', formData(e.target));
+        me = r.user; if (location.hash === '#signup') history.replaceState(null, '', '/portal');
+        boot();
+      }, $('#authErr'));
+    });
+  }
+
+  /* ---------- role routing ---------- */
+  function tabsFor(u) {
+    if (u.role === 'student') return [['learn', 'My courses'], ['browse', 'Find a course'], ['account', 'Account']];
+    if (u.role === 'teacher') return [['teach', 'My students'], ['courses', 'My courses'], ['enq', 'Training enquiries'], ['account', 'Account']];
+    if (u.role === 'admin') return [['teach', 'Academy'], ['shop', 'Store'], ['enq', 'All enquiries'], ['account', 'Account']];
+    if (u.dept === 'store') return [['shop', 'Store'], ['enq', 'Store enquiries'], ['account', 'Account']];
+    return [['enq', (DEPTS[u.dept] || 'Department') + ' jobs'], ['account', 'Account']];
+  }
+  function render() {
+    const tabs = tabsFor(me);
+    if (!tab || !tabs.some((t) => t[0] === tab)) tab = tabs[0][0];
+    const roleText = me.role === 'student' ? 'Student' : me.role === 'teacher' ? 'Teacher · Training academy' : me.role === 'admin' ? 'Administrator' : 'Staff · ' + (DEPTS[me.dept] || me.dept);
+    root.innerHTML = `<div class="pagehead"><div><h1>Hi ${esc(me.name.split(' ')[0])}</h1><p class="muted">${esc(roleText)} · ${esc(me.email)}</p></div>
+      ${me.role === 'admin' ? '<a class="btn" href="/admin">Open admin dashboard</a>' : ''}</div>
+      <div class="tabs" role="tablist">${tabs.map(([k, n]) => `<button type="button" role="tab" data-t="${k}" aria-selected="${k === tab}">${esc(n)}</button>`).join('')}</div>
+      <section id="view"><p class="muted">Loading…</p></section>`;
+    $$('[data-t]').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.t; render(); }));
+    const v = $('#view');
+    ({ learn: learnView, browse: browseView, teach: teachView, courses: myCoursesView, shop: shopView, enq: enqView, account: accountView })[tab](v).catch((e) => { v.innerHTML = `<p class="err">${esc(e.message)}</p>`; if (e.status === 401) boot(); });
+  }
+
+  /* ---------- student ---------- */
+  async function learnView(v) {
+    const { enrolments, results } = await api('/student/overview');
+    if (!enrolments.length) {
+      v.innerHTML = `<div class="card stack"><h2>You have not applied for a course yet</h2><p class="muted">Pick a course and MEA will confirm your place, dates and fees.</p><div><button class="btn" id="go">Find a course</button></div></div>`;
+      $('#go').onclick = () => { tab = 'browse'; render(); };
+      return;
+    }
+    v.innerHTML = `<div class="grid">${enrolments.map((e) => {
+      const rs = results.filter((r) => r.enrolment_id === e.id);
+      return `<div class="card enrol">
+        <div class="row"><span class="small muted">${esc(e.code)} · ${esc(e.level)}</span>${pill(e.status)}</div>
+        <h3>${esc(e.title)}</h3>
+        <p class="small muted">${e.teacher ? 'Teacher: ' + esc(e.teacher) : 'Teacher to be confirmed'} · Applied ${date(e.created_at)}</p>
+        ${e.status === 'pending' ? '<p class="small">Waiting for MEA to confirm your place.</p>' : ''}
+        ${['active', 'completed'].includes(e.status) ? `<div class="row"><div class="bar" style="flex:1"><i style="width:${e.progress}%"></i></div><b class="num">${e.progress}%</b></div>` : ''}
+        ${rs.length ? `<div class="results"><b class="small">Results</b>${rs.map((r) => `<div><span>${esc(r.assessment)}</span><span class="num">${r.score} / ${r.max_score} (${Math.round(r.score * 100 / r.max_score)}%)</span></div>`).join('')}</div>` : ''}
+        ${e.cert_no ? `<button class="btn sm" data-cert="${e.id}">View certificate ${esc(e.cert_no)}</button>` : ''}
+      </div>`;
+    }).join('')}</div>`;
+    $$('[data-cert]').forEach((b) => b.addEventListener('click', () => {
+      const e = enrolments.find((x) => x.id == b.dataset.cert);
+      dialog(`<div class="cert"><img src="/logo-full.png" alt="MEA"><small>MEA Automation Academy</small><h2>Certificate of Completion</h2>
+        <p>This certifies that</p><div class="name">${esc(me.name)}</div>
+        <p>has successfully completed</p><h3>${esc(e.title)} (${esc(e.code)})</h3>
+        <p><small>Issued ${date(e.issued_at)} · Certificate no. ${esc(e.cert_no)}</small></p></div>
+        <div class="actions"><button class="btn ghost" data-close>Close</button><button class="btn" id="printCert">Print or save as PDF</button></div>`,
+        (d) => $('#printCert', d).onclick = () => { document.body.classList.add('pc'); window.print(); document.body.classList.remove('pc'); });
+    }));
+  }
+  async function browseView(v) {
+    const [{ courses }, mine] = await Promise.all([api('/courses'), api('/student/overview')]);
+    const taken = {}; mine.enrolments.forEach((e) => { if (!['withdrawn', 'rejected'].includes(e.status)) taken[e.course_id] = e.status; });
+    v.innerHTML = courses.length ? `<div class="grid">${courses.map((c) => `<div class="card course">
+      <div class="meta"><span>${esc(c.code)}</span><span>·</span><span>${esc(c.level)}</span>${c.weeks ? `<span>·</span><span>${c.weeks} weeks</span>` : ''}</div>
+      <h3>${esc(c.title)}</h3><p class="small muted">${esc(c.description || '')}</p>
+      <p class="small">${esc(c.mode)} · Fee: <b>${money(c.fee)}</b></p>
+      ${taken[c.id] ? `<p>${pill(taken[c.id])}</p>` : `<div><button class="btn sm" data-enrol="${c.id}">Apply for this course</button></div>`}
+    </div>`).join('')}</div>` : '<div class="card"><p class="muted">No courses are open right now. Check back soon.</p></div>';
+    $$('[data-enrol]').forEach((b) => b.addEventListener('click', () => submit(b, async () => { await api('/student/enrol', { course_id: b.dataset.enrol }); toast('Application sent. MEA will confirm your place.'); render(); })));
+  }
+
+  /* ---------- teacher ---------- */
+  async function teachView(v) {
+    const { courses, enrolments, results } = await api('/teach/overview');
+    const pending = enrolments.filter((e) => e.status === 'pending');
+    const current = enrolments.filter((e) => e.status !== 'pending');
+    v.innerHTML = `<div class="stack">
+      <div class="stats">
+        <div class="stat ${pending.length ? 'alert' : ''}"><b>${pending.length}</b><span>applications waiting</span></div>
+        <div class="stat"><b>${current.filter((e) => e.status === 'active').length}</b><span>active students</span></div>
+        <div class="stat"><b>${current.filter((e) => e.status === 'completed').length}</b><span>completed</span></div>
+        <div class="stat"><b>${courses.length}</b><span>${me.role === 'admin' ? 'courses' : 'courses you teach'}</span></div>
+      </div>
+      ${me.role !== 'admin' && !courses.length ? '<div class="card"><p class="muted">MEA admin has not assigned a course to you yet. Once they do, your students appear here.</p></div>' : ''}
+      ${pending.length ? `<div class="card"><div class="cardhead"><h2>Applications</h2></div>${table([
+        { h: 'Student', f: (e) => `<b>${esc(e.student)}</b><br><span class="small muted">${esc(e.email)} ${esc(e.phone || '')}</span>` },
+        { h: 'Course', k: 'code' }, { h: 'Applied', f: (e) => date(e.created_at) },
+        { h: '', f: (e) => `<div class="inline"><button class="btn sm" data-a="approve" data-id="${e.id}">Approve</button><button class="btn sm ghost" data-a="reject" data-id="${e.id}">Decline</button></div>` }], pending)}</div>` : ''}
+      <div class="card"><div class="cardhead"><h2>Students</h2><span class="small muted">Drag progress and press Save. Add results as you assess.</span></div>${table([
+        { h: 'Student', f: (e) => `<b>${esc(e.student)}</b><br><span class="small muted">${esc(e.email)}</span>` },
+        { h: 'Course', k: 'code' }, { h: 'Status', f: (e) => pill(e.status) },
+        { h: 'Progress', f: (e) => e.status === 'active' ? `<div class="inline"><input type="range" min="0" max="100" step="5" value="${e.progress}" aria-label="Progress" data-p="${e.id}"><b class="num" id="pv${e.id}">${e.progress}%</b><button class="btn sm ghost" data-a="progress" data-id="${e.id}">Save</button></div>` : `<b class="num">${e.progress}%</b>` },
+        { h: 'Average', num: true, f: (e) => e.avg_pct == null ? '—' : e.avg_pct + '%' },
+        { h: '', f: (e) => `<div class="inline">${['active', 'completed'].includes(e.status) ? `<button class="btn sm ghost" data-res="${e.id}">Results (${results.filter((r) => r.enrolment_id === e.id).length})</button>` : ''}${e.status === 'active' ? `<button class="btn sm" data-a="complete" data-id="${e.id}">Complete + certificate</button>` : ''}${e.cert_no ? `<span class="small">${esc(e.cert_no)}</span>` : ''}</div>` }], current, 'No approved students yet.')}</div>
+    </div>`;
+    $$('[data-p]').forEach((r) => r.addEventListener('input', () => ($('#pv' + r.dataset.p).textContent = r.value + '%')));
+    $$('[data-a]').forEach((b) => b.addEventListener('click', () => {
+      const id = b.dataset.id, a = b.dataset.a;
+      const go = () => submit(b, async () => {
+        const body = { action: a };
+        if (a === 'progress') body.progress = $(`[data-p="${id}"]`).value;
+        const r = await api('/teach/enrolment/' + id, body);
+        toast(a === 'complete' ? 'Certificate ' + r.cert_no + ' issued' : a === 'progress' ? 'Progress saved' : a === 'approve' ? 'Student approved' : 'Application declined');
+        render();
+      });
+      if (a === 'complete') {
+        const e = enrolments.find((x) => x.id == id);
+        dialog(`<h2>Complete ${esc(e.student)}?</h2><p class="muted">This marks ${esc(e.code)} as finished at 100% and issues a numbered MEA certificate the student can print.</p><div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="yes">Complete and issue certificate</button></div>`,
+          (d) => ($('#yes', d).onclick = () => { d.close(); go(); }));
+      } else go();
+    }));
+    $$('[data-res]').forEach((b) => b.addEventListener('click', () => {
+      const e = enrolments.find((x) => x.id == b.dataset.res), rs = results.filter((r) => r.enrolment_id === e.id);
+      dialog(`<h2>${esc(e.student)} · ${esc(e.code)}</h2>
+        ${rs.length ? `<div class="results">${rs.map((r) => `<div><span>${esc(r.assessment)} <span class="small muted">${date(r.created_at)}</span></span><span class="num">${r.score} / ${r.max_score}</span></div>`).join('')}</div>` : '<p class="muted">No results recorded yet.</p>'}
+        ${`<form class="form" id="resForm"><h3>Add a result</h3>
+          <label>Assessment<input name="assessment" placeholder="e.g. Practical 1: motor start/stop" required></label>
+          <div class="two"><label>Score<input name="score" type="number" step="0.5" min="0" required></label><label>Out of<input name="max_score" type="number" step="0.5" min="1" value="100" required></label></div>
+          <p class="err" id="resErr"></p>
+          <div class="actions"><button class="btn ghost" type="button" data-close>Close</button><button class="btn" type="submit">Save result</button></div></form>`}`,
+        (d) => $('#resForm', d).addEventListener('submit', (ev) => {
+          ev.preventDefault();
+          submit(ev.submitter, async () => { await api('/teach/result', { enrolment_id: e.id, ...formData(ev.target) }); d.close(); toast('Result saved'); render(); }, $('#resErr', d));
+        }));
+    }));
+  }
+  async function myCoursesView(v) {
+    const { courses } = await api('/teach/overview');
+    v.innerHTML = courses.length ? `<div class="grid">${courses.map((c) => `<div class="card course">
+      <div class="meta"><span>${esc(c.code)}</span><span>·</span><span>${esc(c.level)}</span><span>·</span><span>${c.students} students</span></div>
+      <h3>${esc(c.title)}</h3>
+      <label>Course description shown to students<textarea data-desc="${c.id}" rows="4">${esc(c.description || '')}</textarea></label>
+      <div><button class="btn sm" data-save="${c.id}">Save description</button></div></div>`).join('')}</div>`
+      : '<div class="card"><p class="muted">No courses assigned to you yet. MEA admin assigns teachers to courses.</p></div>';
+    $$('[data-save]').forEach((b) => b.addEventListener('click', () => submit(b, async () => { await api('/teach/course/' + b.dataset.save, { description: $(`[data-desc="${b.dataset.save}"]`).value }); toast('Description saved'); })));
+  }
+
+  /* ---------- store department ---------- */
+  const OSTAT = ['awaiting_payment', 'paid', 'packed', 'dispatched', 'completed', 'cancelled'];
+  let shopTab = 'orders';
+  async function shopView(v) {
+    const { products, orders } = await api('/shop/overview');
+    const open = orders.filter((o) => !['completed', 'cancelled'].includes(o.status));
+    const low = products.filter((p) => p.active && p.stock <= p.low_stock);
+    v.innerHTML = `<div class="stack">
+      <div class="stats">
+        <div class="stat ${orders.some((o) => o.status === 'awaiting_payment') ? 'alert' : ''}"><b>${orders.filter((o) => o.status === 'awaiting_payment').length}</b><span>awaiting payment</span></div>
+        <div class="stat"><b>${orders.filter((o) => ['paid', 'packed'].includes(o.status)).length}</b><span>to pack or send</span></div>
+        <div class="stat"><b>${products.filter((p) => p.active).length}</b><span>products on sale</span></div>
+        <div class="stat ${low.length ? 'alert' : ''}"><b>${low.length}</b><span>low on stock</span></div>
+      </div>
+      <div class="inline"><button class="btn ${shopTab === 'orders' ? '' : 'ghost'} sm" data-st="orders">Orders (${open.length} open)</button><button class="btn ${shopTab === 'products' ? '' : 'ghost'} sm" data-st="products">Products and stock</button><a class="btn ghost sm" href="/store" target="_blank" rel="noopener">View the shop</a></div>
+      <div id="shopBody"></div></div>`;
+    $$('[data-st]').forEach((b) => b.addEventListener('click', () => { shopTab = b.dataset.st; shopView(v); }));
+    const body = $('#shopBody');
+    if (shopTab === 'orders') {
+      body.innerHTML = `<div class="card"><div class="cardhead"><h2>Orders</h2><button class="btn ghost sm" id="ordCsv">Download CSV</button></div>${table([
+        { h: 'Order', f: (o) => `<b>${esc(o.number)}</b><br><span class="small muted">${date(o.created_at, 1)}</span>` },
+        { h: 'Customer', f: (o) => `${esc(o.name)}<br><span class="small muted">${esc(o.phone)} · ${esc(o.email)}</span>` },
+        { h: 'Items', f: (o) => `<span class="small">${esc(o.items || '')}</span>` },
+        { h: 'Delivery', f: (o) => o.delivery === 'deliver' ? `Deliver<br><span class="small muted">${esc(o.address || '')}</span>` : 'Collect' },
+        { h: 'Total', num: true, f: (o) => `<b class="num">${money(o.total)}</b>` },
+        { h: 'Status', f: (o) => o.status === 'cancelled' ? pill('cancelled') : `<select data-os="${o.id}" aria-label="Order status">${OSTAT.map((s) => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${label(s)}</option>`).join('')}</select>` }], orders, 'No orders yet. They appear here when customers check out in the shop.')}</div>`;
+      $$('[data-os]').forEach((s) => s.addEventListener('change', () => {
+        const o = orders.find((x) => x.id == s.dataset.os);
+        const go = () => submit(s, async () => { await api('/shop/order/' + o.id, { status: s.value }); toast(o.number + ' set to ' + label(s.value)); shopView(v); });
+        if (s.value === 'cancelled') dialog(`<h2>Cancel ${esc(o.number)}?</h2><p class="muted">The items go back into stock. A cancelled order cannot be reopened.</p><div class="actions"><button class="btn ghost" data-close>Keep order</button><button class="btn danger" id="yes">Cancel order</button></div>`,
+          (d) => { $('#yes', d).onclick = () => { d.close(); go(); }; d.addEventListener('close', () => { if (s.value === 'cancelled') s.value = o.status; }); });
+        else go();
+      }));
+      $('#ordCsv').onclick = () => MEA.download('mea-orders.csv', MEA.csv(['number', 'created_at', 'name', 'email', 'phone', 'country', 'delivery', 'address', 'items', 'total', 'status'], orders));
+    } else {
+      body.innerHTML = `<div class="card"><div class="cardhead"><h2>Products and stock</h2><button class="btn sm" id="addP">Add product</button></div>${table([
+        { h: 'SKU', k: 'sku' }, { h: 'Product', f: (p) => `<b>${esc(p.name)}</b><br><span class="small muted">${esc(p.category)}${p.brand ? ' · ' + esc(p.brand) : ''}</span>` },
+        { h: 'Price', num: true, f: (p) => money(p.price) }, { h: 'Stock', num: true, f: (p) => `<b class="num">${p.stock}</b>` },
+        { h: 'Status', f: (p) => !p.active ? pill('Hidden') : p.stock <= p.low_stock ? pill('Reorder') : pill('OK') },
+        { h: '', f: (p) => `<button class="btn ghost sm" data-ep="${p.id}">Edit</button>` }], products, 'No products yet. Add your first product and it appears in the shop straight away.')}</div>`;
+      $('#addP').onclick = () => productForm({ active: 1, low_stock: 2, stock: 0 }, v);
+      $$('[data-ep]').forEach((b) => b.addEventListener('click', () => productForm(products.find((p) => p.id == b.dataset.ep), v)));
+    }
+  }
+  function productForm(p, v) {
+    const cats = ['PLC & Automation', 'Instrumentation', 'Motor control', 'Electrical', 'Tools', 'Training equipment', 'Spare parts'];
+    dialog(`<h2>${p.id ? 'Edit product' : 'Add product'}</h2>
+      <form class="form" id="pForm">
+        <div class="two"><label>SKU / part number<input name="sku" value="${esc(p.sku || '')}" required></label><label>Brand<input name="brand" value="${esc(p.brand || '')}"></label></div>
+        <label>Product name<input name="name" value="${esc(p.name || '')}" required></label>
+        <label>Category<input name="category" list="cats" value="${esc(p.category || '')}" required><datalist id="cats">${cats.map((c) => `<option value="${esc(c)}">`).join('')}</datalist></label>
+        <div class="three"><label>Price (USD)<input name="price" type="number" step="0.01" min="0" value="${p.price ?? ''}" required></label><label>In stock<input name="stock" type="number" step="1" min="0" value="${p.stock ?? 0}" required></label><label>Reorder at<input name="low_stock" type="number" step="1" min="0" value="${p.low_stock ?? 2}"></label></div>
+        <label>Description<textarea name="description" rows="3">${esc(p.description || '')}</textarea></label>
+        <label class="check"><input type="checkbox" name="active" ${p.active ? 'checked' : ''}> Show in the shop</label>
+        <p class="err" id="pErr"></p>
+        <div class="actions"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn" type="submit">Save product</button></div>
+      </form>`, (d) => $('#pForm', d).addEventListener('submit', (e) => {
+      e.preventDefault();
+      submit(e.submitter, async () => { await api('/shop/product', { id: p.id, ...formData(e.target) }); d.close(); toast('Product saved'); shopView(v); }, $('#pErr', d));
+    }));
+  }
+
+  /* ---------- department enquiries / jobs ---------- */
+  async function enqView(v) {
+    const { enquiries } = await api('/dept/enquiries');
+    const S = ['new', 'in_progress', 'quoted', 'won', 'closed'];
+    v.innerHTML = `<div class="stack"><div class="stats">${S.map((s) => `<div class="stat ${s === 'new' && enquiries.some((q) => q.status === 'new') ? 'alert' : ''}"><b>${enquiries.filter((q) => q.status === s).length}</b><span>${label(s)}</span></div>`).join('')}</div>
+      ${enquiries.length ? enquiries.map((q) => `<div class="card stack">
+        <div class="cardhead" style="margin:0"><div><h3>${esc(q.type || 'Enquiry')} · ${esc(q.project || '')}</h3><p class="small muted">#${q.id} · ${date(q.created_at, 1)}${me.role === 'admin' ? ' · ' + esc(DEPTS[q.dept] || q.dept) : ''}</p></div>${pill(q.status)}</div>
+        <p><b>${esc(q.name)}</b>${q.company ? ' · ' + esc(q.company) : ''}${q.country ? ' · ' + esc(q.country) : ''}<br><span class="small">${esc(q.email || '')} ${esc(q.phone || '')}</span></p>
+        <p style="white-space:pre-wrap">${esc(q.description || '')}</p>
+        ${q.budget || q.needed_by ? `<p class="small muted">${q.budget ? 'Budget: ' + esc(q.budget) : ''} ${q.needed_by ? ' · Needed by ' + esc(q.needed_by) : ''}</p>` : ''}
+        <div class="${me.role === 'admin' ? 'three' : 'two'}">
+          <label>Status<select data-qs="${q.id}">${S.map((s) => `<option value="${s}" ${s === q.status ? 'selected' : ''}>${label(s)}</option>`).join('')}</select></label>
+          ${me.role === 'admin' ? `<label>Department<select data-qd="${q.id}">${Object.keys(DEPTS).map((d) => `<option value="${d}" ${d === q.dept ? 'selected' : ''}>${DEPTS[d]}</option>`).join('')}</select></label>` : ''}
+          <label>Internal note<input data-qn="${q.id}" value="${esc(q.note || '')}" placeholder="e.g. Quoted $1,200, site visit Tuesday"></label>
+        </div>
+        <div><button class="btn sm" data-qsave="${q.id}">Save</button></div>
+      </div>`).join('') : '<div class="card"><p class="muted">No enquiries for your department yet. Website enquiries are sent here automatically.</p></div>'}</div>`;
+    $$('[data-qsave]').forEach((b) => b.addEventListener('click', () => {
+      const id = b.dataset.qsave, dd = $(`[data-qd="${id}"]`);
+      submit(b, async () => { await api('/dept/enquiry/' + id, { status: $(`[data-qs="${id}"]`).value, note: $(`[data-qn="${id}"]`).value, dept: dd ? dd.value : undefined }); toast('Enquiry updated'); render(); });
+    }));
+  }
+
+  async function accountView(v) {
+    v.innerHTML = `<div class="split"><div class="card stack"><h2>Your details</h2>
+      <p><b>${esc(me.name)}</b><br>${esc(me.email)}${me.phone ? '<br>' + esc(me.phone) : ''}</p>
+      <p class="small muted">To change your name or email, contact MEA admin.</p></div><div id="pw"></div></div>`;
+    MEA.changePasswordView($('#pw'), me, () => render());
+    $('#pw h1').outerHTML = '<h2>Change password</h2>';
+    $('#pw .authbox').style.margin = '0';
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

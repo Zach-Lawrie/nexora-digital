@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MEA Admin</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@600;700&display=swap">
+<link rel="stylesheet" href="/app.css">
+<style>
+.depts{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.dept{display:grid;gap:10px;align-content:start}
+.dept dl{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin:0;font-size:14px}
+.dept dt{color:var(--muted)} .dept dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.dept dd.warn{color:var(--warn)}
+.feed{display:grid;gap:0;font-size:14px}
+.feed div{display:grid;grid-template-columns:120px 1fr;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+@media (max-width:560px){.feed div{grid-template-columns:1fr}}
+.rep-head{display:none}
+@media print{.rep-head{display:block;margin-bottom:12px}.rep-head img{height:50px}}
+.summary{display:flex;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/logo.png" alt="MEA"><div><b>MEA Admin</b><span>Whole-business view</span></div></a>
+  <nav class="topnav" id="topnav" aria-label="Main"></nav>
+</div></header>
+<main class="wrap" id="root"><p class="muted">Loading…</p></main>
+<footer class="foot"><div class="wrap">MEA admin · Changes here are recorded in the activity log.</div></footer>
+<script src="/app.js"></script>
+<script>
+(function () {
+  const { $, $$, esc, api, toast, dialog, formData, submit, table, pill, money, date, label, DEPTS } = MEA;
+  const root = $('#root');
+  let me = null, tab = 'overview';
+  const TABS = [['overview', 'Overview'], ['people', 'People and emails'], ['courses', 'Courses'], ['reports', 'Reports'], ['activity', 'Activity log']];
+
+  (async function boot() {
+    try { me = (await api('/me')).user; } catch (e) { me = null; }
+    MEA.header(me, 'admin');
+    if (!me) { location.href = '/portal'; return; }
+    if (me.must_change) return MEA.changePasswordView(root, me, () => location.reload());
+    if (me.role !== 'admin') { root.innerHTML = '<div class="card"><h1>Admins only</h1><p class="muted">Your account does not have admin access. <a href="/portal">Go to your portal</a>.</p></div>'; return; }
+    const h = location.hash.slice(1); if (TABS.some((t) => t[0] === h)) tab = h;
+    render();
+  })();
+  window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (TABS.some((t) => t[0] === h) && h !== tab) { tab = h; render(); } });
+
+  function render() {
+    root.innerHTML = `<div class="pagehead noprint"><div><h1>MEA admin</h1><p class="muted">Every department in one place. Signed in as ${esc(me.email)}.</p></div>
+      <div class="inline"><a class="btn ghost" href="/portal">Academy, store and jobs</a></div></div>
+      <div class="tabs" role="tablist">${TABS.map(([k, n]) => `<button type="button" role="tab" data-t="${k}" aria-selected="${k === tab}">${n}</button>`).join('')}</div>
+      <section id="view"><p class="muted">Loading…</p></section>`;
+    $$('[data-t]').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.t; history.replaceState(null, '', '#' + tab); render(); }));
+    const v = $('#view');
+    ({ overview, people, courses, reports, activity })[tab](v).catch((e) => (v.innerHTML = `<p class="err">${esc(e.message)}</p>`));
+  }
+
+  /* ---------- overview ---------- */
+  async function overview(v) {
+    const d = await api('/admin/dashboard');
+    const enq = (dept) => d.enquiries.find((x) => x.dept === dept) || { new: 0, open: 0, won: 0, total: 0 };
+    const staff = (dept) => (d.staffByDept.find((x) => x.dept === dept) || { n: 0 }).n;
+    const n = (x) => x || 0;
+    const newEnq = d.enquiries.reduce((s, x) => s + n(x.new), 0);
+    const month = new Date(d.monthStart).toLocaleDateString('en-GB', { month: 'long' });
+    const deptCard = (key, rows, link) => `<div class="card dept"><div class="cardhead" style="margin:0"><h2>${DEPTS[key]}</h2><span class="small muted">${staff(key)} staff</span></div>
+      <dl>${rows.map(([k, val, warn]) => `<dt>${k}</dt><dd class="${warn && val ? 'warn' : ''}">${val}</dd>`).join('')}</dl>${link || ''}</div>`;
+    v.innerHTML = `<div class="stack">
+      <div class="stats">
+        <div class="stat"><b>${n(d.people.students)}</b><span>students</span></div>
+        <div class="stat ${n(d.training.pending) ? 'alert' : ''}"><b>${n(d.training.pending)}</b><span>course applications waiting</span></div>
+        <div class="stat ${newEnq ? 'alert' : ''}"><b>${newEnq}</b><span>new enquiries</span></div>
+        <div class="stat ${n(d.store.awaiting) ? 'alert' : ''}"><b>${n(d.store.awaiting)}</b><span>orders awaiting payment</span></div>
+        <div class="stat"><b>${money(d.store.month_sales)}</b><span>store sales in ${month}</span></div>
+        <div class="stat ${n(d.store.low_stock) ? 'alert' : ''}"><b>${n(d.store.low_stock)}</b><span>products low on stock</span></div>
+      </div>
+      <div class="depts">
+        ${deptCard('training', [['Open courses', n(d.training.courses)], ['Courses with no teacher', n(d.training.no_teacher), 1], ['Applications waiting', n(d.training.pending), 1], ['Active students', n(d.training.active)], ['Completed', n(d.training.completed)], ['Certificates issued', n(d.training.certificates)], ['Teachers', n(d.people.teachers)], ['New enquiries', n(enq('training').new), 1]])}
+        ${deptCard('store', [['Products on sale', n(d.store.products)], ['Low on stock', n(d.store.low_stock), 1], ['Awaiting payment', n(d.store.awaiting), 1], ['To pack or send', n(d.store.to_send), 1], ['Sales in ' + month, money(d.store.month_sales)], ['New enquiries', n(enq('store').new), 1]])}
+        ${deptCard('maintenance', [['New jobs', n(enq('maintenance').new), 1], ['In progress or quoted', n(enq('maintenance').open)], ['Won', n(enq('maintenance').won)], ['All time', n(enq('maintenance').total)]])}
+        ${deptCard('engineering', [['New enquiries', n(enq('engineering').new), 1], ['In progress or quoted', n(enq('engineering').open)], ['Won', n(enq('engineering').won)], ['All time', n(enq('engineering').total)]])}
+        ${deptCard('admin', [['General enquiries and CVs', n(enq('admin').new), 1], ['Admins', n(d.people.admins)], ['Department staff', n(d.people.staff)], ['Accounts switched off', n(d.people.disabled)]])}
+      </div>
+      <div class="split">
+        <div class="card"><div class="cardhead"><h2>Reorder soon</h2></div>${table([{ h: 'SKU', k: 'sku' }, { h: 'Product', k: 'name' }, { h: 'Stock', num: true, k: 'stock' }, { h: 'Reorder at', num: true, k: 'low_stock' }], d.lowStock, 'Nothing is low on stock.')}</div>
+        <div class="card"><div class="cardhead"><h2>Latest activity</h2><button class="btn ghost sm" data-go="activity">Full log</button></div>
+          <div class="feed">${d.activity.length ? d.activity.slice(0, 12).map((a) => `<div><span class="small muted">${date(a.at, 1)}</span><span><b>${esc(a.who || '')}</b> ${esc(a.action)}${a.detail ? ' · <span class="muted">' + esc(a.detail) + '</span>' : ''}</span></div>`).join('') : '<p class="muted">No activity yet.</p>'}</div></div>
+      </div></div>`;
+    $$('[data-go]').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.go; render(); }));
+  }
+
+  /* ---------- people ---------- */
+  let pFilter = 'staff';
+  async function people(v) {
+    const { users } = await api('/admin/users');
+    const list = users.filter((u) => pFilter === 'all' || (pFilter === 'staff' ? u.role !== 'student' : u.role === 'student'));
+    v.innerHTML = `<div class="stack">
+      <div class="card stack"><div class="cardhead" style="margin:0"><div><h2>Add an @mea.co.zw account</h2><p class="small muted">Creates a sign-in for a teacher, department staff member or another admin. You get a temporary password to give them; they must change it the first time they sign in.</p></div></div>
+        <form class="form" id="newUser">
+          <div class="two"><label>Full name<input name="name" required></label><label>MEA email<input name="email" type="email" placeholder="name@mea.co.zw" pattern=".+@mea\\.co\\.zw$" required></label></div>
+          <div class="three"><label>Role<select name="role" id="nuRole"><option value="staff">Department staff</option><option value="teacher">Teacher</option><option value="admin">Admin</option></select></label>
+            <label>Department<select name="dept" id="nuDept">${Object.entries(DEPTS).map(([k, n]) => `<option value="${k}" ${k === 'maintenance' ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+            <label>Phone (optional)<input name="phone" type="tel"></label></div>
+          <p class="err" id="nuErr"></p><div><button class="btn" type="submit">Create account</button></div>
+        </form></div>
+      <div class="card"><div class="cardhead"><h2>Accounts</h2><div class="inline">${[['staff', 'Staff'], ['students', 'Students'], ['all', 'Everyone']].map(([k, n]) => `<button class="btn sm ${pFilter === k ? '' : 'ghost'}" data-pf="${k}">${n}</button>`).join('')}</div></div>
+      ${table([
+        { h: 'Name', f: (u) => `<b>${esc(u.name)}</b><br><span class="small muted">${esc(u.email)}</span>` },
+        { h: 'Role', f: (u) => esc(label(u.role)) }, { h: 'Department', f: (u) => esc(DEPTS[u.dept] || '—') },
+        { h: 'Status', f: (u) => u.status === 'disabled' ? pill('disabled') : u.must_change ? '<span class="pill warn">Temp password</span>' : pill('active') },
+        { h: 'Last sign-in', f: (u) => date(u.last_login, 1) },
+        { h: '', f: (u) => u.id === me.id ? '<span class="small muted">You</span>' : `<button class="btn ghost sm" data-u="${u.id}">Manage</button>` }], list, 'No accounts in this group yet.')}</div></div>`;
+    $('#nuRole').onchange = (e) => { if (e.target.value === 'teacher') $('#nuDept').value = 'training'; if (e.target.value === 'admin') $('#nuDept').value = 'admin'; };
+    $$('[data-pf]').forEach((b) => b.addEventListener('click', () => { pFilter = b.dataset.pf; people(v); }));
+    $('#newUser').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const f = formData(e.target);
+      submit(e.submitter, async () => {
+        const r = await api('/admin/users', f);
+        showTemp(f.name, f.email, r.temp_password, 'Account created'); people(v);
+      }, $('#nuErr'));
+    });
+    $$('[data-u]').forEach((b) => b.addEventListener('click', () => manage(users.find((u) => u.id == b.dataset.u), v)));
+  }
+  function showTemp(name, email, pw, title) {
+    dialog(`<h2>${esc(title)}</h2><p>Give <b>${esc(name)}</b> these sign-in details. The password is shown only once.</p>
+      <p class="small muted">Sign in at mea-engineering.pages.dev/portal</p>
+      <div class="secret">${esc(email)}</div><div class="secret">${esc(pw)}</div>
+      <p class="small muted">They will be asked to choose their own password straight away.</p>
+      <div class="actions"><button class="btn ghost" id="cp">Copy details</button><button class="btn" data-close>Done</button></div>`,
+      (d) => ($('#cp', d).onclick = () => {
+        const t = `MEA portal: https://mea-engineering.pages.dev/portal\nEmail: ${email}\nTemporary password: ${pw}`;
+        navigator.clipboard.writeText(t).then(() => toast('Copied. Send it on WhatsApp.'), () => toast('Copy blocked. Select the text instead.', true));
+      }));
+  }
+  function manage(u, v) {
+    const staffish = u.email.toLowerCase().endsWith('@mea.co.zw');
+    dialog(`<h2>${esc(u.name)}</h2><p class="small muted">${esc(u.email)} · created ${date(u.created_at)}</p>
+      <form class="form" id="mForm">
+        <div class="two"><label>Name<input name="name" value="${esc(u.name)}"></label><label>Phone<input name="phone" value="${esc(u.phone || '')}"></label></div>
+        <div class="two"><label>Role<select name="role">${(staffish ? ['staff', 'teacher', 'admin', 'student'] : ['student']).map((r) => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${label(r)}</option>`).join('')}</select></label>
+          <label>Department<select name="dept">${Object.entries(DEPTS).map(([k, n]) => `<option value="${k}" ${k === u.dept ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+        ${staffish ? '' : '<p class="small muted">Only @mea.co.zw emails can be made staff, teachers or admins.</p>'}
+        <p class="err" id="mErr"></p>
+        <div class="actions"><button class="btn ghost" type="button" id="reset">Reset password</button>
+          <button class="btn ${u.status === 'disabled' ? 'ghost' : 'danger'}" type="button" id="toggle">${u.status === 'disabled' ? 'Switch account back on' : 'Switch account off'}</button>
+          <button class="btn" type="submit">Save changes</button></div>
+      </form>`, (d) => {
+      $('#mForm', d).addEventListener('submit', (e) => { e.preventDefault(); submit(e.submitter, async () => { await api('/admin/users/' + u.id, { action: 'update', ...formData(e.target) }); d.close(); toast('Saved'); people(v); }, $('#mErr', d)); });
+      $('#reset', d).onclick = (e) => submit(e.target, async () => { const r = await api('/admin/users/' + u.id, { action: 'reset' }); d.close(); showTemp(u.name, u.email, r.temp_password, 'Password reset'); people(v); }, $('#mErr', d));
+      $('#toggle', d).onclick = (e) => submit(e.target, async () => { await api('/admin/users/' + u.id, { action: u.status === 'disabled' ? 'enable' : 'disable' }); d.close(); toast(u.status === 'disabled' ? 'Account switched on' : 'Account switched off'); people(v); }, $('#mErr', d));
+    });
+  }
+
+  /* ---------- courses ---------- */
+  async function courses(v) {
+    const [{ courses }, { users }] = await Promise.all([api('/admin/courses'), api('/admin/users')]);
+    const teachers = users.filter((u) => ['teacher', 'admin'].includes(u.role) && u.status === 'active');
+    v.innerHTML = `<div class="card"><div class="cardhead"><div><h2>Academy courses</h2><p class="small muted">Assign a teacher to each course. Teachers only see students in their own courses.</p></div><button class="btn sm" id="addC">Add course</button></div>
+      ${table([{ h: 'Code', k: 'code' }, { h: 'Course', f: (c) => `<b>${esc(c.title)}</b><br><span class="small muted">${esc(c.level)}${c.weeks ? ' · ' + c.weeks + ' weeks' : ''}</span>` },
+        { h: 'Teacher', f: (c) => c.teacher ? esc(c.teacher) : '<span class="pill warn">None</span>' }, { h: 'Fee', num: true, f: (c) => money(c.fee) },
+        { h: 'Shown', f: (c) => c.active ? pill('active') : pill('Hidden') }, { h: '', f: (c) => `<button class="btn ghost sm" data-c="${c.id}">Edit</button>` }], courses)}</div>`;
+    const form = (c) => dialog(`<h2>${c.id ? 'Edit course' : 'Add course'}</h2><form class="form" id="cForm">
+        <div class="two"><label>Code<input name="code" value="${esc(c.code || '')}" required></label><label>Level<select name="level">${['Fundamentals', 'Intermediate', 'Advanced'].map((l) => `<option ${l === c.level ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
+        <label>Title<input name="title" value="${esc(c.title || '')}" required></label>
+        <div class="three"><label>Weeks<input name="weeks" type="number" min="1" value="${c.weeks || ''}"></label><label>Fee (USD, empty = on request)<input name="fee" type="number" min="0" step="0.01" value="${c.fee ?? ''}"></label>
+          <label>Teacher<select name="teacher_id"><option value="">Not assigned</option>${teachers.map((t) => `<option value="${t.id}" ${t.id === c.teacher_id ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label></div>
+        <label>Delivery<input name="mode" value="${esc(c.mode || 'Online or face to face')}"></label>
+        <label>Description<textarea name="description" rows="3">${esc(c.description || '')}</textarea></label>
+        <label class="check"><input type="checkbox" name="active" ${c.active ? 'checked' : ''}> Open for students to apply</label>
+        ${teachers.length ? '' : '<p class="small muted">No teachers yet. Add one under People and emails, with the Teacher role.</p>'}
+        <p class="err" id="cErr"></p><div class="actions"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn" type="submit">Save course</button></div></form>`,
+      (d) => $('#cForm', d).addEventListener('submit', (e) => { e.preventDefault(); submit(e.submitter, async () => { await api('/admin/course', { id: c.id, ...formData(e.target) }); d.close(); toast('Course saved'); courses(v); }, $('#cErr', d)); }));
+    $('#addC').onclick = () => form({ active: 1 });
+    $$('[data-c]').forEach((b) => b.addEventListener('click', () => form(courses.find((c) => c.id == b.dataset.c))));
+  }
+
+  /* ---------- reports ---------- */
+  const REPORTS = [['enrolments', 'Academy: enrolments'], ['results', 'Academy: assessment results'], ['certificates', 'Academy: certificates issued'], ['sales', 'Store: orders and sales'], ['stock', 'Store: stock levels'], ['enquiries', 'All departments: enquiries'], ['users', 'People: user accounts'], ['activity', 'Activity log']];
+  let last = null;
+  async function reports(v) {
+    const today = new Date().toISOString().slice(0, 10), first = today.slice(0, 8) + '01';
+    v.innerHTML = `<div class="stack"><div class="card noprint"><form class="form" id="repForm">
+        <div class="three"><label>Report<select name="type">${REPORTS.map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select></label>
+          <label>From<input name="from" type="date" value="${first}"></label><label>To<input name="to" type="date" value="${today}"></label></div>
+        <div class="inline"><button class="btn" type="submit">Generate report</button>${['This month', 'Last 30 days', 'This year', 'All time'].map((p) => `<button class="btn ghost sm" type="button" data-pr="${p}">${p}</button>`).join('')}</div>
+        <p class="err" id="repErr"></p></form></div>
+      <div id="repOut"></div></div>`;
+    const f = $('#repForm');
+    $$('[data-pr]').forEach((b) => b.addEventListener('click', () => {
+      const d = new Date(), iso = (x) => x.toISOString().slice(0, 10), p = b.dataset.pr;
+      f.to.value = iso(d);
+      f.from.value = p === 'This month' ? iso(d).slice(0, 8) + '01' : p === 'This year' ? iso(d).slice(0, 4) + '-01-01' : p === 'All time' ? '2026-01-01' : iso(new Date(Date.now() - 30 * 864e5));
+    }));
+    f.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const q = new URLSearchParams(formData(f));
+      submit(e.submitter, async () => { last = await api('/admin/report?' + q); showReport(); }, $('#repErr'));
+    });
+  }
+  function showReport() {
+    const r = last, isMoney = (c) => /USD/.test(c) || /^Price/.test(c);
+    const fmt = (c, v) => v == null ? '' : /^(Applied|Date|Issued|Received|When|Created|Last sign-in)$/.test(c) ? date(v, /When|Last/.test(c)) : isMoney(c) ? money(v) : /^Status$/.test(c) ? pill(v) : esc(v);
+    $('#repOut').innerHTML = `<div class="card stack">
+      <div class="rep-head"><img src="/logo-full.png" alt="MEA"></div>
+      <div class="cardhead" style="margin:0"><div><h2>${esc(r.title)}</h2><p class="small muted">${r.from ? `${date(r.from)} to ${date(r.to)} · ` : 'Current at '}${r.from ? '' : date(r.generated_at, 1) + ' · '}${r.summary.rows} rows · generated by ${esc(r.generated_by)} ${date(r.generated_at, 1)}</p></div>
+        <div class="inline noprint"><button class="btn ghost sm" id="csv">Download CSV (Excel)</button><button class="btn sm" id="pr">Print or save as PDF</button></div></div>
+      <div class="summary">${r.summary.total != null ? `<div class="stat"><b>${money(r.summary.total)}</b><span>paid sales (excludes unpaid and cancelled)</span></div>` : ''}
+        ${Object.entries(r.summary.byStatus || {}).map(([k, n]) => `<div class="stat"><b>${n}</b><span>${esc(label(k))}</span></div>`).join('')}
+        ${Object.entries(r.summary.byDept || {}).map(([k, n]) => `<div class="stat"><b>${n}</b><span>${esc(DEPTS[k] || k)}</span></div>`).join('')}</div>
+      ${table(r.columns.map((c) => ({ h: c, num: /USD|Score|Out of|%|Stock|Reorder|In stock/.test(c), f: (row) => fmt(c, row[c]) })), r.rows, 'No records in this period.')}</div>`;
+    $('#csv').onclick = () => MEA.download(`mea-${r.title.toLowerCase().replace(/[^a-z]+/g, '-')}${r.from ? '-' + r.from + '-to-' + r.to : ''}.csv`, '﻿' + MEA.csv(r.columns, r.rows));
+    $('#pr').onclick = () => window.print();
+  }
+
+  /* ---------- activity ---------- */
+  async function activity(v) {
+    const today = new Date().toISOString().slice(0, 10);
+    const r = await api('/admin/report?type=activity&from=2026-01-01&to=' + today);
+    v.innerHTML = `<div class="card"><div class="cardhead"><h2>Activity log</h2><span class="small muted">Sign-ins, accounts, enrolments, results, orders, stock and enquiries</span></div>
+      ${table([{ h: 'When', f: (a) => date(a.When, 1) }, { h: 'Who', k: 'Who' }, { h: 'Action', k: 'Action' }, { h: 'Detail', k: 'Detail' }], r.rows.slice(0, 300), 'Nothing recorded yet.')}</div>`;
+  }
+})();
+</script>
+</body>
+</html>
