@@ -99,9 +99,9 @@
     const { users } = await api('/admin/users');
     const list = users.filter((u) => pFilter === 'all' || (pFilter === 'staff' ? u.role !== 'student' : u.role === 'student'));
     v.innerHTML = `<div class="stack">
-      <div class="card stack"><div class="cardhead" style="margin:0"><div><h2>Add an @meazim.co.zw account</h2><p class="small muted">Creates a sign-in for a teacher, department staff member or another admin. You get a temporary password to give them; they must change it the first time they sign in.</p></div></div>
+      <div class="card stack"><div class="cardhead" style="margin:0"><div><h2>Add an @meazim.com account</h2><p class="small muted">Creates a sign-in for a teacher, department staff member or another admin. You get a temporary password to give them; they must change it the first time they sign in.</p></div></div>
         <form class="form" id="newUser">
-          <div class="two"><label>Full name<input name="name" required></label><label>MEA email<input name="email" type="email" placeholder="name@meazim.co.zw" pattern=".+@(meazim|mea)\\.co\\.zw$" title="Use an @meazim.co.zw or @mea.co.zw email" required></label></div>
+          <div class="two"><label>Full name<input name="name" required></label><label>MEA email<input name="email" type="email" placeholder="name@meazim.com" pattern=".+@(meazim\\.com|meazim\\.co\\.zw|mea\\.co\\.zw)$" title="Use an @meazim.com email" required></label></div>
           <div class="three"><label>Role<select name="role" id="nuRole"><option value="staff">Department staff</option><option value="teacher">Teacher</option><option value="admin">Admin</option></select></label>
             <label>Department<select name="dept" id="nuDept">${Object.entries(DEPTS).map(([k, n]) => `<option value="${k}" ${k === 'maintenance' ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
             <label>Phone (optional)<input name="phone" type="tel"></label></div>
@@ -128,23 +128,23 @@
   }
   function showTemp(name, email, pw, title) {
     dialog(`<h2>${esc(title)}</h2><p>Give <b>${esc(name)}</b> these sign-in details. The password is shown only once.</p>
-      <p class="small muted">Sign in at mea-engineering.pages.dev/portal</p>
+      <p class="small muted">Sign in at meazim.com/portal</p>
       <div class="secret">${esc(email)}</div><div class="secret">${esc(pw)}</div>
       <p class="small muted">They will be asked to choose their own password straight away.</p>
       <div class="actions"><button class="btn ghost" id="cp">Copy details</button><button class="btn" data-close>Done</button></div>`,
       (d) => ($('#cp', d).onclick = () => {
-        const t = `MEA portal: https://mea-engineering.pages.dev/portal\nEmail: ${email}\nTemporary password: ${pw}`;
+        const t = `MEA portal: https://meazim.com/portal\nEmail: ${email}\nTemporary password: ${pw}`;
         navigator.clipboard.writeText(t).then(() => toast('Copied. Send it on WhatsApp.'), () => toast('Copy blocked. Select the text instead.', true));
       }));
   }
   function manage(u, v) {
-    const staffish = /@(meazim|mea)\.co\.zw$/i.test(u.email);
+    const staffish = /@(meazim\.com|meazim\.co\.zw|mea\.co\.zw)$/i.test(u.email);
     dialog(`<h2>${esc(u.name)}</h2><p class="small muted">${esc(u.email)} · created ${date(u.created_at)}</p>
       <form class="form" id="mForm">
         <div class="two"><label>Name<input name="name" value="${esc(u.name)}"></label><label>Phone<input name="phone" value="${esc(u.phone || '')}"></label></div>
         <div class="two"><label>Role<select name="role">${(staffish ? ['staff', 'teacher', 'admin', 'student'] : ['student']).map((r) => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${label(r)}</option>`).join('')}</select></label>
           <label>Department<select name="dept">${Object.entries(DEPTS).map(([k, n]) => `<option value="${k}" ${k === u.dept ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
-        ${staffish ? '' : '<p class="small muted">Only @meazim.co.zw or @mea.co.zw emails can be made staff, teachers or admins.</p>'}
+        ${staffish ? '' : '<p class="small muted">Only @meazim.com emails can be made staff, teachers or admins.</p>'}
         <p class="err" id="mErr"></p>
         <div class="actions"><button class="btn ghost" type="button" id="reset">Reset password</button>
           <button class="btn ${u.status === 'disabled' ? 'ghost' : 'danger'}" type="button" id="toggle">${u.status === 'disabled' ? 'Switch account back on' : 'Switch account off'}</button>

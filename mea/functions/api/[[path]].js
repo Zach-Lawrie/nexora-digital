@@ -1,7 +1,7 @@
 // MEA API — Cloudflare Pages Function. All routes live under /api/.
 // Database: D1 bound as env.DB. Sessions: HttpOnly cookie "mea_s".
 
-const STAFF_DOMAINS = ['@meazim.co.zw', '@mea.co.zw'];
+const STAFF_DOMAINS = ['@meazim.com', '@meazim.co.zw', '@mea.co.zw'];
 const isStaffEmail = (e) => STAFF_DOMAINS.some((d) => String(e).toLowerCase().endsWith(d));
 const DOMAIN_TEXT = STAFF_DOMAINS.join(' or ');
 const DEPTS = ['admin', 'training', 'store', 'maintenance', 'engineering'];
