@@ -101,7 +101,7 @@
     v.innerHTML = `<div class="stack">
       <div class="card stack"><div class="cardhead" style="margin:0"><div><h2>Add an @meazim.com account</h2><p class="small muted">Creates a sign-in for a teacher, department staff member or another admin. You get a temporary password to give them; they must change it the first time they sign in.</p></div></div>
         <form class="form" id="newUser">
-          <div class="two"><label>Full name<input name="name" required></label><label>MEA email<input name="email" type="email" placeholder="name@meazim.com" pattern=".+@(meazim\\.com|meazim\\.co\\.zw|mea\\.co\\.zw)$" title="Use an @meazim.com email" required></label></div>
+          <div class="two"><label>Full name<input name="name" required></label><label>MEA email<input name="email" type="email" placeholder="name@meazim.com" pattern=".+@(meazim\\.com|mea\\.co\\.zw)$" title="Use an @meazim.com email" required></label></div>
           <div class="three"><label>Role<select name="role" id="nuRole"><option value="staff">Department staff</option><option value="teacher">Teacher</option><option value="admin">Admin</option></select></label>
             <label>Department<select name="dept" id="nuDept">${Object.entries(DEPTS).map(([k, n]) => `<option value="${k}" ${k === 'maintenance' ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
             <label>Phone (optional)<input name="phone" type="tel"></label></div>
@@ -138,7 +138,7 @@
       }));
   }
   function manage(u, v) {
-    const staffish = /@(meazim\.com|meazim\.co\.zw|mea\.co\.zw)$/i.test(u.email);
+    const staffish = /@(meazim\.com|mea\.co\.zw)$/i.test(u.email);
     dialog(`<h2>${esc(u.name)}</h2><p class="small muted">${esc(u.email)} · created ${date(u.created_at)}</p>
       <form class="form" id="mForm">
         <div class="two"><label>Name<input name="name" value="${esc(u.name)}"></label><label>Phone<input name="phone" value="${esc(u.phone || '')}"></label></div>
