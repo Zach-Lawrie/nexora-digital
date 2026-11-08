@@ -77,6 +77,15 @@ a.chip:hover{background:var(--sky)}
 /* hero */
 .hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:28px;align-items:center;background:linear-gradient(135deg,var(--sky),var(--surface));border:1px solid var(--line);border-radius:24px;padding:clamp(20px,4vw,44px)}
 .hero>div{min-width:0;display:grid;gap:18px}
+.hero{position:relative;overflow:hidden;isolation:isolate}
+.hero>.slides{position:absolute;inset:0;z-index:-2;display:block}
+.hero>.slides i{position:absolute;inset:-24px;background-size:cover;background-position:center;filter:blur(5px) saturate(.9);opacity:0;transform:scale(1.04);transition:opacity 1.4s ease,transform 7s ease}
+.hero>.slides i.on{opacity:1;transform:scale(1.1)}
+.hero>.dim{position:absolute;inset:0;z-index:-1;display:block;background:linear-gradient(100deg,color-mix(in srgb,var(--bg) 84%,transparent) 0%,color-mix(in srgb,var(--bg) 68%,transparent) 50%,color-mix(in srgb,var(--bg) 45%,transparent) 100%)}
+.hero>.slide-cap{position:absolute;right:16px;bottom:12px;display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted);z-index:1}
+.hero>.slide-cap b{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--line)}
+.hero>.slide-cap b.on{background:var(--blue)}
+@media (prefers-reduced-motion:reduce){.hero>.slides i{transition:none;transform:none}}
 .hero .logo{background:#fff;border-radius:20px;padding:20px;display:grid;place-items:center}
 .hero .logo img{width:min(100%,380px);height:auto;display:block}
 
@@ -186,6 +195,8 @@ tr:last-child td{border-bottom:0}
 <!-- HOME -->
 <section class="tab stack" id="tab-home">
   <div class="hero">
+    <div class="slides" aria-hidden="true"><i class="on" style="background-image:url(/projects/slide1.jpg)" data-cap="Control panels"></i><i style="background-image:url(/projects/slide2.jpg)" data-cap="HV substations"></i><i style="background-image:url(/projects/slide3.jpg)" data-cap="Mining and processing"></i><i style="background-image:url(/projects/slide4.jpg)" data-cap="Training labs"></i></div><div class="dim" aria-hidden="true"></div>
+    <div class="slide-cap" aria-hidden="true"><span id="slideCap">Control panels</span><b class="on"></b><b></b><b></b><b></b></div>
     <div>
       <span class="eyebrow">Welcome to MEA</span>
       <h1>Mechanical, electrical and automation work you can count on.</h1>
@@ -1156,4 +1167,16 @@ tr:last-child td{border-bottom:0}
 
 </script>
 
+<script>
+(function () {
+  var hero = document.querySelector('.hero'); if (!hero) return;
+  var s = hero.querySelectorAll('.slides i'), dots = hero.querySelectorAll('.slide-cap b'), cap = document.getElementById('slideCap'), n = 0;
+  if (s.length < 2 || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  setInterval(function () {
+    s[n].classList.remove('on'); dots[n].classList.remove('on');
+    n = (n + 1) % s.length;
+    s[n].classList.add('on'); dots[n].classList.add('on'); cap.textContent = s[n].getAttribute('data-cap');
+  }, 5000);
+})();
+</script>
 </body></html>
