@@ -454,6 +454,50 @@ on('GET', '/admin/report', async ({ env, user, url }) => {
   return json({ title: r.title, from: r.undated ? null : from.slice(0, 10), to: r.undated ? null : to.slice(0, 10), columns, rows, summary, generated_at: now(), generated_by: user.name });
 });
 
+/* export for the Google Sheet (MEA Database). Needs the EXPORT_KEY secret. */
+const EXPORTS = [
+  ['Students', `SELECT u.id AS "ID", u.name AS "Name", u.email AS "Email", u.phone AS "Phone", u.status AS "Account", substr(u.created_at,1,10) AS "Joined", substr(u.last_login,1,16) AS "Last sign-in",
+     (SELECT COUNT(*) FROM enrolments e WHERE e.student_id=u.id AND e.status='pending') AS "Applications waiting",
+     (SELECT COUNT(*) FROM enrolments e WHERE e.student_id=u.id AND e.status='active') AS "Courses in progress",
+     (SELECT COUNT(*) FROM enrolments e WHERE e.student_id=u.id AND e.status='completed') AS "Courses completed",
+     (SELECT GROUP_CONCAT(c.code, ', ') FROM enrolments e JOIN courses c ON c.id=e.course_id WHERE e.student_id=u.id AND e.status IN ('pending','active','completed')) AS "Courses"
+     FROM users u WHERE u.role='student' ORDER BY u.name`],
+  ['Teachers & staff', `SELECT u.id AS "ID", u.name AS "Name", u.email AS "Email", u.phone AS "Phone", u.role AS "Role", u.dept AS "Department", u.status AS "Account", substr(u.created_at,1,10) AS "Created", substr(u.last_login,1,16) AS "Last sign-in",
+     (SELECT GROUP_CONCAT(code, ', ') FROM courses WHERE teacher_id=u.id) AS "Courses taught"
+     FROM users u WHERE u.role IN ('admin','teacher','staff') ORDER BY u.role, u.dept, u.name`],
+  ['Courses', `SELECT c.code AS "Code", c.title AS "Course", c.level AS "Level", c.weeks AS "Weeks", c.fee AS "Fee (USD)", t.name AS "Teacher", CASE WHEN c.active=1 THEN 'Open' ELSE 'Hidden' END AS "Shown",
+     (SELECT COUNT(*) FROM enrolments e WHERE e.course_id=c.id AND e.status='pending') AS "Waiting",
+     (SELECT COUNT(*) FROM enrolments e WHERE e.course_id=c.id AND e.status='active') AS "In progress",
+     (SELECT COUNT(*) FROM enrolments e WHERE e.course_id=c.id AND e.status='completed') AS "Completed"
+     FROM courses c LEFT JOIN users t ON t.id=c.teacher_id ORDER BY c.code`],
+  ['Enrolments', `SELECT e.id AS "ID", substr(e.created_at,1,10) AS "Applied", s.name AS "Student", s.email AS "Email", c.code AS "Course", t.name AS "Teacher", e.status AS "Status", e.progress AS "Progress %",
+     (SELECT ROUND(AVG(r.score*100.0/r.max_score)) FROM results r WHERE r.enrolment_id=e.id) AS "Average %", ce.cert_no AS "Certificate"
+     FROM enrolments e JOIN users s ON s.id=e.student_id JOIN courses c ON c.id=e.course_id LEFT JOIN users t ON t.id=c.teacher_id LEFT JOIN certificates ce ON ce.enrolment_id=e.id ORDER BY e.created_at DESC`],
+  ['Results', `SELECT substr(r.created_at,1,10) AS "Date", s.name AS "Student", c.code AS "Course", r.assessment AS "Assessment", r.score AS "Score", r.max_score AS "Out of", ROUND(r.score*100.0/r.max_score) AS "%", u.name AS "Recorded by"
+     FROM results r JOIN enrolments e ON e.id=r.enrolment_id JOIN users s ON s.id=e.student_id JOIN courses c ON c.id=e.course_id LEFT JOIN users u ON u.id=r.recorded_by ORDER BY r.created_at DESC`],
+  ['Certificates', `SELECT ce.cert_no AS "Certificate no.", substr(ce.issued_at,1,10) AS "Issued", s.name AS "Student", s.email AS "Email", c.code AS "Course", c.title AS "Course title", u.name AS "Issued by"
+     FROM certificates ce JOIN enrolments e ON e.id=ce.enrolment_id JOIN users s ON s.id=e.student_id JOIN courses c ON c.id=e.course_id LEFT JOIN users u ON u.id=ce.issued_by ORDER BY ce.issued_at DESC`],
+  ['Inventory', `SELECT sku AS "SKU", name AS "Product", category AS "Category", brand AS "Brand", price AS "Price (USD)", stock AS "In stock", low_stock AS "Reorder at", ROUND(price*stock,2) AS "Stock value (USD)",
+     CASE WHEN stock <= low_stock THEN 'Reorder' ELSE 'OK' END AS "Stock status", CASE WHEN active=1 THEN 'On sale' ELSE 'Hidden' END AS "Shown", substr(COALESCE(updated_at, created_at),1,10) AS "Last changed"
+     FROM products ORDER BY category, name`],
+  ['Orders', `SELECT substr(o.created_at,1,16) AS "Date", o.number AS "Order", o.name AS "Customer", o.email AS "Email", o.phone AS "Phone", o.country AS "Country", o.delivery AS "Delivery", o.address AS "Address",
+     (SELECT GROUP_CONCAT(qty || ' x ' || name, '; ') FROM order_items WHERE order_id=o.id) AS "Items", o.total AS "Total (USD)", o.status AS "Status", o.notes AS "Notes"
+     FROM orders o ORDER BY o.created_at DESC`],
+  ['Enquiries', `SELECT substr(created_at,1,16) AS "Received", dept AS "Department", type AS "Type", project AS "Project", name AS "Name", company AS "Company", email AS "Email", phone AS "Phone", country AS "Country",
+     description AS "Description", budget AS "Budget", needed_by AS "Needed by", status AS "Status", note AS "Note" FROM enquiries ORDER BY created_at DESC`],
+];
+on('GET', '/export', async ({ env, req, url }) => {
+  const key = req.headers.get('x-export-key') || url.searchParams.get('key') || '';
+  if (!env.EXPORT_KEY || key.length < 20 || !safeEqual(key, env.EXPORT_KEY)) fail(403, 'Wrong export key.');
+  const sheets = {};
+  for (const [name, sql] of EXPORTS) {
+    const r = await env.DB.prepare(sql).raw({ columnNames: true });
+    const head = [...sql.matchAll(/ AS "([^"]+)"/g)].map((m) => m[1]);
+    sheets[name] = r.length ? r : [head.filter((h, i, all) => all.indexOf(h) === i)];
+  }
+  return json({ updated: now(), sheets });
+});
+
 /* ---------------- entry ---------------- */
 export async function onRequest({ request, env }) {
   const url = new URL(request.url);
