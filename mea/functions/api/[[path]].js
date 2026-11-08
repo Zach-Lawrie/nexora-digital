@@ -1,7 +1,9 @@
 // MEA API — Cloudflare Pages Function. All routes live under /api/.
 // Database: D1 bound as env.DB. Sessions: HttpOnly cookie "mea_s".
 
-const STAFF_DOMAIN = '@mea.co.zw';
+const STAFF_DOMAINS = ['@meazim.co.zw', '@mea.co.zw'];
+const isStaffEmail = (e) => STAFF_DOMAINS.some((d) => String(e).toLowerCase().endsWith(d));
+const DOMAIN_TEXT = STAFF_DOMAINS.join(' or ');
 const DEPTS = ['admin', 'training', 'store', 'maintenance', 'engineering'];
 const ROLES = ['admin', 'teacher', 'staff', 'student'];
 const ORDER_STATUS = ['awaiting_payment', 'paid', 'packed', 'dispatched', 'completed', 'cancelled'];
@@ -117,7 +119,7 @@ on('POST', '/auth/signup', async ({ env, body }) => {
   const name = str(body.name, 100), email = str(body.email, 200).toLowerCase(), phone = str(body.phone, 40);
   if (!name) fail(400, 'Enter your full name.');
   if (!emailOk(email)) fail(400, 'Enter a valid email address.');
-  if (email.endsWith(STAFF_DOMAIN)) fail(400, 'MEA staff accounts are created by the admin. Sign in with the password you were given.');
+  if (isStaffEmail(email)) fail(400, 'MEA staff accounts are created by the admin. Sign in with the password you were given.');
   passwordRule(body.password);
   if (await one(env.DB, 'SELECT id FROM users WHERE email = ?', email)) fail(409, 'An account with that email already exists. Sign in instead.');
   const { hash, salt } = await hashPassword(body.password);
@@ -363,7 +365,7 @@ on('POST', '/admin/users', async ({ env, user, body }) => {
   need(user, 'admin');
   const email = str(body.email, 200).toLowerCase(), name = str(body.name, 100), role = body.role, dept = body.dept;
   if (!name) fail(400, 'Enter the person\'s name.');
-  if (!email.endsWith(STAFF_DOMAIN) || !emailOk(email)) fail(400, `Staff emails must end in ${STAFF_DOMAIN}.`);
+  if (!isStaffEmail(email) || !emailOk(email)) fail(400, `Staff emails must end in ${DOMAIN_TEXT}.`);
   if (!['admin', 'teacher', 'staff'].includes(role)) fail(400, 'Choose admin, teacher or staff.');
   if (!DEPTS.includes(dept)) fail(400, 'Choose a department.');
   if (await one(env.DB, 'SELECT id FROM users WHERE email = ?', email)) fail(409, 'That email already has an account.');
@@ -395,7 +397,7 @@ on('POST', '/admin/users/:id', async ({ env, user, body, params }) => {
   }
   if (a === 'update') {
     const role = ROLES.includes(body.role) ? body.role : t.role;
-    if (role !== 'student' && !t.email.endsWith(STAFF_DOMAIN)) fail(400, `Only ${STAFF_DOMAIN} accounts can be staff, teachers or admins.`);
+    if (role !== 'student' && !isStaffEmail(t.email)) fail(400, `Only ${DOMAIN_TEXT} accounts can be staff, teachers or admins.`);
     const dept = role === 'teacher' || role === 'student' ? 'training' : DEPTS.includes(body.dept) ? body.dept : t.dept;
     await run(env.DB, 'UPDATE users SET name=?, phone=?, role=?, dept=? WHERE id=?', str(body.name, 100) || t.name, str(body.phone, 40), role, dept, t.id);
     await audit(env, user, 'account updated', `${t.email} → ${role}, ${dept}`);
