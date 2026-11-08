@@ -315,8 +315,8 @@ footer nav a:hover{color:var(--ink)}
 .values div:nth-child(1){background:#EDFBD0;border-color:transparent}
 .values div:nth-child(4){background:#DDF1FD;border-color:transparent}
 .values p{color:var(--ink-soft);margin-top:6px}
-.work{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-@media (max-width:1000px){.work{grid-template-columns:1fr 1fr}}
+.work{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+@media (max-width:1180px){.work{grid-template-columns:1fr 1fr}}
 @media (max-width:640px){.work{grid-template-columns:1fr}}
 .work-card{display:flex;flex-direction:column;background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;text-decoration:none;transition:transform .15s ease}
 .work-card:hover{transform:translateY(-3px)}
