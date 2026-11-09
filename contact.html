@@ -31,20 +31,49 @@
         <a class="way" href="mailto:lorensomumba@gmail.com"><span class="dot" style="background:var(--sun-soft)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D2B3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span><span><small>Email</small><b>lorensomumba@gmail.com</b></span></a>
       </div>
     </div>
-    <form id="lead">
-      <label>Your name<input id="f-name" required autocomplete="name"></label>
-      <label>Business name<input id="f-biz" required autocomplete="organization"></label>
-      <label>What are you interested in?
-        <select id="f-plan">
-          <option>Free sample, not sure yet</option>
-          <option>Starter website</option><option>Business website</option><option>Pro website</option><option>Custom website quote</option><option>Business system quote</option>
-          <option>Basic hosting</option><option>Standard hosting</option><option>Managed hosting</option>
-          <option>Move my existing website</option><option>Domain name</option><option>Becoming a sales partner</option>
-        </select>
-      </label>
-      <label>Anything we should know?<textarea id="f-msg" placeholder="What you sell, where you are, colours you like..."></textarea></label>
-      <button class="btn btn-wa" type="submit">Send on WhatsApp</button>
-      <p class="form-note">This opens WhatsApp with your details filled in, ready to send.</p>
+    <div class="next-card">
+      <h2>How your free sample works</h2>
+      <ol class="next-steps">
+        <li><b>Fill in the brief below.</b> It takes about 3 minutes and opens WhatsApp with everything filled in.</li>
+        <li><b>We build a sample homepage</b> using your real business details, and send you the link.</li>
+        <li><b>Ask for changes.</b> Pay only when you love it, then we connect your domain and go live.</li>
+      </ol>
+      <ul class="next-ticks"><li>No payment before the sample</li><li>No pressure</li><li>You own your website and domain</li></ul>
+      <a class="btn btn-main" href="#brief">Start my brief</a>
+    </div>
+  </div>
+</section>
+<section id="brief" class="tight">
+  <div class="wrap">
+    <div class="head"><h2>Your free sample brief</h2><p>The more you tell us, the closer your sample will be to the real thing. Only your name, business and WhatsApp number are required.</p></div>
+    <form id="lead" class="brief">
+      <fieldset><legend><span class="n">1</span>What are you interested in?</legend>
+        <select id="f-plan"><option>Free sample, not sure yet</option><option>Starter website</option><option>Business website</option><option>Pro website</option><option>Custom website quote</option><option>Business system quote</option><option>Basic hosting</option><option>Standard hosting</option><option>Managed hosting</option><option>Move my existing website</option><option>Domain name</option><option>Becoming a sales partner</option></select></fieldset>
+      <fieldset><legend><span class="n">2</span>What type of business do you run?</legend>
+        <select id="f-type"><option value="">Choose one</option><option>Shop / retail</option><option>Salon / barber / beauty</option><option>Restaurant / café / takeaway</option><option>Bakery / cakes</option><option>Church / ministry</option><option>School / college / training</option><option>Hardware / building supplies</option><option>Clinic / pharmacy / health</option><option>Lodge / guest house</option><option>Tours / transport</option><option>Real estate / property</option><option>Farming / agriculture</option><option>Construction / trades</option><option>Consultant / professional services</option><option>NGO / community organisation</option><option>Other</option></select></fieldset>
+      <fieldset><legend><span class="n">3</span>Where are you based?</legend>
+        <select id="f-loc"><option value="">Choose one</option><option>Harare</option><option>Bulawayo</option><option>Mutare</option><option>Gweru</option><option>Masvingo</option><option>Victoria Falls</option><option>Chinhoyi</option><option>Kwekwe / Kadoma</option><option>Outside Zimbabwe (diaspora-owned)</option><option>Other</option></select></fieldset>
+      <fieldset><legend><span class="n">4</span>What do you use online now?</legend><div class="chips"><label class="chip"><input type="checkbox" name="now" value="Facebook page"><span>Facebook page</span></label><label class="chip"><input type="checkbox" name="now" value="Instagram"><span>Instagram</span></label><label class="chip"><input type="checkbox" name="now" value="TikTok"><span>TikTok</span></label><label class="chip"><input type="checkbox" name="now" value="WhatsApp only"><span>WhatsApp only</span></label><label class="chip"><input type="checkbox" name="now" value="Google Maps listing"><span>Google Maps listing</span></label><label class="chip"><input type="checkbox" name="now" value="An old website"><span>An old website</span></label><label class="chip"><input type="checkbox" name="now" value="Nothing yet"><span>Nothing yet</span></label></div></fieldset>
+      <fieldset><legend><span class="n">5</span>What should customers do on your website?</legend><div class="chips"><label class="chip"><input type="checkbox" name="do" value="WhatsApp me"><span>WhatsApp me</span></label><label class="chip"><input type="checkbox" name="do" value="Call me"><span>Call me</span></label><label class="chip"><input type="checkbox" name="do" value="Send a form"><span>Send a form</span></label><label class="chip"><input type="checkbox" name="do" value="Book an appointment, table or room"><span>Book an appointment, table or room</span></label><label class="chip"><input type="checkbox" name="do" value="Order products"><span>Order products</span></label><label class="chip"><input type="checkbox" name="do" value="Find my location"><span>Find my location</span></label><label class="chip"><input type="checkbox" name="do" value="Ask for a quote"><span>Ask for a quote</span></label><label class="chip"><input type="checkbox" name="do" value="Pay online"><span>Pay online</span></label></div></fieldset>
+      <fieldset><legend><span class="n">6</span>Links, if you have them</legend>
+        <div class="grid2">
+          <label>Facebook<input id="l-fb" type="url" placeholder="https://facebook.com/..."></label>
+          <label>Instagram or TikTok<input id="l-ig" type="url" placeholder="https://instagram.com/..."></label>
+          <label>Google Maps<input id="l-map" type="url" placeholder="https://maps.google.com/..."></label>
+          <label>Current website<input id="l-web" type="url" placeholder="https://..."></label>
+        </div></fieldset>
+      <fieldset><legend><span class="n">7</span>What do you sell?</legend>
+        <textarea id="f-msg" rows="4" placeholder="Your main products or services, prices or from-prices, opening hours, areas you serve, and anything customers always ask."></textarea></fieldset>
+      <fieldset><legend><span class="n">8</span>Pick a style</legend><div class="styles"><label class="style-pick"><input type="radio" name="style" value="Clean and professional" checked><span class="sw" style="background:linear-gradient(135deg,#1D2B3A 55%,#1E9BE9 55%)"></span><span>Clean and professional</span></label><label class="style-pick"><input type="radio" name="style" value="Bright and playful"><span class="sw" style="background:linear-gradient(135deg,#B6EE3A 55%,#FF8FB1 55%)"></span><span>Bright and playful</span></label><label class="style-pick"><input type="radio" name="style" value="Bold and modern"><span class="sw" style="background:linear-gradient(135deg,#111111 55%,#FFC63D 55%)"></span><span>Bold and modern</span></label><label class="style-pick"><input type="radio" name="style" value="Premium and elegant"><span class="sw" style="background:linear-gradient(135deg,#2B2A28 55%,#C8A15A 55%)"></span><span>Premium and elegant</span></label><label class="style-pick"><input type="radio" name="style" value="Simple and practical"><span class="sw" style="background:linear-gradient(135deg,#FFFFFF 55%,#2E8B57 55%)"></span><span>Simple and practical</span></label></div></fieldset>
+      <fieldset><legend><span class="n">9</span>Your details</legend>
+        <div class="grid2">
+          <label>Your name<input id="f-name" required autocomplete="name"></label>
+          <label>Business name<input id="f-biz" required autocomplete="organization"></label>
+          <label>WhatsApp number<input id="f-wa" type="tel" required autocomplete="tel" placeholder="+263 7..."></label>
+          <label>Email (optional)<input id="f-email" type="email" autocomplete="email"></label>
+        </div></fieldset>
+      <div class="brief-send"><button class="btn btn-wa" type="submit">Send my sample brief on WhatsApp</button>
+      <p class="form-note">This opens WhatsApp with your whole brief filled in, ready to send. Nothing is sent until you press send.</p></div>
     </form>
   </div>
 </section>
@@ -58,6 +87,10 @@
       <details><summary>How long does it take?</summary><p>Most sample sites are ready within a few days of getting your details and photos. Starter sites can be live in about 5 days.</p></details>
       <details><summary>I don't have a logo or good photos. Can you still help?</summary><p>Yes. We can work with photos from your phone, and help you put together a simple logo if you don't have one.</p></details>
       <details><summary>I already have a website. Can you take it over?</summary><p>Yes. Moving an existing website starts from $40. Send us your website link and we'll tell you what we need, usually your domain and hosting logins. We make sure your email keeps working.</p></details>
+      <details><summary>Do I own my website?</summary><p>Yes. Your domain is registered in your business name and the words and photos are yours. If you ever leave, we help you move.</p></details>
+      <details><summary>How do I pay?</summary><p>Prices are in US dollars. We agree an easy way to pay with you, such as mobile money or bank transfer, before any work starts.</p></details>
+      <details><summary>Can you use my Facebook page?</summary><p>Yes. Send us the link and we use your photos, services and reviews as a starting point, so you don't have to write everything from scratch.</p></details>
+      <details><summary>Can you help me show up on Google Maps?</summary><p>Yes. We set up or tidy your Google Business Profile and link it to your website so people nearby can find you.</p></details>
       <details><summary>What if I stop paying for hosting?</summary><p>Your site goes offline, but we keep a copy and can bring it back when you're ready.</p></details>
     </div>
   </div>

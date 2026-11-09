@@ -84,17 +84,29 @@
     });
   }
 
-  // Contact: prefill and send on WhatsApp
+  // Contact: free sample brief, sent on WhatsApp
   if ($("lead")) {
     if (params.get("biz")) $("f-biz").value = params.get("biz");
     if (params.get("plan")) {
       var want = params.get("plan");
       Array.prototype.forEach.call($("f-plan").options, function (o) { if (o.text === want) $("f-plan").value = o.value; });
     }
+    var picked = function (name) { return Array.prototype.map.call(document.querySelectorAll('input[name="' + name + '"]:checked'), function (i) { return i.value; }); };
     $("lead").addEventListener("submit", function (e) {
       e.preventDefault();
-      var t = "Hi Nexora, I'm interested in: " + $("f-plan").value + "\n\nName: " + $("f-name").value + "\nBusiness: " + $("f-biz").value + ($("f-msg").value ? "\n\n" + $("f-msg").value : "");
-      window.open(WA + "?text=" + encodeURIComponent(t), "_blank", "noopener");
+      var L = [], add = function (k, v) { if (v && String(v).trim()) L.push(k + ": " + String(v).trim()); };
+      L.push("Hi Nexora, here is my free sample brief.", "");
+      add("Interested in", $("f-plan").value);
+      add("Business", $("f-biz").value);
+      add("Type of business", $("f-type").value);
+      add("Based in", $("f-loc").value);
+      add("Online now", picked("now").join(", "));
+      add("Customers should", picked("do").join(", "));
+      add("Facebook", $("l-fb").value); add("Instagram/TikTok", $("l-ig").value); add("Google Maps", $("l-map").value); add("Current website", $("l-web").value);
+      add("Style", picked("style").join(""));
+      if ($("f-msg").value.trim()) { L.push("", "What we sell:", $("f-msg").value.trim()); }
+      L.push(""); add("Name", $("f-name").value); add("WhatsApp", $("f-wa").value); add("Email", $("f-email").value);
+      window.open(WA + "?text=" + encodeURIComponent(L.join("\n")), "_blank", "noopener");
     });
   }
 
