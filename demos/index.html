@@ -24,7 +24,7 @@ nav.jump{display:flex;gap:8px;overflow-x:auto;padding:18px 0 4px;scrollbar-width
 nav.jump a{flex:none;font-size:13.5px;font-weight:700;color:var(--ink);text-decoration:none;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
 section.g{padding:26px 0 6px}
 section.g h2{font-size:22px;margin:0 0 14px;letter-spacing:-.02em}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
 .sc{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto 1fr auto;gap:12px 14px;padding:18px;border-radius:18px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink);transition:transform .15s,border-color .15s,box-shadow .15s;position:relative;overflow:hidden}
 .sc::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,var(--c),var(--c2))}
 .sc:hover{transform:translateY(-2px);border-color:var(--c);box-shadow:0 14px 30px -16px rgba(0,0,0,.35)}
@@ -37,6 +37,7 @@ section.g h2{font-size:22px;margin:0 0 14px;letter-spacing:-.02em}
 .cta h2{margin:0 0 6px;font-size:24px}.cta p{margin:0;opacity:.8;max-width:60ch}
 .cta a{background:#f6c445;color:#16140f;font-weight:800;text-decoration:none;padding:13px 20px;border-radius:12px;white-space:nowrap}
 footer{padding:0 0 30px;color:var(--muted);font-size:13px}
+@media (max-width:560px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.sc{grid-template-columns:1fr;padding:14px;gap:8px}.sb{display:none}.sm{flex-direction:column;align-items:flex-start;gap:2px}.st b{font-size:15px}}
 </style>
 </head>
 <body>
