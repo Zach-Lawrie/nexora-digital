@@ -1,0 +1,1430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rubatsiro · NGO projects &amp; beneficiaries | Live demo by Nexora Digital</title>
+<meta name="description" content="Donor projects, budgets, beneficiaries, distributions and field visits with donor reports. Try the live demo of Rubatsiro, built by Nexora Digital in Zimbabwe.">
+<meta name="theme-color" content="#0e7490">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%220%200%2040%2040%22%20aria-hidden%3D%22true%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g-rubatsiro%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%230e7490%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2322c55e%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20rx%3D%2211%22%20fill%3D%22url(%23g-rubatsiro)%22%2F%3E%3Cpath%20d%3D%22M0%2028%20Q20%2018%2040%2026%20V40%20H0Z%22%20fill%3D%22%23fff%22%20opacity%3D%22.1%22%2F%3E%3Cg%20transform%3D%22translate(8%208)%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2022a10%2010%200%201%200%200-20%2010%2010%200%200%200%200%2020M2%2012h20M12%202a15%2015%200%200%201%200%2020%2015%2015%200%200%201%200-20%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>:root{
+  --brand:#1e3a8a;--brand2:#f59e0b;
+  --bg:#f4f5f8;--surface:#fff;--ink:#13161b;--muted:#5b6370;--line:#e3e6ec;--line2:#eef0f4;
+  --b-ink:color-mix(in srgb,var(--brand) 86%,#000);--b-soft:color-mix(in srgb,var(--brand) 8%,#fff);--b-mid:color-mix(in srgb,var(--brand) 22%,#fff);
+  --side:color-mix(in srgb,var(--brand) 80%,#05070b);--bar:var(--brand);
+  --ok:#137a46;--ok-bg:#e2f4ea;--warn:#935600;--warn-bg:#fff0d4;--bad:#b42318;--bad-bg:#fde6e3;--info:#1f5aa6;--info-bg:#e6eefa;--grey-bg:#eceef2;
+  --r:14px;--f:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --sh:0 1px 2px rgba(16,24,40,.05),0 8px 24px -12px rgba(16,24,40,.12);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1014;--surface:#161a20;--ink:#eceef2;--muted:#a0a8b4;--line:#2a3039;--line2:#20252d;
+  --b-ink:color-mix(in srgb,var(--brand) 38%,#fff);--b-soft:color-mix(in srgb,var(--brand) 18%,#161a20);--b-mid:color-mix(in srgb,var(--brand) 35%,#161a20);
+  --side:color-mix(in srgb,var(--brand) 45%,#07090c);--bar:color-mix(in srgb,var(--brand) 55%,#fff);
+  --ok:#5fd08e;--ok-bg:#11301f;--warn:#f2bd5a;--warn-bg:#33260d;--bad:#ff8b80;--bad-bg:#3b1613;--info:#8fb8f5;--info-bg:#142740;--grey-bg:#252a32;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.5);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1014;--surface:#161a20;--ink:#eceef2;--muted:#a0a8b4;--line:#2a3039;--line2:#20252d;
+  --b-ink:color-mix(in srgb,var(--brand) 38%,#fff);--b-soft:color-mix(in srgb,var(--brand) 18%,#161a20);--b-mid:color-mix(in srgb,var(--brand) 35%,#161a20);
+  --side:color-mix(in srgb,var(--brand) 45%,#07090c);--bar:color-mix(in srgb,var(--brand) 55%,#fff);
+  --ok:#5fd08e;--ok-bg:#11301f;--warn:#f2bd5a;--warn-bg:#33260d;--bad:#ff8b80;--bad-bg:#3b1613;--info:#8fb8f5;--info-bg:#142740;--grey-bg:#252a32;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.5);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:14.5px/1.5 var(--f);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;line-height:1.2;letter-spacing:-.01em;text-wrap:balance}
+p{margin:0}
+a{color:var(--b-ink)}
+button{font:inherit;color:inherit}
+.i{flex:none}
+.muted{color:var(--muted)}.small{font-size:12.5px}.dim{color:var(--muted);opacity:.6}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--brand) 55%,#fff);outline-offset:2px;border-radius:8px}
+.inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:700;font-size:14px;padding:9px 15px;border-radius:10px;border:1px solid var(--brand);background:var(--brand);color:#fff;cursor:pointer;text-decoration:none;white-space:nowrap;transition:filter .15s,transform .05s}
+.btn:hover{filter:brightness(1.1)}.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{background:var(--b-soft);filter:none}
+.btn.danger{color:var(--bad)}.btn.danger.sure{background:var(--bad);color:#fff;border-color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn.big{width:100%;padding:13px;font-size:15px;margin-top:4px}
+.link{background:none;border:0;color:var(--b-ink);font-weight:700;cursor:pointer;padding:4px;display:inline-flex;align-items:center;gap:4px;font-size:13px}
+.iconbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:inline-grid;place-items:center;cursor:pointer;position:relative;color:var(--ink)}
+.iconbtn:hover{background:var(--b-soft)}
+.iconbtn i{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:var(--bad);color:#fff;font:700 11px/18px var(--f);font-style:normal;padding:0 4px;text-align:center}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;font-weight:700;font-size:11.5px;line-height:1;padding:5px 9px;border-radius:999px;white-space:nowrap;background:var(--info-bg);color:var(--info)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.grey{background:var(--grey-bg);color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--info);flex:none;display:inline-block}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--b-soft);color:var(--b-ink)}
+.stars{color:#e0a100;letter-spacing:1px}.stars i{color:var(--line);font-style:normal}
+.mbar{display:inline-block;width:70px;height:7px;border-radius:9px;background:var(--line);overflow:hidden;vertical-align:middle;margin-right:6px}.mbar i{display:block;height:100%;background:var(--bar)}
+
+/* login */
+.login{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);min-height:100vh;min-height:100dvh}
+.login-brand{position:relative;overflow:hidden;color:#fff;padding:48px clamp(24px,5vw,64px);display:flex;flex-direction:column;justify-content:space-between;gap:30px;
+  background:radial-gradient(1200px 500px at 110% -10%,color-mix(in srgb,var(--brand2) 55%,transparent),transparent 60%),linear-gradient(150deg,var(--brand),color-mix(in srgb,var(--brand) 55%,#05070b))}
+.login-brand::after{content:"";position:absolute;inset:auto -80px -120px auto;width:380px;height:380px;border-radius:50%;border:60px solid rgba(255,255,255,.06)}
+.lb-in{position:relative;z-index:1;display:grid;gap:22px;max-width:560px;margin-block:auto}
+.lb-logo{display:flex;align-items:center;gap:14px}
+.lb-logo svg{box-shadow:0 10px 30px -8px rgba(0,0,0,.5);border-radius:14px}
+.lb-logo b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em}
+.lb-logo span{opacity:.8;font-weight:600}
+.lb-in h1{font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.025em}
+.ticks{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.ticks li{display:flex;gap:10px;align-items:flex-start;font-weight:500}
+.ticks .i{margin-top:2px;padding:2px;border-radius:50%;background:rgba(255,255,255,.18);width:20px;height:20px}
+.lb-org{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);padding:10px 14px;border-radius:12px;width:fit-content}
+.lb-foot{position:relative;z-index:1;font-size:13px;opacity:.8}.lb-foot a{color:#fff;font-weight:700}
+.login-pick{display:flex;align-items:center;justify-content:center;padding:40px clamp(16px,4vw,48px)}
+.pick-in{width:100%;max-width:500px;display:grid;gap:14px}
+.pick-in h2{font-size:28px;font-weight:800}
+.demo-tag{display:inline-flex;align-items:center;gap:6px;width:fit-content;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--b-ink);background:var(--b-soft);padding:6px 10px;border-radius:999px}
+.roles{display:grid;gap:10px;margin-top:6px}
+.role{display:flex;align-items:center;gap:14px;text-align:left;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--surface);cursor:pointer;box-shadow:var(--sh);transition:border-color .15s,transform .15s}
+.role:hover{border-color:var(--brand);transform:translateY(-1px)}
+.role>.i{color:var(--muted);margin-left:auto}
+.rt{display:grid;gap:1px;min-width:0}
+.rt b{font-size:15px}.rt small{color:var(--b-ink);font-weight:700;font-size:12.5px}.rt em{font-style:normal;color:var(--muted);font-size:13px}
+.av{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand2));flex:none}
+.pick-cta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+@media (max-width:860px){
+  .login{grid-template-columns:1fr}
+  .login-brand{padding:28px 16px 26px;gap:18px}
+  .lb-in{gap:14px}.lb-in h1{font-size:24px}
+  .ticks li:nth-child(n+4){display:none}
+  .lb-foot{display:none}
+  .login-pick{padding:24px 16px 40px;align-items:flex-start}
+}
+
+/* app shell */
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh;min-height:100dvh}
+.side{background:var(--side);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;height:100dvh;padding:18px 12px}
+.side-brand{display:flex;align-items:center;gap:11px;padding:4px 8px 18px;border-bottom:1px solid rgba(255,255,255,.1)}
+.side-brand b{display:block;font-size:16px;font-weight:800;letter-spacing:-.01em}
+.side-brand span{display:block;font-size:12px;opacity:.7;line-height:1.3}
+.nav{display:grid;gap:2px;padding:14px 0;overflow-y:auto;align-content:start;flex:1}
+.nav button{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;border:0;background:none;color:rgba(255,255,255,.78);font-weight:600;cursor:pointer;text-align:left;position:relative;white-space:nowrap}
+.nav button:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav button[aria-current="page"]{background:rgba(255,255,255,.14);color:#fff}
+.nav button[aria-current="page"]::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:4px;border-radius:0 4px 4px 0;background:var(--brand2)}
+.side-foot{border-top:1px solid rgba(255,255,255,.1);padding-top:12px;display:grid;gap:2px}
+.me{display:flex;align-items:center;gap:10px;padding:6px 8px 10px}
+.me .av{width:36px;height:36px;font-size:12.5px;border-radius:10px;box-shadow:0 0 0 2px rgba(255,255,255,.2)}
+.me b{display:block;font-size:13.5px}.me small{opacity:.7;font-size:12px}
+.sf{display:flex;align-items:center;gap:9px;padding:8px 10px;border:0;background:none;color:rgba(255,255,255,.72);font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;text-decoration:none}
+.sf:hover{background:rgba(255,255,255,.08);color:#fff}
+.sf.credit{font-weight:500;font-size:12px;opacity:.8}.sf.credit b{color:#fff;margin-left:3px}
+.main{min-width:0;display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 28px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line)}
+.bar h1{font-size:22px;font-weight:800}
+.crumb{font-size:12.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
+.demo-pill{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--brand2);color:#111;padding:2px 7px;border-radius:5px}
+.bar-r{display:flex;align-items:center;gap:8px}
+.mob{display:none}
+#view{padding:24px 28px 60px;display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-content:start;outline:none;max-width:1400px;width:100%}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:sticky;top:0;z-index:20;height:auto;flex-direction:column;padding:10px 0 0;min-width:0}
+  .side-brand{padding:0 16px 8px;border:0}
+  .side-brand svg{width:30px;height:30px}
+  .nav{display:flex;overflow-x:auto;padding:0 10px 8px;gap:4px;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{padding:8px 12px;font-size:13.5px;flex:none}
+  .nav button[aria-current="page"]::before{left:12px;right:12px;top:auto;bottom:2px;width:auto;height:3px;border-radius:3px}
+  .side-foot{display:none}
+  .bar{position:static;padding:14px 16px}
+  .bar h1{font-size:19px}
+  .mob{display:inline-grid}
+  .crumb .co{display:none}
+  .kpi b{font-size:22px}
+  .bar .cta span{display:none}
+  .bar .cta{padding:9px 11px}
+  #view{padding:16px 16px 60px;gap:14px}
+}
+
+/* cards & dashboard */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);min-width:0}
+.card h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.cardhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.hello{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.hello h2{font-size:24px;font-weight:800}
+.quick{display:flex;gap:8px;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);position:relative;overflow:hidden;min-width:0}
+.kpi::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(var(--brand),var(--brand2))}
+.kpi span{font-size:12.5px;color:var(--muted);font-weight:600;display:block}
+.kpi b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:4px;overflow-wrap:anywhere}
+.kpi small{color:var(--muted);font-size:12px}
+.kpis.sm .kpi{padding:12px 16px}.kpis.sm .kpi b{font-size:20px}
+.alerts{display:grid;gap:4px}
+.alerts h3{margin-bottom:6px}
+.alerts.calm{display:flex;align-items:center;gap:10px;color:var(--ok);font-weight:600}
+.al{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:0;background:none;cursor:pointer;text-align:left;font-weight:600}
+.al:hover{background:var(--b-soft)}
+.al .i{margin-left:auto;color:var(--muted)}
+.al.bad{background:color-mix(in srgb,var(--bad-bg) 60%,transparent)}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.chart h3{margin-bottom:14px}
+.cols{display:flex;align-items:stretch;gap:10px;height:190px}
+.col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.cb{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.cb i{display:block;width:min(42px,80%);border-radius:7px 7px 3px 3px;background:var(--b-mid)}
+.col.now .cb i{background:linear-gradient(var(--brand2),var(--brand))}
+.cv{font-size:11.5px;font-weight:700;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.cl{font-size:12px;color:var(--muted);font-weight:600}
+.bars{display:grid;gap:10px}
+.brow{display:grid;grid-template-columns:minmax(80px,32%) 1fr auto;align-items:center;gap:10px;font-size:13px}
+.bl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.bt{height:10px;border-radius:9px;background:var(--line2);overflow:hidden}
+.bt i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--brand),color-mix(in srgb,var(--brand) 60%,#fff))}
+.bv{font-weight:700;font-variant-numeric:tabular-nums;font-size:12.5px;white-space:nowrap}
+.empty-s{padding:10px 0}
+
+/* page head & toolbar */
+.phead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{display:flex;align-items:center;gap:6px;padding:8px 12px;border:0;background:none;cursor:pointer;font-weight:600;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--b-soft);color:var(--b-ink)}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0 12px;flex:1 1 240px;max-width:380px;color:var(--muted)}
+.search input{border:0;background:none;padding:10px 0;font:inherit;color:var(--ink);width:100%;outline:none}
+.search:focus-within{border-color:var(--brand)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;max-width:100%}
+.chips::-webkit-scrollbar{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap}
+.chip i{font-style:normal;font-size:11px;background:var(--line2);padding:1px 6px;border-radius:9px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.chip[aria-pressed="true"] i{background:rgba(255,255,255,.22);color:#fff}
+.filterbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;background:var(--warn-bg);color:var(--warn);font-size:13.5px}
+
+/* tables */
+.tw{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:auto;box-shadow:var(--sh)}
+.tw.mini{box-shadow:none;border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line2);vertical-align:middle}
+th{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:color-mix(in srgb,var(--b-soft) 55%,var(--surface));white-space:nowrap;position:sticky;top:0;cursor:pointer;user-select:none}
+.tw.mini th{cursor:default}
+tbody tr{cursor:pointer;transition:background .1s}
+tbody tr:hover{background:var(--b-soft)}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{border-top:2px solid var(--line);border-bottom:0;background:color-mix(in srgb,var(--b-soft) 40%,var(--surface))}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.ref,.ref{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);white-space:nowrap}
+td.tt{font-weight:700}
+.count{text-align:right}
+.empty{display:grid;place-items:center;gap:8px;padding:40px;color:var(--muted);text-align:center}
+@media (max-width:700px){
+  .rt thead{display:none}
+  .rt,.rt tbody,.rt tr,.rt td,.rt tfoot{display:block}
+  .tw:has(.rt){background:none;border:0;box-shadow:none;overflow:visible}
+  .rt tbody tr{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;padding:8px 14px;box-shadow:var(--sh)}
+  .rt td{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border:0;text-align:right}
+  .rt td::before{content:attr(data-label);color:var(--muted);font-size:12.5px;font-weight:600;text-align:left}
+  .rt td.tt{font-size:15px}
+  .rt tfoot tr{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 14px;border-radius:12px;background:var(--b-soft)}
+  .rt tfoot td{background:none;border:0;padding:0}
+  .rt tfoot td:empty{display:none}
+}
+
+/* board */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:12px;overflow-x:auto;padding-bottom:8px;align-items:start}
+.lane{background:color-mix(in srgb,var(--line2) 70%,var(--bg));border-radius:var(--r);padding:10px;display:grid;gap:8px;min-height:120px}
+.lane-h{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;padding:4px 6px}
+.lane-h b{margin-left:auto;font-size:12px;background:var(--surface);border-radius:9px;padding:1px 8px;color:var(--muted)}
+.lane-empty{color:var(--muted);font-size:12.5px;text-align:center;padding:12px;opacity:.7}
+.bcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:4px;cursor:pointer;box-shadow:var(--sh)}
+.bcard:hover{border-color:var(--brand)}
+.bcard b{font-size:14px}
+.bf{font-size:12.5px;color:var(--muted)}
+.next{justify-self:start;margin-top:6px;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--b-soft);color:var(--b-ink);cursor:pointer}
+.next:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+/* dialog */
+dialog{border:0;border-radius:18px;padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 32px);background:var(--surface);color:var(--ink);box-shadow:0 30px 80px rgba(0,0,0,.35)}
+dialog.wide{width:min(760px,calc(100vw - 24px))}
+dialog.narrow{width:min(380px,calc(100vw - 24px))}
+dialog::backdrop{background:rgba(8,10,14,.55);backdrop-filter:blur(2px)}
+.dlg{padding:22px;display:grid;gap:16px;max-height:calc(100dvh - 32px);overflow:auto}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.dh h2{font-size:20px;font-weight:800;margin-top:2px}
+.x{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;flex:none}
+.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 18px;margin:0;padding:14px;border-radius:12px;background:color-mix(in srgb,var(--b-soft) 60%,var(--surface))}
+.dl div{min-width:0}.dl .wide{grid-column:1/-1}
+.dl dt{font-size:12px;color:var(--muted);font-weight:600}
+.dl dd{margin:2px 0 0;font-weight:600;overflow-wrap:anywhere}
+.rel{display:grid;gap:8px}
+.dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.frm{display:grid;gap:16px}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fgrid .wide{grid-column:1/-1}
+label{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:var(--muted)}
+input,select,textarea{font:14.5px var(--f);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
+.err{color:var(--bad);font-weight:700;font-size:13.5px}
+@media (max-width:560px){.fgrid{grid-template-columns:1fr}.dlg{padding:18px}}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#14171c;color:#fff;padding:11px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:1000;display:flex;align-items:center;gap:8px;box-shadow:0 12px 30px rgba(0,0,0,.3);max-width:calc(100vw - 32px);animation:tin .2s ease-out}
+.toast .i{color:#5fd08e}.toast.bad{background:var(--bad)}.toast.bad .i{color:#fff}
+@keyframes tin{from{opacity:0;transform:translate(-50%,8px)}}
+
+/* POS */
+.pos{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+.pos>section{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;min-width:0}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.pitem{display:grid;gap:4px;text-align:left;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);cursor:pointer;box-shadow:var(--sh);align-content:start;min-height:120px}
+.pitem:hover{border-color:var(--brand)}
+.pitem:disabled{opacity:.5;cursor:not-allowed}
+.pitem b{font-size:14px;line-height:1.3}
+.pcat{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--b-ink)}
+.pp{font-size:17px;font-weight:800;margin-top:auto;font-variant-numeric:tabular-nums}
+.ps{font-size:12px;color:var(--muted);font-weight:600}.ps.warn{color:var(--warn)}.ps.bad{color:var(--bad)}
+.cart{position:sticky;top:90px;display:grid;gap:12px}
+.cline{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding-bottom:10px;border-bottom:1px dashed var(--line)}
+.cline b{font-size:13.5px}.cline small{display:block;color:var(--muted);font-size:12px}
+.cline .lt{grid-column:2;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:800;font-size:16px}
+.cart-empty{display:grid;place-items:center;gap:6px;color:var(--muted);padding:24px 0;opacity:.75}
+.ctotal{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;font-weight:700;padding-top:4px}
+.ctotal b{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.methods{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.mth{display:block;position:relative}
+.mth input{position:absolute;opacity:0;pointer-events:none}
+.mth span{display:block;text-align:center;padding:9px 6px;border-radius:10px;border:1px solid var(--line);font-weight:700;color:var(--ink);font-size:13px;cursor:pointer}
+.mth input:checked+span{border-color:var(--brand);background:var(--b-soft);color:var(--b-ink);box-shadow:inset 0 0 0 1px var(--brand)}
+.mth input:focus-visible+span{outline:3px solid color-mix(in srgb,var(--brand) 55%,#fff)}
+@media (max-width:980px){.pos{grid-template-columns:minmax(0,1fr)}.cart{position:static}}
+.toolbar>*{min-width:0}
+.receipt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;display:grid;gap:6px;padding:16px;border:1px dashed var(--line);border-radius:12px}
+.rc-h{display:grid;justify-items:center;gap:4px;text-align:center;padding-bottom:8px;border-bottom:1px dashed var(--line);font-family:var(--f)}
+.rc-m,.rc-l,.rc-t{display:flex;justify-content:space-between;gap:10px}
+.rc-m{color:var(--muted);font-size:12px}
+.rc-t{font-weight:800;font-size:16px;border-top:1px dashed var(--line);padding-top:8px}
+.rc-f{text-align:center;color:var(--muted);font-size:12px;padding-top:6px}
+
+/* agenda */
+.agenda{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px;display:grid;gap:8px;align-content:start;min-height:200px;box-shadow:var(--sh)}
+.day.today{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand),var(--sh)}
+.day h3{display:flex;align-items:baseline;gap:6px;font-size:13px;padding:2px 4px 6px;border-bottom:1px solid var(--line2)}
+.day h3 span{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:11.5px;letter-spacing:.05em}
+.day h3 b{font-size:20px;font-weight:800}.day h3 small{color:var(--muted)}
+.day h3 i{margin-left:auto;font-style:normal;font-size:11px;font-weight:800;background:var(--b-soft);color:var(--b-ink);padding:1px 7px;border-radius:9px}
+.day.today h3 b{color:var(--b-ink)}
+.ev{display:grid;gap:2px;padding:9px 10px;border-radius:10px;background:var(--b-soft);border-left:3px solid var(--brand);cursor:pointer}
+.ev:hover{filter:brightness(.97)}
+.ev .et{font-size:11.5px;font-weight:800;color:var(--b-ink)}
+.ev b{font-size:13px;line-height:1.25}.ev small{font-size:12px;color:var(--muted)}
+.ev .pill{justify-self:start;margin-top:3px;font-size:10.5px;padding:3px 7px}
+@media (max-width:1100px){.agenda{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.day{min-height:0}}
+
+/* reports */
+.rsel{display:flex;gap:10px;flex-wrap:wrap}
+.rsel label{min-width:180px}
+.rmeta{margin-bottom:4px}
+#report{display:grid;gap:14px}
+
+/* print */
+.print-only{display:none}
+.ph{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:2px solid #222;margin-bottom:14px}
+.ph b{display:block;font-size:17px}.ph span{font-size:12px;color:#555}
+.ph h2{margin-left:auto;font-size:20px;text-transform:uppercase;letter-spacing:.06em}
+.pmeta{display:flex;gap:24px;margin-bottom:12px;font-size:13px}
+.ptab th{background:#f2f2f2;color:#333;width:38%;text-transform:none;letter-spacing:0;font-size:13px;position:static}
+.ptab th,.ptab td{border:1px solid #ddd}
+.pf{margin-top:18px;font-size:11px;color:#666;text-align:center}
+@media print{
+  body.printing .app>.side,body.printing .bar,body.printing #view,body.printing dialog,body.printing .toast{display:none!important}
+  body.printing .app{display:block}
+  body.printing #printdoc{display:block!important;color:#000}
+  body.printing #printdoc .print-only,body.printing #printdoc [class=""]{display:block}
+  body{background:#fff}
+  .card,.kpi,.tw{box-shadow:none!important;border-color:#ccc!important;background:#fff!important;color:#000}
+  .kpi::after{display:none}
+  th{background:#eee!important;color:#000!important}
+  .noprint{display:none!important}
+}
+
+@media (max-width:900px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .kpi{padding:12px 14px}.kpi b{font-size:20px}.kpi small{font-size:11.5px}
+  .tw.mini td,.tw.mini th{white-space:nowrap;padding:9px 10px}
+  .hello h2{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div id="app"><p style="padding:40px;font-family:system-ui">Loading Rubatsiro demo…</p></div>
+<noscript><p style="padding:20px">This demo needs JavaScript switched on.</p></noscript>
+<script>window.SYS_ID="rubatsiro";window.__SYS=[];</script>
+<script>window.ICONS = {
+  home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+  users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+  user: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8',
+  cash: 'M2 6h20v12H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M6 12h.01M18 12h.01',
+  chart: 'M3 3v18h18M7 15v2M11 11v6M15 7v10M19 12v5',
+  box: 'M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8',
+  cart: 'M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h7.7a2 2 0 0 0 2-1.6L21 8H6M10 21h.01M17 21h.01',
+  calendar: 'M3 5h18v16H3zM16 3v4M8 3v4M3 10h18',
+  clipboard: 'M9 3h6v4H9zM9 5H5v16h14V5h-4M9 12h6M9 16h4',
+  file: 'M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6',
+  sliders: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6',
+  truck: 'M1 4h14v12H1zM15 9h4l4 4v3h-8M5.5 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4M18.5 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4',
+  wrench: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z',
+  heart: 'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z',
+  cross: 'M9 3h6v6h6v6h-6v6H9v-6H3V9h6z',
+  pill: 'M10.5 20.5a5 5 0 0 1-7-7l10-10a5 5 0 0 1 7 7zM8.5 8.5l7 7',
+  flask: 'M9 3h6M10 3v6L4 20h16L14 9V3M7 15h10',
+  book: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5',
+  cap: 'M22 10 12 5 2 10l10 5zM6 12v5c3 2 9 2 12 0v-5M22 10v6',
+  church: 'M12 2v6M9 5h6M5 22V12l7-4 7 4v10M10 22v-5h4v5M3 22h18',
+  building: 'M4 22V3h11v19M15 9h5v13M8 7h3M8 11h3M8 15h3M2 22h20',
+  key: 'M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3M7.5 21a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11',
+  leaf: 'M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10zM2 21c0-3 1.9-5.4 5.1-6C9.5 14.5 12 13 13 12',
+  sprout: 'M7 20h10M12 20v-8M12 12C12 8 9 6 5 6c0 4 3 6 7 6zM12 10c0-3 2-5 6-5 0 3-2 5-6 5z',
+  car: 'M5 17h14v-5l-2-5H7l-2 5zM5 12h14M7 17v3M17 17v3M8 14.5h.01M16 14.5h.01',
+  shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+  scissors: 'M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12',
+  dumbbell: 'M6 6v12M18 6v12M3 9v6M21 9v6M6 12h12',
+  ticket: 'M3 7a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-3a2 2 0 0 0 0-4zM14 5v2M14 11v2M14 17v2',
+  briefcase: 'M3 7h18v13H3zM8 7V4h8v3M3 13h18',
+  scale: 'M12 3v18M7 21h10M5 7h14M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z',
+  headset: 'M3 14v-2a9 9 0 0 1 18 0v2M3 14h3v6H4a1 1 0 0 1-1-1zM21 14h-3v6h2a1 1 0 0 0 1-1z',
+  alert: 'M12 3 2 21h20zM12 10v4M12 18h.01',
+  check: 'M20 6 9 17l-5-5',
+  clock: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20M12 6v6l4 2',
+  pin: 'M12 22s7-6.1 7-12a7 7 0 0 0-14 0c0 5.9 7 12 7 12zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5',
+  utensils: 'M3 2v7a3 3 0 0 0 6 0V2M6 2v20M19 15V2a5 5 0 0 0-4 5v8zM19 15v7',
+  bed: 'M2 20V5M2 17h20v3M22 17v-5a3 3 0 0 0-3-3H10v8M6 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4',
+  hammer: 'M14 4l6 6-3 3-6-6zM11 7l-8 8 3 3 8-8',
+  zap: 'M13 2 3 14h9l-1 8 10-12h-9z',
+  droplet: 'M12 22a7 7 0 0 0 7-7c0-4-7-13-7-13S5 11 5 15a7 7 0 0 0 7 7z',
+  tag: 'M2 12V2h10l10 10-10 10zM7 7h.01',
+  receipt: 'M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2zM9 7h6M9 11h6M9 15h4',
+  layers: 'M12 2 2 7l10 5 10-5zM2 12l10 5 10-5M2 17l10 5 10-5',
+  globe: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20',
+  coins: 'M8 14a6 6 0 1 0 0-12 6 6 0 0 0 0 12M18.1 10.4A6 6 0 1 1 10.3 18.4M7 6h1v4',
+  award: 'M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14M8.2 13.9 7 23l5-3 5 3-1.2-9.1',
+  search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16M21 21l-4.3-4.3',
+  plus: 'M12 5v14M5 12h14',
+  download: 'M12 3v12M7 10l5 5 5-5M5 21h14',
+  printer: 'M6 9V2h12v7M6 18H4v-7h16v7h-2M6 14h12v8H6z',
+  moon: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z',
+  sun: 'M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4',
+  logout: 'M9 21H5V3h4M16 17l5-5-5-5M21 12H9',
+  refresh: 'M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5',
+  x: 'M18 6 6 18M6 6l12 12',
+  grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+  list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+  kanban: 'M3 3h18v18H3zM9 3v18M15 3v18',
+  phone: 'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z',
+  mail: 'M3 5h18v14H3zM3 6l9 7 9-7',
+  star: 'M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.2-6.2 3.2L7 14.2 2 9.3l6.9-1z',
+  gauge: 'M12 14l4-4M3.3 19a10 10 0 1 1 17.4 0',
+  hardhat: 'M2 18h20v-2a10 10 0 0 0-20 0zM10 6v6M14 6v6M10 6a2 2 0 0 1 4 0',
+  bus: 'M4 17V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12M4 11h16M4 17h16M7 20v-3M17 20v-3M8 14h.01M16 14h.01',
+  target: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4',
+  door: 'M3 21h18M5 21V3h10v18M15 7h4v14M11 12h.01',
+  fuel: 'M3 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18M2 22h14M15 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3M6 7h6',
+  megaphone: 'M3 11v3a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 8a5 5 0 0 1 0 8',
+  lock: 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4',
+  bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0',
+  menu: 'M4 6h16M4 12h16M4 18h16',
+  arrow: 'M5 12h14M13 6l6 6-6 6',
+  chevL: 'M15 18l-6-6 6-6',
+  chevR: 'M9 18l6-6-6-6',
+  camera: 'M3 7h4l2-3h6l2 3h4v13H3zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8',
+  cow: 'M4 9c0-3 2-5 4-5h8c2 0 4 2 4 5v5a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6zM2 6l2 3M22 6l-2 3M9 15h.01M15 15h.01M10 11h.01M14 11h.01',
+  stethoscope: 'M5 3v6a5 5 0 0 0 10 0V3M10 14v2a5 5 0 0 0 10 0v-3M20 13a2 2 0 1 0 0-4 2 2 0 0 0 0 4'
+};
+</script>
+<script>/* Education & community */
+window.__SYS.push({
+  id: 'chikoro', name: 'Chikoro', tag: 'School management', group: 'Education & community', icon: 'cap', color: '#1e40af', color2: '#f59e0b',
+  org: { name: 'Mufakose High School', place: 'Mufakose, Harare', phone: '+263 242 610 455' },
+  blurb: 'Pupils, fees, results, report cards and attendance for primary and secondary schools.',
+  headline: 'Run the whole school from one place: fees, results and attendance.',
+  features: ['Fee balances update the moment a payment is receipted', 'Teachers enter marks; grades and report cards are automatic', 'Parents see only their own child\'s fees and results', 'Daily attendance by class with term reports'],
+  roles: [
+    ['head', 'Head / Admin', 'Mrs Tariro Moyo', 'Sees the whole school', ['dash', 'pupils', 'payments', 'results', 'attendance', 'staff', 'reports']],
+    ['bursar', 'Bursar', 'Mr Farai Ndlovu', 'Fees, receipts and arrears', ['dash', 'payments', 'pupils:r', 'reports']],
+    ['teacher', 'Teacher', 'Ms Rudo Chikore', 'Marks and the class register', ['results', 'attendance', 'pupils:r']],
+    ['parent', 'Parent portal', 'Mr Blessing Mutasa', 'Own child only', ['pupils:r', 'payments:r', 'results:r'], { pupils: 'guardian=Mr B. Mutasa', payments: 'pupil=Tanaka Mutasa', results: 'pupil=Tanaka Mutasa' }]
+  ],
+  tables: {
+    pupils: {
+      label: 'Pupils', icon: 'users', code: 'P', desc: 'Every enrolled pupil with class, guardian and fee balance for the term.',
+      fields: 'name:Pupil name|cls:Class:sel:Form 1A,Form 1B,Form 2A,Form 3A,Form 4A,Lower 6,Upper 6|-gender:Gender:sel:F,M|guardian:Guardian|-phone:Guardian phone:tel|fees:Term fees:money|paid:Paid:money|bal:Balance:=money|status:Status:status:Active~ok,Suspended~bad,Left~grey',
+      calc: { bal: (r) => (Number(r.fees) || 0) - (Number(r.paid) || 0) },
+      actions: [['Mark fees fully paid', 'paid=@fees', 'bal>0', 'Fees marked as paid']],
+      related: [['payments', 'pupil', 'Fee payments', ['date', 'amount', 'method']], ['results', 'pupil', 'Results', ['subject', 'mark', 'grade']]],
+      print: 'Print fee statement',
+      rows: [
+        ['Tanaka Mutasa', 'Form 3A', 'M', 'Mr B. Mutasa', '0772 114 908', 480, 300, 'Active'],
+        ['Nyasha Gumbo', 'Form 1A', 'F', 'Mrs P. Gumbo', '0773 552 019', 420, 420, 'Active'],
+        ['Kudakwashe Sibanda', 'Form 4A', 'M', 'Mr T. Sibanda', '0712 330 871', 480, 150, 'Active'],
+        ['Ruvimbo Chirwa', 'Lower 6', 'F', 'Ms A. Chirwa', '0784 662 104', 560, 560, 'Active'],
+        ['Tatenda Banda', 'Form 2A', 'M', 'Mrs L. Banda', '0775 201 554', 450, 0, 'Active'],
+        ['Chiedza Marufu', 'Upper 6', 'F', 'Mr K. Marufu', '0778 903 116', 560, 400, 'Active'],
+        ['Tinashe Dube', 'Form 1B', 'M', 'Mrs R. Dube', '0719 448 230', 420, 380, 'Active'],
+        ['Rutendo Nyathi', 'Form 3A', 'F', 'Mr S. Nyathi', '0773 870 665', 480, 480, 'Active'],
+        ['Simbarashe Zhou', 'Form 4A', 'M', 'Mrs J. Zhou', '0782 115 093', 480, 200, 'Suspended'],
+        ['Fadzai Mlambo', 'Form 2A', 'F', 'Mr C. Mlambo', '0771 664 280', 450, 450, 'Active'],
+        ['Takudzwa Phiri', 'Lower 6', 'M', 'Ms N. Phiri', '0714 902 337', 560, 100, 'Active'],
+        ['Vimbai Chakanetsa', 'Form 1A', 'F', 'Mrs E. Chakanetsa', '0776 338 412', 420, 420, 'Left']
+      ]
+    },
+    payments: {
+      label: 'Fee payments', icon: 'receipt', code: 'RCT', one: 'payment', addLabel: 'Record payment', desc: 'Receipts for school fees. Each payment updates the pupil\'s balance.',
+      fields: 'date:Date:date|pupil:Pupil:ref:pupils.name|amount:Amount:money|method:Method:sel:Cash USD,EcoCash,Bank transfer,ZiG|term:Term:sel:Term 3 2026,Term 2 2026|by:Received by',
+      defaults: { by: 'me' }, print: 'Print receipt',
+      onAdd: (r, H) => { const p = H.find('pupils', 'name', r.pupil); if (p) p.paid = (Number(p.paid) || 0) + (Number(r.amount) || 0); },
+      rows: [
+        ['d-1', 'Kudakwashe Sibanda', 150, 'EcoCash', 'Term 3 2026', 'Mr Farai Ndlovu'],
+        ['d-2', 'Tinashe Dube', 380, 'Bank transfer', 'Term 3 2026', 'Mr Farai Ndlovu'],
+        ['d-4', 'Chiedza Marufu', 200, 'Cash USD', 'Term 3 2026', 'Mr Farai Ndlovu'],
+        ['d-6', 'Tanaka Mutasa', 300, 'EcoCash', 'Term 3 2026', 'Mr Farai Ndlovu'],
+        ['d-9', 'Ruvimbo Chirwa', 560, 'Bank transfer', 'Term 3 2026', 'Mr Farai Ndlovu'],
+        ['d-12', 'Nyasha Gumbo', 420, 'Cash USD', 'Term 3 2026', 'Mr Farai Ndlovu'],
+        ['d-20', 'Rutendo Nyathi', 480, 'EcoCash', 'Term 3 2026', 'Mr Farai Ndlovu'],
+        ['d-38', 'Fadzai Mlambo', 450, 'Bank transfer', 'Term 3 2026', 'Mr Farai Ndlovu'],
+        ['d-45', 'Chiedza Marufu', 200, 'Cash USD', 'Term 3 2026', 'Mr Farai Ndlovu'],
+        ['d-70', 'Takudzwa Phiri', 100, 'ZiG', 'Term 2 2026', 'Mr Farai Ndlovu'],
+        ['d-96', 'Simbarashe Zhou', 200, 'Cash USD', 'Term 2 2026', 'Mr Farai Ndlovu'],
+        ['d-130', 'Ruvimbo Chirwa', 540, 'Bank transfer', 'Term 2 2026', 'Mr Farai Ndlovu']
+      ]
+    },
+    results: {
+      label: 'Results', icon: 'award', one: 'result', addLabel: 'Enter mark', desc: 'Marks per subject and term. Grades are worked out automatically (A 75+, B 65+, C 50+, D 40+).',
+      fields: 'pupil:Pupil:ref:pupils.name|subject:Subject:sel:Mathematics,English,Shona,Combined Science,Geography,History,Accounts,Agriculture|term:Term:sel:Term 3 2026,Term 2 2026|mark:Mark %:num|grade:Grade:=tag|teacher:Teacher',
+      calc: { grade: (r) => { const m = Number(r.mark); return m >= 75 ? 'A' : m >= 65 ? 'B' : m >= 50 ? 'C' : m >= 40 ? 'D' : m >= 30 ? 'E' : 'U'; } },
+      defaults: { teacher: 'me' },
+      rows: [
+        ['Tanaka Mutasa', 'Mathematics', 'Term 3 2026', 78, 'Ms Rudo Chikore'], ['Tanaka Mutasa', 'English', 'Term 3 2026', 64, 'Mr Obert Shumba'], ['Tanaka Mutasa', 'Combined Science', 'Term 3 2026', 71, 'Ms Rudo Chikore'], ['Tanaka Mutasa', 'Shona', 'Term 3 2026', 82, 'Mrs Grace Moyo'],
+        ['Kudakwashe Sibanda', 'Mathematics', 'Term 3 2026', 45, 'Ms Rudo Chikore'], ['Kudakwashe Sibanda', 'Geography', 'Term 3 2026', 58, 'Mr Obert Shumba'],
+        ['Rutendo Nyathi', 'Mathematics', 'Term 3 2026', 91, 'Ms Rudo Chikore'], ['Rutendo Nyathi', 'English', 'Term 3 2026', 76, 'Mr Obert Shumba'],
+        ['Tatenda Banda', 'Mathematics', 'Term 3 2026', 33, 'Ms Rudo Chikore'], ['Tatenda Banda', 'Shona', 'Term 3 2026', 61, 'Mrs Grace Moyo'],
+        ['Ruvimbo Chirwa', 'Accounts', 'Term 3 2026', 69, 'Mr Obert Shumba'], ['Chiedza Marufu', 'History', 'Term 3 2026', 74, 'Mr Obert Shumba'],
+        ['Fadzai Mlambo', 'Agriculture', 'Term 3 2026', 38, 'Mrs Grace Moyo'], ['Takudzwa Phiri', 'Mathematics', 'Term 3 2026', 55, 'Ms Rudo Chikore'],
+        ['Nyasha Gumbo', 'English', 'Term 3 2026', 88, 'Mr Obert Shumba'], ['Tinashe Dube', 'Combined Science', 'Term 3 2026', 62, 'Ms Rudo Chikore']
+      ]
+    },
+    attendance: {
+      label: 'Attendance', icon: 'clipboard', one: 'register', addLabel: 'Mark register', desc: 'Daily class registers. The rate is worked out for you.',
+      fields: 'date:Date:date|cls:Class:sel:Form 1A,Form 1B,Form 2A,Form 3A,Form 4A,Lower 6,Upper 6|present:Present:num|absent:Absent:num|rate:Attendance:=bar|by:Marked by',
+      calc: { rate: (r) => { const t = (+r.present || 0) + (+r.absent || 0); return t ? (r.present / t) * 100 : 0; } }, defaults: { by: 'me' },
+      rows: [['d0', 'Form 3A', 38, 2, 'Ms Rudo Chikore'], ['d0', 'Form 1A', 41, 1, 'Mr Obert Shumba'], ['d-1', 'Form 3A', 36, 4, 'Ms Rudo Chikore'], ['d-1', 'Form 4A', 33, 7, 'Mrs Grace Moyo'], ['d-2', 'Lower 6', 22, 1, 'Mr Obert Shumba'], ['d-2', 'Form 2A', 39, 3, 'Mrs Grace Moyo']]
+    },
+    staff: {
+      label: 'Staff', icon: 'user', one: 'staff member', desc: 'Teaching and support staff.',
+      fields: 'name:Name|role:Role:sel:Teacher,Head of Department,Bursar,Clerk,Ground staff|subject:Subject|phone:Phone:tel|status:Status:status:On duty~ok,On leave~warn',
+      rows: [['Ms Rudo Chikore', 'Head of Department', 'Mathematics & Science', '0772 551 903', 'On duty'], ['Mr Obert Shumba', 'Teacher', 'English & History', '0773 220 418', 'On duty'], ['Mrs Grace Moyo', 'Teacher', 'Shona & Agriculture', '0715 663 001', 'On leave'], ['Mr Farai Ndlovu', 'Bursar', '', '0782 330 117', 'On duty'], ['Mrs Ivy Matanga', 'Clerk', '', '0774 118 209', 'On duty'], ['Mr Peter Gwaze', 'Ground staff', '', '0719 884 552', 'On duty']]
+    }
+  },
+  dash: {
+    quick: [['Record payment', 'payments', 1], ['Add pupil', 'pupils']],
+    kpis: [['Active pupils', 'count:pupils?status=Active', 'num', 'Enrolled this term'], ['Fees collected', 'sum:payments.amount?term=Term 3 2026', 'money', 'Term 3 2026'], ['Fees outstanding', 'sum:pupils.bal?bal>0', 'money', 'Across all classes'], ['Average mark', 'avg:results.mark', 'pct', 'All subjects this term']],
+    alerts: [['pupils?bal>200', '{n} pupil{s} owe more than $200 in fees', 'bad'], ['results?mark<40', '{n} result{s} below a pass mark', 'warn'], ['staff?status=On leave', '{n} staff member{s} on leave today', 'info']],
+    charts: [['Fees collected by month', 'month:payments.date.amount', 'money'], ['Outstanding fees by class', 'sum:pupils.cls.bal', 'money'], ['Grades this term', 'by:results.grade']],
+    recent: [['payments', 'Latest fee payments', 5, ['date', 'pupil', 'amount', 'method']]]
+  }
+});
+
+window.__SYS.push({
+  id: 'ungano', name: 'Ungano', tag: 'Church management', group: 'Education & community', icon: 'church', color: '#6d28d9', color2: '#f472b6',
+  org: { name: 'Living Waters Assembly', place: 'Belvedere, Harare', phone: '+263 77 410 2290' },
+  blurb: 'Members, cell groups, tithes and offerings, pledges, services and events.',
+  headline: 'Know your congregation and account for every dollar given.',
+  features: ['Members and cell groups with follow-up for first-time visitors', 'Tithes, offerings and building fund receipted by EcoCash or cash', 'Members see their own giving statement on their phone', 'Service attendance and a church calendar'],
+  roles: [
+    ['pastor', 'Senior Pastor', 'Pastor Joseph Mapfumo', 'Full overview', ['dash', 'members', 'giving', 'calendar', 'events', 'services', 'reports']],
+    ['treasurer', 'Treasurer', 'Mrs Agnes Chigumba', 'Giving and finance reports', ['dash', 'giving', 'members:r', 'reports']],
+    ['secretary', 'Church secretary', 'Mr Lovemore Chari', 'Members, events and services', ['members', 'calendar', 'events', 'services']],
+    ['member', 'Member portal', 'Tendai Moyo', 'Own giving and events', ['giving:r', 'calendar:r'], { giving: 'member=Tendai Moyo' }]
+  ],
+  modules: { calendar: { type: 'agenda', label: 'Calendar', icon: 'calendar', table: 'events', date: 'date', time: 'time', title: 'event', sub: 'venue' } },
+  tables: {
+    members: {
+      label: 'Members', icon: 'users', code: 'M', desc: 'Everyone in the church family, with their cell group and status.',
+      fields: 'name:Name|cell:Cell group:sel:Belvedere North,Belvedere South,Warren Park,Kambuzuma,Avondale|phone:Phone:tel|joined:Joined:date|dept:Ministry:sel:Choir,Ushering,Youth,Women\'s fellowship,Men\'s fellowship,Sunday school,None|status:Status:status:Member~ok,New visitor~warn,Follow up~bad,Inactive~grey',
+      actions: [['Mark as member', 'status=Member', 'status!=Member', 'Welcome to the family']],
+      related: [['giving', 'member', 'Giving', ['date', 'type', 'amount']]],
+      rows: [['Tendai Moyo', 'Belvedere North', '0772 908 114', 'd-1500', 'Choir', 'Member'], ['Agnes Chigumba', 'Avondale', '0773 019 552', 'd-3200', 'Women\'s fellowship', 'Member'], ['Lovemore Chari', 'Warren Park', '0712 871 330', 'd-2400', 'Ushering', 'Member'], ['Patience Mhlanga', 'Kambuzuma', '0784 104 662', 'd-6', 'None', 'New visitor'], ['Brian Tsvangirai', 'Belvedere South', '0775 554 201', 'd-13', 'Youth', 'Follow up'], ['Memory Kanengoni', 'Belvedere North', '0778 116 903', 'd-900', 'Sunday school', 'Member'], ['Clive Mupfumira', 'Warren Park', '0719 230 448', 'd-700', 'Men\'s fellowship', 'Member'], ['Sarah Nkomo', 'Avondale', '0773 665 870', 'd-1100', 'Choir', 'Member'], ['Admire Zvobgo', 'Kambuzuma', '0782 093 115', 'd-2000', 'None', 'Inactive'], ['Grace Mabika', 'Belvedere South', '0771 280 664', 'd-3', 'None', 'New visitor']]
+    },
+    giving: {
+      label: 'Giving', icon: 'heart', code: 'G', one: 'gift', addLabel: 'Record giving', desc: 'Tithes, offerings, building fund and pledges.',
+      fields: 'date:Date:date|member:Member:ref:members.name|type:Type:sel:Tithe,Offering,Building fund,Pledge,Thanksgiving|amount:Amount:money|method:Method:sel:Cash USD,EcoCash,InnBucks,Bank transfer|by:Recorded by',
+      defaults: { by: 'me' }, print: 'Print receipt',
+      rows: [['d-2', 'Tendai Moyo', 'Tithe', 85, 'EcoCash', 'Mrs Agnes Chigumba'], ['d-2', 'Sarah Nkomo', 'Tithe', 60, 'Cash USD', 'Mrs Agnes Chigumba'], ['d-2', 'Clive Mupfumira', 'Building fund', 200, 'Bank transfer', 'Mrs Agnes Chigumba'], ['d-2', 'Memory Kanengoni', 'Offering', 15, 'Cash USD', 'Mrs Agnes Chigumba'], ['d-9', 'Tendai Moyo', 'Offering', 20, 'EcoCash', 'Mrs Agnes Chigumba'], ['d-9', 'Lovemore Chari', 'Tithe', 120, 'InnBucks', 'Mrs Agnes Chigumba'], ['d-16', 'Agnes Chigumba', 'Thanksgiving', 50, 'Cash USD', 'Mrs Agnes Chigumba'], ['d-30', 'Tendai Moyo', 'Tithe', 85, 'EcoCash', 'Mrs Agnes Chigumba'], ['d-33', 'Clive Mupfumira', 'Pledge', 500, 'Bank transfer', 'Mrs Agnes Chigumba'], ['d-61', 'Tendai Moyo', 'Tithe', 85, 'EcoCash', 'Mrs Agnes Chigumba'], ['d-64', 'Sarah Nkomo', 'Building fund', 150, 'Cash USD', 'Mrs Agnes Chigumba'], ['d-95', 'Lovemore Chari', 'Tithe', 120, 'InnBucks', 'Mrs Agnes Chigumba']]
+    },
+    events: {
+      label: 'Events', icon: 'calendar', one: 'event', desc: 'Services, conferences, weddings and outreach.',
+      fields: 'date:Date:date|time:Time:time|event:Event|venue:Venue|lead:Led by|status:Status:status:Planned~warn,Confirmed~ok,Done~grey',
+      rows: [['d0', '18:00', 'Midweek prayer', 'Main sanctuary', 'Pastor Joseph Mapfumo', 'Confirmed'], ['d+1', '17:30', 'Choir practice', 'Hall B', 'Tendai Moyo', 'Confirmed'], ['d+3', '09:00', 'Sunday service', 'Main sanctuary', 'Pastor Joseph Mapfumo', 'Confirmed'], ['d+3', '14:00', 'Youth hangout', 'Youth hall', 'Brian Tsvangirai', 'Planned'], ['d+4', '10:00', 'Wedding: Chari & Nkomo', 'Main sanctuary', 'Pastor Joseph Mapfumo', 'Confirmed'], ['d+5', '08:00', 'Hospital outreach', 'Parirenyatwa', 'Women\'s fellowship', 'Planned'], ['d-4', '09:00', 'Sunday service', 'Main sanctuary', 'Pastor Joseph Mapfumo', 'Done']]
+    },
+    services: {
+      label: 'Service attendance', icon: 'clipboard', one: 'service', addLabel: 'Record attendance', desc: 'Headcounts per service so you can see growth.',
+      fields: 'date:Date:date|service:Service:sel:Sunday 1st service,Sunday 2nd service,Midweek,Youth|adults:Adults:num|children:Children:num|visitors:First-time visitors:num|total:Total:=num',
+      calc: { total: (r) => (+r.adults || 0) + (+r.children || 0) + (+r.visitors || 0) },
+      rows: [['d-4', 'Sunday 1st service', 312, 88, 7], ['d-4', 'Sunday 2nd service', 245, 61, 4], ['d-7', 'Midweek', 96, 0, 1], ['d-11', 'Sunday 1st service', 298, 92, 5], ['d-11', 'Sunday 2nd service', 230, 55, 3], ['d-34', 'Sunday 1st service', 280, 80, 9], ['d-64', 'Sunday 1st service', 265, 77, 6]]
+    }
+  },
+  dash: {
+    quick: [['Record giving', 'giving', 1], ['Add member', 'members']],
+    kpis: [['Members', 'count:members?status=Member', 'num', 'Active church family'], ['Giving this month', (H) => H.sum('giving', 'amount', 'date>=' + H.today.slice(0, 8) + '01'), 'money', 'All types'], ['Building fund', 'sum:giving.amount?type=Building fund', 'money', 'Raised so far'], ['Last Sunday', (H) => H.sum('services', 'adults', 'date>=d-7&service~Sunday') + H.sum('services', 'children', 'date>=d-7&service~Sunday'), 'num', 'Adults and children']],
+    alerts: [['members?status=New visitor,Follow up', '{n} visitor{s} waiting for a follow-up call', 'warn'], ['events?date>=today&date<=d+3&status=Planned', '{n} event{s} this week still to confirm', 'info']],
+    charts: [['Giving by month', 'month:giving.date.amount', 'money'], ['Giving by type', 'sum:giving.type.amount', 'money'], ['Members by cell group', 'by:members.cell']],
+    recent: [['giving', 'Latest giving', 5, ['date', 'member', 'type', 'amount']]]
+  }
+});
+
+window.__SYS.push({
+  id: 'nhengo', name: 'Nhengo', tag: 'Membership & associations', group: 'Education & community', icon: 'award', color: '#0f766e', color2: '#84cc16',
+  org: { name: 'Zimbabwe Institute of Technicians', place: 'Harare & Bulawayo', phone: '+263 242 703 118' },
+  blurb: 'Members, subscriptions, renewals, CPD events and certificates for clubs, unions and professional bodies.',
+  headline: 'Renewals, subscriptions and events for every member, on time.',
+  features: ['Membership categories, branches and expiry dates', 'Renewal reminders before memberships lapse', 'Subscriptions receipted by EcoCash, bank or cash', 'CPD and event attendance with points'],
+  roles: [
+    ['sec', 'Secretary General', 'Eng. Ruth Mavhunga', 'Full overview', ['dash', 'members', 'subs', 'events', 'reports']],
+    ['fin', 'Finance officer', 'Mr Gift Marange', 'Subscriptions and income', ['dash', 'subs', 'members:r', 'reports']],
+    ['branch', 'Branch chair', 'Mr Sipho Ncube', 'Bulawayo branch only', ['members:r', 'events'], { members: 'branch=Bulawayo' }]
+  ],
+  tables: {
+    members: {
+      label: 'Members', icon: 'users', code: 'ZIT', desc: 'All members with category, branch and expiry.',
+      fields: 'name:Name|cat:Category:sel:Fellow,Full member,Associate,Student,Corporate|branch:Branch:sel:Harare,Bulawayo,Mutare,Gweru,Masvingo|phone:Phone:tel|expires:Expires:date|status:Status:=status:Active~ok,Expiring~warn,Grace~bad,Lapsed~grey,Pending~info',
+      calc: { status: (r, H) => !r.expires ? 'Pending' : r.expires < H.today ? (H.days(r.expires) > 60 ? 'Lapsed' : 'Grace') : H.days(H.today, r.expires) <= 30 ? 'Expiring' : 'Active' },
+      actions: [['Renew for 1 year', (r, H) => { r.expires = H.addDays(365, r.expires && r.expires > H.today ? r.expires : H.today); }, '', 'Membership renewed']],
+      related: [['subs', 'member', 'Subscriptions', ['date', 'period', 'amount']]], print: 'Print certificate',
+      rows: [['Eng. Tawanda Hove', 'Fellow', 'Harare', '0772 401 118', 'd+220'], ['Ms Linda Moyo', 'Full member', 'Harare', '0773 662 980', 'd+14'], ['Mr Sipho Ncube', 'Full member', 'Bulawayo', '0712 553 019', 'd+180'], ['Mr Thabani Dube', 'Associate', 'Bulawayo', '0784 330 871', 'd-20'], ['Ms Precious Sibanda', 'Student', 'Bulawayo', '0775 662 104', 'd+300'], ['Delta Engineering (Pvt) Ltd', 'Corporate', 'Harare', '0242 778 120', 'd+90'], ['Mr Kelvin Mutswairo', 'Full member', 'Mutare', '0778 201 554', 'd-95'], ['Mrs Nomsa Khumalo', 'Associate', 'Gweru', '0719 903 116', 'd+25'], ['Mr Collen Rusere', 'Student', 'Masvingo', '0773 448 230', 'd+150'], ['Eng. Mercy Chidzambwa', 'Fellow', 'Harare', '0782 870 665', 'd+400']]
+    },
+    subs: {
+      label: 'Subscriptions', icon: 'receipt', code: 'SUB', one: 'subscription', addLabel: 'Record subscription', desc: 'Membership fees received.',
+      fields: 'date:Date:date|member:Member:ref:members.name|period:Period:sel:2026/27,2025/26|amount:Amount:money|method:Method:sel:EcoCash,Bank transfer,Cash USD,Swipe',
+      print: 'Print receipt',
+      rows: [['d-3', 'Eng. Mercy Chidzambwa', '2026/27', 180, 'Bank transfer'], ['d-8', 'Ms Precious Sibanda', '2026/27', 25, 'EcoCash'], ['d-15', 'Mr Sipho Ncube', '2026/27', 90, 'EcoCash'], ['d-40', 'Delta Engineering (Pvt) Ltd', '2026/27', 650, 'Bank transfer'], ['d-66', 'Eng. Tawanda Hove', '2026/27', 180, 'Swipe'], ['d-120', 'Mr Collen Rusere', '2026/27', 25, 'Cash USD'], ['d-150', 'Ms Linda Moyo', '2025/26', 90, 'EcoCash']]
+    },
+    events: {
+      label: 'Events & CPD', icon: 'calendar', one: 'event', desc: 'Workshops, AGMs and CPD sessions with points earned.',
+      fields: 'date:Date:date|event:Event|branch:Branch:sel:Harare,Bulawayo,Mutare,Gweru,Masvingo,Online|points:CPD points:num|booked:Booked:num|fee:Fee:money|status:Status:status:Open~ok,Full~warn,Done~grey',
+      rows: [['d+9', 'Solar PV design workshop', 'Harare', 8, 46, 35, 'Open'], ['d+16', 'Electrical safety refresher', 'Bulawayo', 4, 30, 20, 'Full'], ['d+40', 'Annual general meeting', 'Online', 2, 120, 0, 'Open'], ['d-12', 'PLC programming basics', 'Harare', 8, 28, 50, 'Done']]
+    }
+  },
+  dash: {
+    quick: [['Record subscription', 'subs', 1], ['Add member', 'members']],
+    kpis: [['Active members', 'count:members?status=Active,Expiring', 'num'], ['Renewals due (30 days)', 'count:members?status=Expiring', 'num', 'Send reminders'], ['Lapsed or in grace', 'count:members?status=Lapsed,Grace', 'num'], ['Subscriptions this year', 'sum:subs.amount?period=2026/27', 'money']],
+    alerts: [['members?status=Expiring', '{n} membership{s} expire in the next 30 days', 'warn'], ['members?status=Grace', '{n} member{s} in the grace period', 'bad']],
+    charts: [['Subscription income', 'month:subs.date.amount', 'money'], ['Members by category', 'by:members.cat'], ['Members by branch', 'by:members.branch']],
+    recent: [['subs', 'Latest subscriptions', 5, ['date', 'member', 'amount']]]
+  }
+});
+
+window.__SYS.push({
+  id: 'mukando', name: 'Mukando', tag: 'Savings clubs & burial societies', group: 'Education & community', icon: 'coins', color: '#b45309', color2: '#facc15',
+  org: { name: 'Tashinga Savings Club', place: 'Chitungwiza', phone: '+263 78 220 4419' },
+  blurb: 'Monthly contributions, member loans with interest, payouts and burial cover for savings groups.',
+  headline: 'Every contribution, loan and payout, open for every member to see.',
+  features: ['Monthly contributions with who has and hasn\'t paid', 'Member loans with interest worked out', 'Burial and emergency claims with approvals', 'Members check their own balance on their phone'],
+  roles: [
+    ['chair', 'Chairperson', 'Mai Rumbi Chiwenga', 'Full overview', ['dash', 'members', 'contrib', 'loans', 'claims', 'reports']],
+    ['treas', 'Treasurer', 'Mrs Loveness Tagwireyi', 'Money in and out', ['dash', 'contrib', 'loans', 'claims', 'members:r', 'reports']],
+    ['member', 'Member', 'Mrs Shamiso Banda', 'Own contributions and loans', ['contrib:r', 'loans:r'], { contrib: 'member=Mrs Shamiso Banda', loans: 'member=Mrs Shamiso Banda' }]
+  ],
+  tables: {
+    members: {
+      label: 'Members', icon: 'users', code: 'TS', desc: 'Club members and their monthly commitment.',
+      fields: 'name:Name|phone:Phone:tel|joined:Joined:date|monthly:Monthly amount:money|saved:Total saved:=money|status:Status:status:Active~ok,Behind~bad,Left~grey',
+      calc: { saved: (r, H) => H.sum('contrib', 'amount', 'member=' + r.name) },
+      related: [['contrib', 'member', 'Contributions', ['date', 'month', 'amount']], ['loans', 'member', 'Loans', ['date', 'amount', 'balance', 'status']]],
+      rows: [['Mai Rumbi Chiwenga', '0772 118 440', 'd-700', 50, 'Active'], ['Mrs Loveness Tagwireyi', '0773 552 210', 'd-700', 50, 'Active'], ['Mrs Shamiso Banda', '0712 908 663', 'd-500', 30, 'Active'], ['Mrs Ropafadzo Gore', '0784 019 337', 'd-420', 30, 'Behind'], ['Mrs Esther Mudzingwa', '0775 871 902', 'd-380', 50, 'Active'], ['Mrs Faith Machingura', '0778 104 551', 'd-300', 20, 'Active'], ['Mrs Ruth Chabata', '0719 554 118', 'd-200', 30, 'Behind'], ['Mrs Joyce Mhuri', '0773 903 006', 'd-120', 20, 'Active']]
+    },
+    contrib: {
+      label: 'Contributions', icon: 'coins', code: 'C', one: 'contribution', addLabel: 'Record contribution', desc: 'Monthly money paid in by members.',
+      fields: 'date:Date:date|member:Member:ref:members.name|month:For month:sel:Nov 2026,Oct 2026,Sep 2026|amount:Amount:money|method:Method:sel:EcoCash,Cash USD,InnBucks',
+      print: 'Print receipt',
+      rows: [['d-2', 'Mai Rumbi Chiwenga', 'Nov 2026', 50, 'EcoCash'], ['d-3', 'Mrs Shamiso Banda', 'Nov 2026', 30, 'EcoCash'], ['d-5', 'Mrs Esther Mudzingwa', 'Nov 2026', 50, 'Cash USD'], ['d-6', 'Mrs Loveness Tagwireyi', 'Nov 2026', 50, 'InnBucks'], ['d-31', 'Mai Rumbi Chiwenga', 'Oct 2026', 50, 'EcoCash'], ['d-32', 'Mrs Shamiso Banda', 'Oct 2026', 30, 'EcoCash'], ['d-33', 'Mrs Faith Machingura', 'Oct 2026', 20, 'Cash USD'], ['d-34', 'Mrs Joyce Mhuri', 'Oct 2026', 20, 'EcoCash'], ['d-35', 'Mrs Ropafadzo Gore', 'Oct 2026', 30, 'Cash USD'], ['d-36', 'Mrs Esther Mudzingwa', 'Oct 2026', 50, 'Cash USD'], ['d-37', 'Mrs Loveness Tagwireyi', 'Oct 2026', 50, 'InnBucks'], ['d-62', 'Mai Rumbi Chiwenga', 'Sep 2026', 50, 'EcoCash'], ['d-63', 'Mrs Shamiso Banda', 'Sep 2026', 30, 'EcoCash'], ['d-64', 'Mrs Ruth Chabata', 'Sep 2026', 30, 'Cash USD'], ['d-66', 'Mrs Esther Mudzingwa', 'Sep 2026', 50, 'Cash USD']]
+    },
+    loans: {
+      label: 'Loans', icon: 'cash', code: 'L', one: 'loan', addLabel: 'Issue loan', desc: 'Loans to members. Interest is worked out on the amount borrowed.',
+      fields: 'date:Issued:date|member:Member:ref:members.name|amount:Amount:money|rate:Interest %:pct|due:Due date:date|owed:Total owed:=money|repaid:Repaid:money|balance:Balance:=money|status:Status:=status:Active~warn,Overdue~bad,Repaid~ok',
+      calc: { owed: (r) => (+r.amount || 0) * (1 + (+r.rate || 0) / 100), balance: (r) => (+r.amount || 0) * (1 + (+r.rate || 0) / 100) - (+r.repaid || 0), status: (r, H) => { const b = (+r.amount || 0) * (1 + (+r.rate || 0) / 100) - (+r.repaid || 0); return b <= 0.001 ? 'Repaid' : r.due < H.today ? 'Overdue' : 'Active'; } },
+      defaults: { rate: 10, due: 'd+90' },
+      actions: [['Record full repayment', (r) => { r.repaid = (+r.amount || 0) * (1 + (+r.rate || 0) / 100); }, 'balance>0', 'Loan repaid']],
+      rows: [['d-40', 'Mrs Shamiso Banda', 150, 10, 'd+50', 60], ['d-100', 'Mrs Ropafadzo Gore', 200, 10, 'd-10', 80], ['d-20', 'Mrs Faith Machingura', 100, 10, 'd+70', 0], ['d-150', 'Mrs Esther Mudzingwa', 300, 10, 'd-60', 330]]
+    },
+    claims: {
+      label: 'Claims & payouts', icon: 'shield', code: 'CL', one: 'claim', addLabel: 'Log a claim', desc: 'Burial cover and emergency payouts.',
+      fields: 'date:Date:date|member:Member:ref:members.name|reason:Reason:sel:Funeral (member),Funeral (family),Hospital,Year-end payout|payout:Payout:money|status:Status:status:Submitted~warn,Approved~info,Paid~ok,Declined~bad',
+      actions: [['Approve', 'status=Approved', 'status=Submitted'], ['Mark paid', 'status=Paid', 'status=Approved']],
+      rows: [['d-4', 'Mrs Ruth Chabata', 'Funeral (family)', 250, 'Submitted'], ['d-50', 'Mrs Joyce Mhuri', 'Hospital', 120, 'Paid']]
+    }
+  },
+  dash: {
+    quick: [['Record contribution', 'contrib', 1], ['Issue loan', 'loans']],
+    kpis: [['Club fund', (H) => H.sum('contrib', 'amount') - H.sum('loans', 'amount') + H.sum('loans', 'repaid') - H.sum('claims', 'payout', 'status=Paid'), 'money', 'Cash available now'], ['Total saved', 'sum:contrib.amount', 'money', 'All contributions'], ['Loans out', 'sum:loans.balance?status!=Repaid', 'money', 'Still to come back'], ['Interest earned', (H) => H.where('loans').reduce((a, r) => a + (+r.amount || 0) * (+r.rate || 0) / 100, 0), 'money', 'On all loans']],
+    alerts: [['loans?status=Overdue', '{n} loan{s} past the due date', 'bad'], ['members?status=Behind', '{n} member{s} behind on contributions', 'warn'], ['claims?status=Submitted', '{n} claim{s} waiting for approval', 'warn']],
+    charts: [['Contributions by month', 'month:contrib.date.amount', 'money'], ['Saved by member', 'sum:contrib.member.amount', 'money']],
+    recent: [['contrib', 'Latest contributions', 5, ['date', 'member', 'month', 'amount']]]
+  }
+});
+
+window.__SYS.push({
+  id: 'rubatsiro', name: 'Rubatsiro', tag: 'NGO projects & beneficiaries', group: 'Education & community', icon: 'globe', color: '#0e7490', color2: '#22c55e',
+  org: { name: 'Hope Rural Trust', place: 'Masvingo & Mutare', phone: '+263 39 226 4410' },
+  blurb: 'Donor projects, budgets, beneficiaries, distributions and field visits with donor reports.',
+  headline: 'Show donors exactly where every dollar and every bag of seed went.',
+  features: ['Projects with budget against spend', 'Beneficiary register by district and programme', 'Distributions and field visits from the field', 'Donor role sees reports, read only'],
+  roles: [
+    ['dir', 'Programme director', 'Dr Chipo Makoni', 'All projects', ['dash', 'projects', 'beneficiaries', 'distributions', 'visits', 'reports']],
+    ['officer', 'Field officer', 'Mr Tonderai Mafu', 'Register and distribute', ['beneficiaries', 'distributions', 'visits']],
+    ['donor', 'Donor view', 'Ms Anna Larsen', 'Read only reports', ['dash', 'projects:r', 'distributions:r', 'reports']]
+  ],
+  tables: {
+    projects: {
+      label: 'Projects', icon: 'target', code: 'PRJ', desc: 'Funded projects with budget used.',
+      fields: 'name:Project|donor:Donor|district:District:sel:Masvingo,Bikita,Mutare,Chimanimani,Zaka|budget:Budget:money|spent:Spent:money|used:Budget used:=bar|ends:Ends:date|status:Status:status:Active~ok,At risk~bad,Closing~warn,Closed~grey',
+      calc: { used: (r) => r.budget ? (r.spent / r.budget) * 100 : 0 },
+      related: [['distributions', 'project', 'Distributions', ['date', 'item', 'reached']]],
+      rows: [['Drought-tolerant seed pack', 'Nordic Aid', 'Bikita', 85000, 61200, 'd+120', 'Active'], ['Borehole rehabilitation', 'Water4All', 'Zaka', 140000, 131500, 'd+30', 'At risk'], ['School feeding', 'World Kids Fund', 'Masvingo', 60000, 22800, 'd+200', 'Active'], ['Cyclone recovery shelters', 'Red Relief', 'Chimanimani', 210000, 198000, 'd+12', 'Closing']]
+    },
+    beneficiaries: {
+      label: 'Beneficiaries', icon: 'users', code: 'BEN', one: 'beneficiary', desc: 'Registered households.',
+      fields: 'name:Household head|district:District:sel:Masvingo,Bikita,Mutare,Chimanimani,Zaka|programme:Programme:sel:Seed pack,Water,School feeding,Shelter|gender:Gender:sel:F,M|size:Household size:num|registered:Registered:date|status:Status:status:Active~ok,Pending verification~warn,Graduated~grey',
+      rows: [['Mrs Elizabeth Shoko', 'Bikita', 'Seed pack', 'F', 6, 'd-60', 'Active'], ['Mr John Chivasa', 'Zaka', 'Water', 'M', 8, 'd-90', 'Active'], ['Mrs Martha Gumbo', 'Chimanimani', 'Shelter', 'F', 5, 'd-150', 'Graduated'], ['Mrs Ruth Zhou', 'Masvingo', 'School feeding', 'F', 4, 'd-20', 'Active'], ['Mr Peter Moyo', 'Bikita', 'Seed pack', 'M', 7, 'd-3', 'Pending verification'], ['Mrs Agnes Rusike', 'Zaka', 'Water', 'F', 9, 'd-45', 'Active'], ['Mrs Tecla Hungwe', 'Chimanimani', 'Shelter', 'F', 3, 'd-2', 'Pending verification']]
+    },
+    distributions: {
+      label: 'Distributions', icon: 'box', code: 'DST', one: 'distribution', desc: 'What was handed out, where and to how many people.',
+      fields: 'date:Date:date|project:Project:ref:projects.name|district:District:sel:Masvingo,Bikita,Mutare,Chimanimani,Zaka|item:Item|qty:Quantity:num|reached:People reached:num|cost:Cost:money',
+      rows: [['d-5', 'Drought-tolerant seed pack', 'Bikita', 'Sorghum seed 10 kg', 420, 2520, 6300], ['d-12', 'School feeding', 'Masvingo', 'Maize meal 50 kg', 80, 1900, 3200], ['d-30', 'Borehole rehabilitation', 'Zaka', 'Borehole repair kit', 6, 3400, 21000], ['d-44', 'Cyclone recovery shelters', 'Chimanimani', 'Shelter kit', 75, 380, 41250], ['d-70', 'Drought-tolerant seed pack', 'Bikita', 'Fertiliser 25 kg', 300, 1800, 9600]]
+    },
+    visits: {
+      label: 'Field visits', icon: 'pin', code: 'FV', one: 'visit', desc: 'Monitoring visits and what was found.',
+      fields: 'date:Date:date|district:District:sel:Masvingo,Bikita,Mutare,Chimanimani,Zaka|officer:Officer|finding:Finding:area|status:Status:status:Logged~info,Action needed~bad,Closed~ok',
+      defaults: { officer: 'me' },
+      rows: [['d-1', 'Zaka', 'Mr Tonderai Mafu', 'Two boreholes need new pump rods.', 'Action needed'], ['d-8', 'Bikita', 'Mr Tonderai Mafu', 'Germination good in 80% of plots.', 'Closed'], ['d-15', 'Masvingo', 'Ms Nyarai Chuma', 'Feeding running at all 4 schools.', 'Logged']]
+    }
+  },
+  dash: {
+    kpis: [['Active projects', 'count:projects?status!=Closed', 'num'], ['Total budget', 'sum:projects.budget', 'money'], ['Spent so far', 'sum:projects.spent', 'money'], ['People reached', 'sum:distributions.reached', 'num', 'From distributions']],
+    alerts: [['projects?status=At risk', '{n} project{s} at risk of overspending', 'bad'], ['visits?status=Action needed', '{n} field visit{s} need action', 'warn'], ['beneficiaries?status=Pending verification', '{n} household{s} waiting for verification', 'info']],
+    charts: [['People reached by month', 'month:distributions.date.reached', 'num'], ['Spend by project', 'sum:projects.name.spent', 'money'], ['Beneficiaries by programme', 'by:beneficiaries.programme']],
+    recent: [['distributions', 'Latest distributions', 5, ['date', 'item', 'district', 'reached']]]
+  }
+});
+</script>
+<script>/* Nexora Digital demo engine: one config-driven app for every system demo. */
+(function () {
+  'use strict';
+  const ALL = window.__SYS || [];
+  const C = ALL.find((s) => s.id === window.SYS_ID) || ALL[0];
+  const ICONS = window.ICONS;
+  const ENGINE_V = 4;
+
+  /* ---------- small helpers ---------- */
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const ic = (n, s = 18) => `<svg class="i" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICONS[n] || ICONS.grid}"/></svg>`;
+  const split1 = (s, ch) => { const i = String(s).indexOf(ch); return i < 0 ? [s, ''] : [s.slice(0, i), s.slice(i + 1)]; };
+  const pad = (n) => String(n).padStart(2, '0');
+  const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const TODAY = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+  const todayS = iso(TODAY);
+  const parseD = (s) => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1); };
+  const addDays = (n, base) => { const d = base ? parseD(base) : new Date(TODAY); d.setDate(d.getDate() + n); return iso(d); };
+  const rel = (v) => { if (typeof v === 'string') { const m = v.match(/^d([+-]?\d+)$/); if (m) return addDays(+m[1]); } return v; };
+  const days = (a, b) => Math.round((parseD(b || todayS) - parseD(a)) / 864e5);
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dfmt = (s) => { if (!s || !/^\d{4}-\d\d/.test(s)) return esc(s); const d = parseD(s); return `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`; };
+  const CUR = C.currency || '$';
+  const money = (v) => (Number(v) < 0 ? '-' : '') + CUR + Math.abs(Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const moneyS = (v) => { const n = Number(v) || 0; return Math.abs(n) >= 100 || Number.isInteger(n) ? (n < 0 ? '-' : '') + CUR + Math.round(Math.abs(n)).toLocaleString('en-US') : money(n); };
+  const num = (v) => (Number(v) || 0).toLocaleString('en-US', { maximumFractionDigits: 1 });
+  const fmtV = (v, k) => k === 'money' ? moneyS(v) : k === 'pct' ? Math.round(v || 0) + '%' : k === 'days' ? num(v) + ' days' : k === 'raw' ? esc(v) : num(v);
+  const initials = (n) => String(n).replace(/^(Dr|Mr|Mrs|Ms|Pastor|Rev|Eng)\.?\s+/i, '').split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+  const nowT = () => { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+
+  /* ---------- logo ---------- */
+  function logo(size) {
+    const id = 'lg' + Math.random().toString(36).slice(2, 7);
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${C.color}"/><stop offset="1" stop-color="${C.color2}"/></linearGradient></defs><rect width="40" height="40" rx="11" fill="url(#${id})"/><path d="M0 28 Q20 18 40 26 V40 H0Z" fill="#fff" opacity=".1"/><g transform="translate(8 8)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${ICONS[C.icon]}"/></g></svg>`;
+  }
+
+  /* ---------- tables ---------- */
+  function parseFields(s) {
+    return s.split('|').map((p) => {
+      const [k0, label, type0 = 'text', opts = ''] = p.split(':');
+      const hide = k0[0] === '-', k = hide ? k0.slice(1) : k0;
+      let type = type0, calc = false;
+      if (type[0] === '=') { calc = true; type = type.slice(1) || 'text'; }
+      const o = opts ? opts.split(',').map((x) => { const [v, tone] = x.split('~'); return { v: v.trim(), tone: tone || '' }; }) : [];
+      return { k, label, type, opts: o, hide, calc };
+    });
+  }
+  const T = {};
+  Object.entries(C.tables).forEach(([name, t]) => {
+    t.name = name;
+    t.fields = parseFields(t.fields);
+    t.calc = t.calc || {};
+    t.statusF = t.fields.find((f) => f.type === 'status');
+    t.dateF = t.fields.find((f) => f.k === t.dateKey) || t.fields.find((f) => f.type === 'date');
+    t.titleF = t.fields.find((f) => f.k === t.title) || t.fields.find((f) => ['text', 'ref', 'sel'].includes(f.type) && !f.hide && !f.calc) || t.fields[0];
+    t.icon = t.icon || 'list';
+    t.one = t.one || t.label.replace(/s$/, '').toLowerCase();
+    T[name] = t;
+  });
+  const F = (t, k) => t.fields.find((f) => f.k === k);
+  const isNum = (f) => ['money', 'num', 'pct'].includes(f.type);
+  const makeId = (t, n) => t.code ? `${t.code}-${1000 + n}` : String(n);
+
+  /* ---------- storage ---------- */
+  const KEY = 'nexora-demo-' + C.id;
+  const VER = ENGINE_V + '.' + (C.v || 1);
+  let S;
+  function seedDB() {
+    const db = {}, seq = {};
+    Object.values(T).forEach((t) => {
+      const stored = t.fields.filter((f) => !f.calc);
+      db[t.name] = (t.rows || []).map((r, i) => {
+        const o = { id: makeId(t, i + 1) };
+        stored.forEach((f, j) => { o[f.k] = r[j] === undefined ? '' : rel(r[j]); });
+        return o;
+      });
+      seq[t.name] = (t.rows || []).length;
+    });
+    return { db, seq };
+  }
+  function freshState(keep) { const { db, seq } = seedDB(); return { v: VER, day: todayS, touched: false, db, seq, role: keep ? keep.role : null, theme: keep ? keep.theme : null }; }
+  function load() {
+    try {
+      const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (s && s.v === VER && s.db) { S = (s.day !== todayS && !s.touched) ? freshState(s) : s; return; }
+    } catch (e) { /* storage blocked */ }
+    S = freshState();
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
+  const touch = () => { S.touched = true; save(); };
+
+  /* ---------- values, filters, aggregates ---------- */
+  let role = null;
+  const H = {
+    get db() { return S.db; }, today: todayS, days, addDays, money, moneyS, num,
+    me: () => (role ? role.person : ''),
+    where: (tn, e) => where(tn, e),
+    sum: (tn, fk, e) => agg(`sum:${tn}.${fk}${e ? '?' + e : ''}`),
+    count: (tn, e) => agg(`count:${tn}${e ? '?' + e : ''}`),
+    find: (tn, k, v) => S.db[tn].find((r) => r[k] == v),
+    val: (tn, r, k) => val(T[tn], r, k)
+  };
+  function val(t, r, f) {
+    if (typeof f === 'string') f = F(t, f) || { k: f };
+    if (f.calc) { try { return t.calc[f.k](r, H); } catch (e) { return ''; } }
+    return r[f.k];
+  }
+  function resolve(v, t, r) {
+    v = String(v).trim();
+    if (v === 'today') return todayS;
+    if (v === 'me') return H.me();
+    const m = v.match(/^d([+-]?\d+)$/); if (m) return addDays(+m[1]);
+    if (v[0] === '@') return val(t, r, v.slice(1));
+    return v;
+  }
+  function cond(t, r, c) {
+    const m = c.match(/^([\w]+)\s*(<=|>=|!=|=|<|>|~)\s*(.*)$/);
+    if (!m) return true;
+    const [, k, op] = m;
+    const a = k === 'id' ? r.id : val(t, r, k);
+    const b = resolve(m[3], t, r);
+    const blankA = a == null || a === '';
+    if ((op === '=' || op === '!=') && String(b).includes(',')) { const inSet = String(b).split(',').includes(String(a)); return op === '=' ? inSet : !inSet; }
+    if (op === '=') return blankA ? b === '' : String(a) === String(b);
+    if (op === '!=') return blankA ? b !== '' : String(a) !== String(b);
+    if (op === '~') return String(a || '').toLowerCase().includes(String(b).toLowerCase());
+    if (blankA || b === '') return false;
+    const na = Number(a), nb = Number(b);
+    const n = !isNaN(na) && !isNaN(nb);
+    const x = n ? na : String(a), y = n ? nb : String(b);
+    return op === '<' ? x < y : op === '>' ? x > y : op === '<=' ? x <= y : x >= y;
+  }
+  const matchExpr = (t, r, e) => !e || (typeof e === 'function' ? e(r, H) : e.split('&').every((c) => cond(t, r, c.trim())));
+  const rowsOf = (tn) => { const sc = role && role.scope && role.scope[tn]; return sc ? S.db[tn].filter((r) => matchExpr(T[tn], r, sc)) : S.db[tn]; };
+  const where = (tn, e) => rowsOf(tn).filter((r) => matchExpr(T[tn], r, e));
+  function agg(spec) {
+    if (typeof spec === 'function') return spec(H);
+    const [kind, rest] = split1(spec, ':');
+    const [path, e] = split1(rest, '?');
+    const [tn, fk] = path.split('.');
+    const rows = where(tn, e), t = T[tn];
+    if (kind === 'count') return rows.length;
+    const vals = rows.map((r) => Number(val(t, r, fk)) || 0);
+    const s = vals.reduce((a, b) => a + b, 0);
+    if (kind === 'sum') return s;
+    if (kind === 'avg') return vals.length ? s / vals.length : 0;
+    if (kind === 'max') return vals.length ? Math.max(...vals) : 0;
+    if (kind === 'min') return vals.length ? Math.min(...vals) : 0;
+    return 0;
+  }
+  function series(spec) {
+    const [kind, rest] = split1(spec, ':');
+    const [path, e] = split1(rest, '?');
+    const p = path.split('.'), t = T[p[0]], rows = where(p[0], e);
+    if (kind === 'month') {
+      const out = [];
+      for (let i = 5; i >= 0; i--) { const d = new Date(TODAY.getFullYear(), TODAY.getMonth() - i, 1); out.push([`${d.getFullYear()}-${pad(d.getMonth() + 1)}`, MON[d.getMonth()], 0]); }
+      rows.forEach((r) => { const ym = String(val(t, r, p[1]) || '').slice(0, 7); const o = out.find((x) => x[0] === ym); if (o) o[2] += p[2] ? Number(val(t, r, p[2])) || 0 : 1; });
+      return out.map((x) => [x[1], x[2]]);
+    }
+    const gf = F(t, p[1]); const map = new Map();
+    const pre = gf && gf.opts.length && gf.type !== 'ref';
+    if (pre) gf.opts.forEach((o) => map.set(o.v, 0));
+    rows.forEach((r) => { const g = val(t, r, p[1]) || 'Other'; map.set(g, (map.get(g) || 0) + (kind === 'sum' ? Number(val(t, r, p[2])) || 0 : 1)); });
+    let arr = [...map.entries()];
+    if (!pre) arr.sort((a, b) => b[1] - a[1]);
+    return arr.slice(0, 8);
+  }
+
+  /* ---------- formatting ---------- */
+  const OK = /\b(paid|active|done|complete|completed|approved|in stock|delivered|available|closed|resolved|passed|present|won|ready|served|checked out|cleared|current|valid|fit|returned|hired|confirmed|attended|settled|good|operational|signed|in service|received|issued|on track|live|healthy|repaid|fulfilled|vacant|in date|compliant|reconciled|sold|harvested|dispatched|checked in|in use|placed)\b/i;
+  const BAD = /\b(overdue|late|failed|fail|cancelled|canceled|rejected|lost|arrears|critical|absent|expired|out of stock|defaulted|urgent|high|breached|lapsed|blocked|faulty|stolen|missing|no show|declined|suspended|dead|written off|offline|damaged|severe)\b/i;
+  const WARN = /\b(pending|due|draft|in progress|open|waiting|on leave|booked|partial|review|scheduled|low|awaiting|sent|quoted|new|preparing|in transit|under repair|maintenance|medium|follow up|interview|shortlisted|probation|occupied|grace|reserved|planned|ordered|on hold|expiring|renewal|serviced soon|negotiation|proposal)\b/i;
+  function toneOf(f, v) {
+    const o = f && f.opts.find((x) => x.v === v);
+    if (o && o.tone) return o.tone;
+    const s = String(v);
+    return BAD.test(s) ? 'bad' : OK.test(s) ? 'ok' : WARN.test(s) ? 'warn' : 'info';
+  }
+  const pill = (v, tone) => `<span class="pill ${tone || 'info'}">${esc(v)}</span>`;
+  function cell(t, r, f) {
+    const v = val(t, r, f);
+    if (v === '' || v == null) return '<span class="dim">—</span>';
+    switch (f.type) {
+      case 'money': return money(v);
+      case 'num': return num(v);
+      case 'pct': return Math.round(v) + '%';
+      case 'date': return dfmt(v);
+      case 'status': return pill(v, toneOf(f, v));
+      case 'tag': return `<span class="tag">${esc(v)}</span>`;
+      case 'stars': return '<span class="stars">' + '★'.repeat(+v) + '<i>' + '★'.repeat(Math.max(0, 5 - v)) + '</i></span>';
+      case 'bar': return `<span class="mbar"><i style="width:${Math.max(0, Math.min(100, +v))}%"></i></span><span class="small">${Math.round(v)}%</span>`;
+      default: return esc(v);
+    }
+  }
+
+  /* ---------- roles & modules ---------- */
+  C.roles = C.roles.map((x) => Array.isArray(x) ? { id: x[0], title: x[1], person: x[2], desc: x[3], scope: x[5] || null, mods: x[4].map((m) => { const [k, ro] = m.split(':'); return { k, ro: ro === 'r' }; }) } : x);
+  function modMeta(k) {
+    if (k === 'dash') return { k, type: 'dash', label: (C.dash && C.dash.label) || 'Dashboard', icon: 'home' };
+    if (k === 'reports') return { k, type: 'reports', label: 'Reports', icon: 'chart' };
+    if (C.modules && C.modules[k]) return Object.assign({ k }, C.modules[k]);
+    if (T[k]) return { k, type: 'table', label: T[k].label, icon: T[k].icon, table: k };
+    return null;
+  }
+  const myMods = () => role.mods.map((m) => Object.assign(modMeta(m.k) || {}, { ro: m.ro })).filter((m) => m.type);
+  const canSee = (k) => role && role.mods.some((m) => m.k === k);
+
+  /* ---------- ui state ---------- */
+  let curMod = null;
+  const ui = { q: {}, status: {}, filter: null, view: {}, sort: {}, cart: {}, ag: 0, rep: { table: null, range: 'month' } };
+  const contactHref = '../contact.html?plan=' + encodeURIComponent(C.name + ' (' + C.tag + ') system');
+
+  /* ---------- dialogs & toast ---------- */
+  function dlg(html, wire, cls) {
+    const d = document.createElement('dialog');
+    d.className = cls || '';
+    d.innerHTML = `<div class="dlg">${html}</div>`;
+    document.body.appendChild(d);
+    d.addEventListener('close', () => d.remove());
+    d.addEventListener('click', (e) => { if (e.target === d || e.target.closest('[data-close]')) d.close(); });
+    if (wire) wire(d);
+    d.showModal();
+    return d;
+  }
+  function toast(msg, bad) {
+    const el = document.createElement('div');
+    el.className = 'toast' + (bad ? ' bad' : '');
+    el.setAttribute('role', 'status');
+    el.innerHTML = ic(bad ? 'alert' : 'check', 16) + esc(msg);
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2600);
+  }
+
+  /* ---------- theme ---------- */
+  function applyTheme() {
+    const r = document.documentElement;
+    r.style.setProperty('--brand', C.color);
+    r.style.setProperty('--brand2', C.color2);
+    if (S.theme) r.dataset.theme = S.theme; else delete r.dataset.theme;
+  }
+  const isDark = () => S.theme ? S.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  function setFavicon() {
+    let l = $('link[rel="icon"]');
+    if (!l) { l = document.createElement('link'); l.rel = 'icon'; document.head.appendChild(l); }
+    l.href = 'data:image/svg+xml,' + encodeURIComponent(logo(64));
+  }
+
+  /* ---------- login ---------- */
+  function login() {
+    role = null;
+    document.title = `${C.name} · ${C.tag} | Live demo by Nexora Digital`;
+    $('#app').innerHTML = `<div class="login">
+      <section class="login-brand">
+        <div class="lb-in">
+          <div class="lb-logo">${logo(58)}<div><b>${esc(C.name)}</b><span>${esc(C.tag)}</span></div></div>
+          <h1>${esc(C.headline || C.blurb)}</h1>
+          <ul class="ticks">${(C.features || []).map((f) => `<li>${ic('check', 16)}${esc(f)}</li>`).join('')}</ul>
+          <p class="lb-org">${ic('building', 16)}<span>Sample organisation: <b>${esc(C.org.name)}</b>, ${esc(C.org.place)}</span></p>
+        </div>
+        <p class="lb-foot">Built by <a href="../index.html">Nexora Digital</a> · Harare, Zimbabwe</p>
+      </section>
+      <section class="login-pick"><div class="pick-in">
+        <span class="demo-tag">${ic('zap', 14)} Live demo</span>
+        <h2>Sign in as…</h2>
+        <p class="muted">Each role sees its own screens and permissions. This demo runs on sample data in your browser, so try anything.</p>
+        <div class="roles">${C.roles.map((r) => `<button class="role" data-role="${r.id}">
+          <span class="av">${initials(r.person)}</span>
+          <span class="rt"><b>${esc(r.title)}</b><small>${esc(r.person)}</small><em>${esc(r.desc)}</em></span>${ic('arrow', 18)}</button>`).join('')}</div>
+        <div class="pick-cta"><a class="btn" href="${contactHref}">${ic('zap', 16)} Get this system for your business</a><a class="btn ghost" href="./">See all demos</a></div>
+      </div></section></div>`;
+    $$('[data-role]').forEach((b) => b.addEventListener('click', () => {
+      role = C.roles.find((r) => r.id === b.dataset.role);
+      S.role = role.id; save();
+      shell(); go(role.mods[0].k);
+    }));
+  }
+
+  /* ---------- app shell ---------- */
+  function alertsList() {
+    return ((C.dash && C.dash.alerts) || []).map((a) => {
+      const [path, e] = split1(a[0], '?');
+      const n = where(path, e).length;
+      return { table: path, expr: e, n, text: a[1].replace('{n}', n).replace('{s}', n === 1 ? '' : 's'), tone: a[2] || 'warn' };
+    }).filter((a) => a.n > 0);
+  }
+  function shell() {
+    document.title = `${C.name} · ${C.org.name}`;
+    $('#app').innerHTML = `<div class="app">
+      <aside class="side">
+        <div class="side-brand">${logo(36)}<div><b>${esc(C.name)}</b><span>${esc(C.org.name)}</span></div></div>
+        <nav class="nav" aria-label="Main">${myMods().map((m) => `<button data-go="${m.k}">${ic(m.icon)}<span>${esc(m.label)}</span></button>`).join('')}</nav>
+        <div class="side-foot">
+          <div class="me"><span class="av">${initials(role.person)}</span><div><b>${esc(role.person)}</b><small>${esc(role.title)}</small></div></div>
+          <button class="sf" data-switch>${ic('logout', 16)} Switch role</button>
+          <button class="sf" data-reset>${ic('refresh', 16)} Reset demo data</button>
+          <a class="sf credit" href="../index.html">Built by <b>Nexora Digital</b></a>
+        </div>
+      </aside>
+      <div class="main">
+        <header class="bar">
+          <div class="bar-t"><span class="crumb"><span class="co">${esc(C.org.name)} ·</span> <span class="demo-pill">Demo</span></span><h1 id="title"></h1></div>
+          <div class="bar-r">
+            <button class="iconbtn" data-bell aria-label="Alerts">${ic('bell')}<i id="bellN" hidden></i></button>
+            <button class="iconbtn" data-theme aria-label="Switch light or dark">${ic(isDark() ? 'sun' : 'moon')}</button>
+            <button class="iconbtn mob" data-switch aria-label="Switch role">${ic('logout')}</button>
+            <a class="btn cta" href="${contactHref}">${ic('zap', 16)}<span>Get this system</span></a>
+          </div>
+        </header>
+        <main id="view" tabindex="-1"></main>
+        <div id="printdoc" class="print-only"></div>
+      </div></div>`;
+    $$('[data-go]').forEach((b) => b.addEventListener('click', () => { ui.filter = null; go(b.dataset.go); }));
+    $$('[data-switch]').forEach((b) => b.addEventListener('click', () => { S.role = null; save(); history.replaceState(null, '', location.pathname); login(); }));
+    $('[data-reset]').addEventListener('click', () => dlg(`<div class="dh"><h2>Reset demo data?</h2><button class="x" data-close aria-label="Close">${ic('x')}</button></div><p class="muted">Every change you made goes back to the original sample data.</p><div class="dact"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="doReset">Reset data</button></div>`,
+      (d) => $('#doReset', d).addEventListener('click', () => { const keep = S; S = freshState(keep); save(); d.close(); toast('Sample data restored'); render(); })));
+    $('[data-theme]').addEventListener('click', (e) => { S.theme = isDark() ? 'light' : 'dark'; save(); applyTheme(); e.currentTarget.innerHTML = ic(isDark() ? 'sun' : 'moon'); });
+    $('[data-bell]').addEventListener('click', () => { if (canSee('dash')) go('dash'); else toast(alertsList().length ? alertsList().map((a) => a.text).join(' · ') : 'No alerts right now'); });
+  }
+  function go(k) {
+    if (!canSee(k)) k = role.mods[0].k;
+    curMod = k;
+    if (location.hash.slice(1) !== k) history.replaceState(null, '', '#' + k);
+    $$('[data-go]').forEach((b) => b.setAttribute('aria-current', b.dataset.go === k ? 'page' : 'false'));
+    const a = $(`[data-go="${k}"]`); if (a && a.scrollIntoView && innerWidth < 900) a.scrollIntoView({ inline: 'center', block: 'nearest' });
+    render();
+    window.scrollTo(0, 0);
+  }
+  function render() {
+    const m = myMods().find((x) => x.k === curMod);
+    $('#title').textContent = m.label;
+    const n = alertsList().length, bn = $('#bellN');
+    bn.hidden = !n; bn.textContent = n;
+    const v = $('#view');
+    if (m.type === 'dash') viewDash(v);
+    else if (m.type === 'table') viewTable(v, m);
+    else if (m.type === 'pos') viewPOS(v, m);
+    else if (m.type === 'agenda') viewAgenda(v, m);
+    else if (m.type === 'reports') viewReports(v);
+  }
+
+  /* ---------- dashboard ---------- */
+  function chartHTML(c) {
+    const [title, spec, kind] = c;
+    const s = series(spec), max = Math.max(1, ...s.map((x) => Math.abs(x[1])));
+    if (spec.startsWith('month:')) {
+      return `<div class="card chart"><h3>${esc(title)}</h3><div class="cols">${s.map(([l, v], i) => `<div class="col${i === s.length - 1 ? ' now' : ''}"><span class="cv">${fmtV(v, kind)}</span><div class="cb"><i style="height:${Math.max(2, (v / max) * 100)}%"></i></div><span class="cl">${esc(l)}</span></div>`).join('')}</div></div>`;
+    }
+    return `<div class="card chart"><h3>${esc(title)}</h3><div class="bars">${s.map(([l, v]) => `<div class="brow"><span class="bl">${esc(l)}</span><span class="bt"><i style="width:${Math.max(1.5, (v / max) * 100)}%"></i></span><span class="bv">${fmtV(v, kind)}</span></div>`).join('') || '<p class="muted small">No data yet</p>'}</div></div>`;
+  }
+  function miniTable(t, rows, cols) {
+    const fs = (cols ? cols.map((k) => F(t, k)) : t.fields.filter((f) => !f.hide).slice(0, 4)).filter(Boolean);
+    if (!rows.length) return '<p class="muted small empty-s">Nothing to show yet.</p>';
+    return `<div class="tw mini"><table><thead><tr>${fs.map((f) => `<th class="${isNum(f) ? 'n' : ''}">${esc(f.label)}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr data-open="${t.name}" data-id="${esc(r.id)}" tabindex="0">${fs.map((f) => `<td class="${isNum(f) ? 'n' : ''}" data-label="${esc(f.label)}">${cell(t, r, f)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  }
+  function viewDash(v) {
+    const d = C.dash || {};
+    const h = new Date().getHours();
+    const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    const first = role.person.replace(/^(Dr|Mr|Mrs|Ms|Pastor|Rev|Eng)\.?\s+/i, '').split(' ')[0];
+    const al = alertsList();
+    v.innerHTML = `<div class="hello"><div><h2>${greet}, ${esc(first)}</h2><p class="muted">${WD[TODAY.getDay()]} ${dfmt(todayS)} · here is how ${esc(C.org.name)} is doing today.</p></div>
+        ${d.quick ? `<div class="quick">${d.quick.filter((q) => canSee(q[1])).map((q) => `<button class="btn ${q[2] ? '' : 'ghost'}" data-quick="${q[1]}">${ic('plus', 16)}${esc(q[0])}</button>`).join('')}</div>` : ''}</div>
+      <div class="kpis">${(d.kpis || []).map(([label, spec, kind, sub]) => `<div class="kpi"><span>${esc(label)}</span><b>${fmtV(agg(spec), kind)}</b>${sub ? `<small>${esc(typeof sub === 'function' ? sub(H) : sub)}</small>` : ''}</div>`).join('')}</div>
+      ${al.length ? `<div class="card alerts"><h3>${ic('bell', 16)} Needs attention</h3>${al.map((a) => `<button class="al ${a.tone}" data-al="${esc(a.table)}" data-ex="${esc(a.expr)}" data-tx="${esc(a.text)}"><span class="dot ${a.tone}"></span><span>${esc(a.text)}</span>${canSee(a.table) ? ic('chevR', 16) : ''}</button>`).join('')}</div>` : `<div class="card alerts calm">${ic('check', 18)} All clear. Nothing needs attention right now.</div>`}
+      <div class="charts">${(d.charts || []).map(chartHTML).join('')}</div>
+      ${(d.recent || []).filter((x) => canSee(x[0])).map(([tn, title, n, cols]) => { const t = T[tn]; const rows = sorted(t, rowsOf(tn).slice()).slice(0, n || 5); return `<div class="card"><div class="cardhead"><h3>${esc(title)}</h3><button class="link" data-go2="${tn}">View all ${ic('chevR', 14)}</button></div>${miniTable(t, rows, cols)}</div>`; }).join('')}`;
+    $$('[data-al]', v).forEach((b) => b.addEventListener('click', () => { if (!canSee(b.dataset.al)) return; ui.filter = { table: b.dataset.al, expr: b.dataset.ex, text: b.dataset.tx }; ui.status[b.dataset.al] = 'All'; ui.view[b.dataset.al] = 'list'; go(b.dataset.al); }));
+    $$('[data-go2]', v).forEach((b) => b.addEventListener('click', () => go(b.dataset.go2)));
+    $$('[data-quick]', v).forEach((b) => b.addEventListener('click', () => { const m = modMeta(b.dataset.quick); if (m.type === 'table') form(T[m.table], null); else go(m.k); }));
+    wireOpen(v);
+  }
+  function wireOpen(root) {
+    $$('[data-open]', root).forEach((tr) => {
+      const open = () => { const t = T[tr.dataset.open]; const r = S.db[t.name].find((x) => String(x.id) === tr.dataset.id); if (r) detail(t, r, !canEdit(t.name)); };
+      tr.addEventListener('click', open);
+      tr.addEventListener('keydown', (e) => { if (e.key === 'Enter') open(); });
+    });
+  }
+  const canEdit = (tn) => role.mods.some((m) => m.k === tn && !m.ro) || Object.values(C.modules || {}).some((m) => (m.table === tn || m.sales === tn) && role.mods.some((x) => C.modules[x.k] === m && !x.ro));
+
+  /* ---------- table module ---------- */
+  function sorted(t, rows) {
+    const s = ui.sort[t.name];
+    const k = s ? s.k : t.dateF ? t.dateF.k : null;
+    const dir = s ? s.dir : -1;
+    if (!k) return rows;
+    const f = F(t, k) || { k };
+    return rows.sort((a, b) => {
+      let x = k === 'id' ? a.id : val(t, a, f), y = k === 'id' ? b.id : val(t, b, f);
+      const nx = Number(x), ny = Number(y);
+      if (x !== '' && y !== '' && !isNaN(nx) && !isNaN(ny)) return (nx - ny) * dir;
+      return String(x || '').localeCompare(String(y || '')) * dir;
+    });
+  }
+  function rowsFor(t) {
+    let rows = rowsOf(t.name).slice();
+    if (ui.filter && ui.filter.table === t.name) rows = rows.filter((r) => matchExpr(t, r, ui.filter.expr));
+    const st = ui.status[t.name];
+    if (st && st !== 'All' && t.statusF && ui.view[t.name] !== 'board') rows = rows.filter((r) => val(t, r, t.statusF) === st);
+    const q = (ui.q[t.name] || '').toLowerCase().trim();
+    if (q) rows = rows.filter((r) => String(r.id).toLowerCase().includes(q) || t.fields.some((f) => String(val(t, r, f) == null ? '' : val(t, r, f)).toLowerCase().includes(q)));
+    return sorted(t, rows);
+  }
+  function viewTable(v, m) {
+    const t = T[m.table];
+    const ro = m.ro;
+    const view = ui.view[t.name] || (t.board === 'default' ? 'board' : 'list');
+    ui.view[t.name] = view;
+    const st = ui.status[t.name] || 'All';
+    v.innerHTML = `<div class="phead"><div><p class="muted">${esc(t.desc || '')}</p></div>
+        <div class="acts">
+          ${t.board ? `<div class="seg" role="group" aria-label="View"><button data-view="list" aria-pressed="${view === 'list'}">${ic('list', 16)} List</button><button data-view="board" aria-pressed="${view === 'board'}">${ic('kanban', 16)} Board</button></div>` : ''}
+          <button class="btn ghost" data-csv>${ic('download', 16)}<span>CSV</span></button>
+          ${ro ? '<span class="pill grey">View only</span>' : `<button class="btn" data-add>${ic('plus', 16)} ${esc(t.addLabel || 'Add ' + t.one)}</button>`}
+        </div></div>
+      ${t.stats ? `<div class="kpis sm">${t.stats.map(([l, s, k]) => `<div class="kpi"><span>${esc(l)}</span><b>${fmtV(agg(s), k)}</b></div>`).join('')}</div>` : ''}
+      <div class="toolbar">
+        <label class="search">${ic('search', 16)}<input type="search" placeholder="Search ${esc(t.label.toLowerCase())}" value="${esc(ui.q[t.name] || '')}" aria-label="Search"></label>
+        ${t.statusF && view === 'list' ? `<div class="chips">${['All', ...t.statusF.opts.map((o) => o.v)].map((o) => `<button class="chip" data-st="${esc(o)}" aria-pressed="${o === st}">${esc(o)}<i>${o === 'All' ? rowsOf(t.name).length : rowsOf(t.name).filter((r) => val(t, r, t.statusF) === o).length}</i></button>`).join('')}</div>` : ''}
+      </div>
+      ${ui.filter && ui.filter.table === t.name ? `<div class="filterbar">${ic('bell', 14)} Showing: <b>${esc(ui.filter.text)}</b><button class="link" data-clear>Show everything</button></div>` : ''}
+      <div id="rows"></div>`;
+    const draw = () => {
+      const rows = rowsFor(t);
+      $('#rows', v).innerHTML = view === 'board' ? boardHTML(t, rows, ro) : listHTML(t, rows);
+      wireOpen($('#rows', v));
+      $$('[data-sort]', v).forEach((th) => th.addEventListener('click', () => { const k = th.dataset.sort; const s = ui.sort[t.name]; ui.sort[t.name] = { k, dir: s && s.k === k ? -s.dir : (t.fields.find((f) => f.k === k) && isNum(F(t, k)) ? -1 : 1) }; draw(); }));
+      $$('[data-next]', v).forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); const r = S.db[t.name].find((x) => String(x.id) === b.dataset.next); r[t.statusF.k] = b.dataset.to; if (t.onStatus) t.onStatus(r, H); touch(); toast(`${val(t, r, t.titleF)} moved to ${b.dataset.to}`); draw(); }));
+    };
+    draw();
+    $('.search input', v).addEventListener('input', (e) => { ui.q[t.name] = e.target.value; draw(); });
+    $$('[data-st]', v).forEach((b) => b.addEventListener('click', () => { ui.status[t.name] = b.dataset.st; viewTable(v, m); }));
+    $$('[data-view]', v).forEach((b) => b.addEventListener('click', () => { ui.view[t.name] = b.dataset.view; viewTable(v, m); }));
+    const clr = $('[data-clear]', v); if (clr) clr.addEventListener('click', () => { ui.filter = null; viewTable(v, m); });
+    const add = $('[data-add]', v); if (add) add.addEventListener('click', () => form(t, null));
+    $('[data-csv]', v).addEventListener('click', () => csv(t, rowsFor(t)));
+  }
+  function listHTML(t, rows) {
+    const cols = t.fields.filter((f) => !f.hide);
+    if (!rows.length) return `<div class="card empty">${ic('search', 28)}<p>No ${esc(t.label.toLowerCase())} match. Try another search or filter.</p></div>`;
+    const sum = cols.map((f) => f.type === 'money' && !t.noTotal ? rows.reduce((a, r) => a + (Number(val(t, r, f)) || 0), 0) : null);
+    const s = ui.sort[t.name];
+    const arrow = (k) => s && s.k === k ? (s.dir > 0 ? ' ↑' : ' ↓') : '';
+    return `<div class="tw"><table class="rt"><thead><tr>${t.code ? `<th data-sort="id">Ref${arrow('id')}</th>` : ''}${cols.map((f) => `<th class="${isNum(f) ? 'n' : ''}" data-sort="${f.k}">${esc(f.label)}${arrow(f.k)}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map((r) => `<tr data-open="${t.name}" data-id="${esc(r.id)}" tabindex="0">${t.code ? `<td class="ref" data-label="Ref">${esc(r.id)}</td>` : ''}${cols.map((f, i) => `<td class="${isNum(f) ? 'n' : ''}${f === t.titleF ? ' tt' : ''}" data-label="${esc(f.label)}">${cell(t, r, f)}</td>`).join('')}</tr>`).join('')}</tbody>
+      ${sum.some((x) => x !== null) ? `<tfoot><tr>${t.code ? '<td></td>' : ''}${cols.map((f, i) => `<td class="${isNum(f) ? 'n' : ''}">${i === 0 && sum[0] === null ? `<b>${rows.length} total</b>` : sum[i] !== null ? `<b>${money(sum[i])}</b>` : ''}</td>`).join('')}</tr></tfoot>` : ''}
+      </table></div><p class="muted small count">${rows.length} of ${rowsOf(t.name).length} ${esc(t.label.toLowerCase())}</p>`;
+  }
+  function boardHTML(t, rows, ro) {
+    const opts = t.statusF.opts;
+    const cardF = (t.card || t.fields.filter((f) => !f.hide && f !== t.titleF && f !== t.statusF).slice(0, 3).map((f) => f.k)).map((k) => F(t, k)).filter(Boolean);
+    return `<div class="board">${opts.map((o, i) => {
+      const rs = rows.filter((r) => val(t, r, t.statusF) === o.v);
+      const nx = opts[i + 1];
+      return `<section class="lane"><div class="lane-h"><span class="dot ${o.tone || toneOf(t.statusF, o.v)}"></span>${esc(o.v)}<b>${rs.length}</b></div>
+        ${rs.map((r) => `<article class="bcard" data-open="${t.name}" data-id="${esc(r.id)}" tabindex="0">
+          ${t.code ? `<span class="ref">${esc(r.id)}</span>` : ''}<b>${esc(val(t, r, t.titleF))}</b>
+          ${cardF.map((f) => { const x = val(t, r, f); return x === '' || x == null ? '' : `<span class="bf">${esc(f.label)}: ${cell(t, r, f)}</span>`; }).join('')}
+          ${!ro && nx ? `<button class="next" data-next="${esc(r.id)}" data-to="${esc(nx.v)}">${esc(nx.v)} ${ic('arrow', 14)}</button>` : ''}
+        </article>`).join('') || '<p class="lane-empty">Nothing here</p>'}
+      </section>`;
+    }).join('')}</div>`;
+  }
+
+  /* ---------- record detail ---------- */
+  function detail(t, r, ro) {
+    const acts = (t.actions || []).filter((a) => !ro && matchExpr(t, r, a[2]));
+    const rel2 = (t.related || []).map(([tn, fk, title, cols]) => {
+      const rt = T[tn]; const key = val(t, r, t.titleF);
+      const rows = sorted(rt, rowsOf(tn).filter((x) => x[fk] === key || x[fk] === r.id)).slice(0, 8);
+      return `<div class="rel"><h3>${esc(title)} <span class="muted small">(${rows.length})</span></h3>${miniTable(rt, rows, cols)}</div>`;
+    }).join('');
+    dlg(`<div class="dh"><div><span class="ref">${t.code ? esc(r.id) : esc(t.label)}</span><h2>${esc(val(t, r, t.titleF))}</h2></div>
+        <div class="inline">${t.statusF ? pill(val(t, r, t.statusF), toneOf(t.statusF, val(t, r, t.statusF))) : ''}<button class="x" data-close aria-label="Close">${ic('x')}</button></div></div>
+      <dl class="dl">${t.fields.filter((f) => f !== t.titleF).map((f) => `<div class="${f.type === 'area' ? 'wide' : ''}"><dt>${esc(f.label)}</dt><dd>${cell(t, r, f)}</dd></div>`).join('')}</dl>
+      ${rel2}
+      <div class="dact">${acts.map((a, i) => `<button class="btn" data-act="${i}">${esc(a[0])}</button>`).join('')}
+        ${t.print ? `<button class="btn ghost" data-print>${ic('printer', 16)} ${esc(t.print)}</button>` : ''}
+        ${!ro ? `<button class="btn ghost" data-edit>Edit</button><button class="btn ghost danger" data-del>Delete</button>` : ''}</div>`,
+    (d) => {
+      $$('[data-act]', d).forEach((b) => b.addEventListener('click', () => {
+        const a = acts[+b.dataset.act];
+        if (typeof a[1] === 'function') a[1](r, H);
+        else a[1].split('&').forEach((p) => { const [k, x] = split1(p, '='); const rv = resolve(x, t, r); const f = F(t, k); r[k] = f && isNum(f) ? Number(rv) || 0 : rv; });
+        if (t.onStatus) t.onStatus(r, H);
+        touch(); d.close(); toast(a[3] || `${a[0]}: done`); render();
+      }));
+      const p = $('[data-print]', d); if (p) p.addEventListener('click', () => printRecord(t, r));
+      const e = $('[data-edit]', d); if (e) e.addEventListener('click', () => { d.close(); form(t, r); });
+      const del = $('[data-del]', d);
+      if (del) del.addEventListener('click', () => {
+        if (del.dataset.sure) { S.db[t.name] = S.db[t.name].filter((x) => x !== r); touch(); d.close(); toast(`${t.one[0].toUpperCase() + t.one.slice(1)} deleted`); render(); return; }
+        del.dataset.sure = '1'; del.textContent = 'Tap again to delete'; del.classList.add('sure');
+      });
+      wireOpen(d);
+    }, 'wide');
+  }
+
+  /* ---------- add / edit form ---------- */
+  function optionsFor(f) {
+    if (f.type === 'ref') { const [tn, fk] = f.opts[0].v.split('.'); return S.db[tn].map((r) => val(T[tn], r, fk || T[tn].titleF.k)); }
+    return f.opts.map((o) => o.v);
+  }
+  function input(f, v, req) {
+    const n = `name="${f.k}"`, rq = req ? ' required' : '';
+    const vv = esc(v == null ? '' : v);
+    let el;
+    if (['sel', 'status', 'ref'].includes(f.type)) el = `<select ${n}${rq}>${f.type === 'ref' && !req ? '<option value=""></option>' : ''}${optionsFor(f).map((o) => `<option${String(o) === String(v) ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+    else if (f.type === 'area') el = `<textarea ${n} rows="3"${rq}>${vv}</textarea>`;
+    else if (f.type === 'money' || f.type === 'num' || f.type === 'pct' || f.type === 'bar') el = `<input ${n} type="number" step="any" inputmode="decimal" value="${vv}"${rq}>`;
+    else if (f.type === 'stars') el = `<select ${n}>${[5, 4, 3, 2, 1].map((x) => `<option value="${x}"${+v === x ? ' selected' : ''}>${'★'.repeat(x)}</option>`).join('')}</select>`;
+    else el = `<input ${n} type="${{ date: 'date', time: 'time', email: 'email', tel: 'tel' }[f.type] || 'text'}" value="${vv}"${rq}${f.type === 'tel' ? ' inputmode="tel"' : ''}>`;
+    return `<label class="${f.type === 'area' ? 'wide' : ''}"><span>${esc(f.label)}</span>${el}</label>`;
+  }
+  function dflt(t, f) {
+    const d = t.defaults && t.defaults[f.k];
+    if (d !== undefined) return resolve(d, t, {});
+    if (f.type === 'status' || f.type === 'sel' || f.type === 'stars') return f.type === 'stars' ? 5 : (f.opts[0] || {}).v;
+    if (f.type === 'ref') return optionsFor(f)[0];
+    if (f === t.dateF) return todayS;
+    return '';
+  }
+  function form(t, r) {
+    const isNew = !r;
+    const fs = t.fields.filter((f) => !f.calc && !(t.noForm || []).includes(f.k));
+    dlg(`<form class="frm" novalidate><div class="dh"><h2>${isNew ? esc(t.addLabel || 'Add ' + t.one) : 'Edit ' + esc(t.one)}</h2><button type="button" class="x" data-close aria-label="Close">${ic('x')}</button></div>
+      <div class="fgrid">${fs.map((f, i) => input(f, r ? r[f.k] : dflt(t, f), i === 0)).join('')}</div>
+      <p class="err" hidden></p>
+      <div class="dact"><button type="button" class="btn ghost" data-close>Cancel</button><button class="btn" type="submit">${isNew ? 'Save' : 'Save changes'}</button></div></form>`,
+    (d) => $('form', d).addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target), vals = {};
+      fs.forEach((f) => { const x = fd.get(f.k); vals[f.k] = isNum(f) || f.type === 'stars' ? (x === '' || x == null ? '' : Number(x)) : (x == null ? '' : String(x).trim()); });
+      if (vals[fs[0].k] === '') { const er = $('.err', d); er.hidden = false; er.textContent = `${fs[0].label} is needed.`; return; }
+      if (isNew) {
+        S.seq[t.name] = (S.seq[t.name] || 0) + 1;
+        const o = Object.assign({ id: makeId(t, S.seq[t.name]) }, vals);
+        S.db[t.name].unshift(o);
+        if (t.onAdd) t.onAdd(o, H);
+      } else { Object.assign(r, vals); if (t.onStatus) t.onStatus(r, H); }
+      touch(); d.close();
+      toast(isNew ? `${t.one[0].toUpperCase() + t.one.slice(1)} saved` : 'Changes saved');
+      render();
+    }), 'wide');
+  }
+
+  /* ---------- printing & CSV ---------- */
+  const printHead = (title) => `<div class="ph">${logo(44)}<div><b>${esc(C.org.name)}</b><span>${esc(C.org.place)}${C.org.phone ? ' · ' + esc(C.org.phone) : ''}</span></div><h2>${esc(title)}</h2></div>`;
+  const printFoot = () => `<p class="pf">Printed ${dfmt(todayS)} from ${esc(C.name)} · Built by Nexora Digital · nexoradigitalzim.com</p>`;
+  function doPrint(html) {
+    const p = $('#printdoc'); p.innerHTML = html;
+    document.body.classList.add('printing');
+    const done = () => { document.body.classList.remove('printing'); p.innerHTML = ''; window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    setTimeout(() => { window.print(); setTimeout(done, 500); }, 50);
+  }
+  function printRecord(t, r) {
+    doPrint(`${printHead(t.print.replace(/^Print\s+/i, ''))}<div class="pmeta"><span>Ref <b>${esc(r.id)}</b></span><span>Date <b>${dfmt(t.dateF ? val(t, r, t.dateF) : todayS)}</b></span></div>
+      <table class="ptab"><tbody>${t.fields.map((f) => `<tr><th>${esc(f.label)}</th><td>${cell(t, r, f)}</td></tr>`).join('')}</tbody></table>${printFoot()}`);
+  }
+  function csv(t, rows) {
+    const fs = t.fields;
+    const q = (x) => `"${String(x == null ? '' : x).replace(/"/g, '""')}"`;
+    const lines = [['Ref', ...fs.map((f) => f.label)].map(q).join(','), ...rows.map((r) => [r.id, ...fs.map((f) => val(t, r, f))].map(q).join(','))];
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `${C.id}-${t.name}-${todayS}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    toast(`${rows.length} rows downloaded`);
+  }
+
+  /* ---------- point of sale ---------- */
+  function viewPOS(v, m) {
+    const t = T[m.items], st = T[m.sales];
+    const cart = ui.cart[m.k] = ui.cart[m.k] || {};
+    const cats = m.cat ? ['All', ...new Set(S.db[t.name].map((r) => r[m.cat]))] : null;
+    const cat = ui.cart[m.k + ':cat'] || 'All';
+    v.innerHTML = `<div class="pos"><section>
+        <div class="toolbar"><label class="search">${ic('search', 16)}<input type="search" placeholder="Search or scan a code" aria-label="Search products" value="${esc(ui.q[m.k] || '')}"></label>
+        ${cats ? `<div class="chips">${cats.map((c) => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === cat}">${esc(c)}</button>`).join('')}</div>` : ''}</div>
+        <div class="pgrid" id="pgrid"></div></section>
+      <aside class="card cart" id="cart"></aside></div>`;
+    const drawGrid = () => {
+      const q = (ui.q[m.k] || '').toLowerCase();
+      const items = S.db[t.name].filter((r) => (cat === 'All' || r[m.cat] === cat) && (!q || JSON.stringify(r).toLowerCase().includes(q)));
+      $('#pgrid', v).innerHTML = items.map((r) => {
+        const stock = m.stock ? Number(r[m.stock]) : Infinity;
+        const low = m.reorder ? stock <= Number(r[m.reorder]) : stock <= 5;
+        return `<button class="pitem" data-pi="${esc(r.id)}" ${stock <= 0 ? 'disabled' : ''}>
+          <span class="pcat">${esc(m.cat ? r[m.cat] : '')}</span><b>${esc(r[m.name])}</b>
+          <span class="pp">${money(r[m.price])}</span>
+          ${m.stock ? `<span class="ps ${stock <= 0 ? 'bad' : low ? 'warn' : ''}">${stock <= 0 ? 'Out of stock' : num(stock) + ' in stock'}</span>` : ''}</button>`;
+      }).join('') || '<p class="muted">Nothing matches.</p>';
+      $$('[data-pi]', v).forEach((b) => b.addEventListener('click', () => {
+        const r = S.db[t.name].find((x) => String(x.id) === b.dataset.pi);
+        const q2 = (cart[r.id] || 0) + 1;
+        if (m.stock && q2 > Number(r[m.stock])) return toast(`Only ${r[m.stock]} in stock`, true);
+        cart[r.id] = q2; drawCart();
+      }));
+    };
+    const lines = () => Object.entries(cart).map(([id, q]) => ({ r: S.db[t.name].find((x) => String(x.id) === id), q })).filter((l) => l.r);
+    const drawCart = () => {
+      const ls = lines(); const total = ls.reduce((a, l) => a + l.q * Number(l.r[m.price]), 0);
+      $('#cart', v).innerHTML = `<div class="cardhead"><h3>${esc(m.cartTitle || 'Current sale')}</h3>${ls.length ? '<button class="link" data-clr>Clear</button>' : ''}</div>
+        ${ls.length ? ls.map((l) => `<div class="cline"><div><b>${esc(l.r[m.name])}</b><small>${money(l.r[m.price])} each</small></div>
+          <div class="qty"><button data-dq="${esc(l.r.id)}" aria-label="One less">−</button><b>${l.q}</b><button data-iq="${esc(l.r.id)}" aria-label="One more">+</button></div><span class="lt">${money(l.q * l.r[m.price])}</span></div>`).join('') : `<div class="cart-empty">${ic('cart', 30)}<p>Tap items to add them</p></div>`}
+        <div class="ctotal"><span>Total</span><b>${money(total)}</b></div>
+        ${m.extra ? `<label><span>${esc(m.extra.label)}</span><select id="pxtra">${m.extra.opts.map((o) => `<option>${esc(o)}</option>`).join('')}</select></label>` : ''}
+        <label><span>Customer (optional)</span><input id="pcust" placeholder="Name or phone"></label>
+        <div class="methods" role="radiogroup" aria-label="Payment method">${(m.methods || ['Cash', 'EcoCash', 'Card']).map((x, i) => `<label class="mth"><input type="radio" name="pm" value="${esc(x)}" ${i ? '' : 'checked'}><span>${esc(x)}</span></label>`).join('')}</div>
+        <button class="btn big" data-pay ${ls.length ? '' : 'disabled'}>${ic('check', 18)} ${esc(m.payLabel || 'Complete sale')} · ${money(total)}</button>`;
+      const c = $('#cart', v);
+      $$('[data-iq]', c).forEach((b) => b.addEventListener('click', () => { const r = S.db[t.name].find((x) => String(x.id) === b.dataset.iq); if (m.stock && cart[r.id] + 1 > Number(r[m.stock])) return toast(`Only ${r[m.stock]} in stock`, true); cart[r.id]++; drawCart(); }));
+      $$('[data-dq]', c).forEach((b) => b.addEventListener('click', () => { cart[b.dataset.dq]--; if (cart[b.dataset.dq] <= 0) delete cart[b.dataset.dq]; drawCart(); }));
+      const clr = $('[data-clr]', c); if (clr) clr.addEventListener('click', () => { Object.keys(cart).forEach((k) => delete cart[k]); drawCart(); });
+      const pay = $('[data-pay]', c);
+      pay.addEventListener('click', () => {
+        const method = ($('input[name="pm"]:checked', c) || {}).value;
+        const cust = $('#pcust', c).value.trim();
+        const extra = m.extra ? $('#pxtra', c).value : '';
+        S.seq[st.name] = (S.seq[st.name] || 0) + 1;
+        const row = { id: makeId(st, S.seq[st.name]) };
+        const data = { date: todayS, time: nowT(), items: ls.map((l) => `${l.q}× ${l.r[m.name]}`).join(', '), qty: ls.reduce((a, l) => a + l.q, 0), total, method, cashier: role.person, customer: cust || 'Walk-in' };
+        if (m.extra) data[m.extra.k] = extra;
+        st.fields.forEach((f) => { if (!f.calc) row[f.k] = f.k in data ? data[f.k] : f.type === 'status' ? (m.saleStatus || f.opts[0].v) : ''; });
+        S.db[st.name].unshift(row);
+        if (m.stock) ls.forEach((l) => { l.r[m.stock] = Number(l.r[m.stock]) - l.q; });
+        touch();
+        Object.keys(cart).forEach((k) => delete cart[k]);
+        drawGrid(); drawCart(); render2Bell();
+        dlg(`<div class="receipt"><div class="rc-h">${logo(40)}<b>${esc(C.org.name)}</b><small>${esc(C.org.place)}</small></div>
+          <p class="rc-m"><span>${esc(row.id)}</span><span>${dfmt(todayS)} ${data.time}</span></p>
+          ${ls.map((l) => `<p class="rc-l"><span>${l.q} × ${esc(l.r[m.name])}</span><span>${money(l.q * l.r[m.price])}</span></p>`).join('')}
+          <p class="rc-t"><span>Total</span><span>${money(total)}</span></p><p class="rc-m"><span>Paid by ${esc(method)}</span><span>${esc(role.person)}</span></p>
+          ${m.extra ? `<p class="rc-m"><span>${esc(m.extra.label)}</span><span>${esc(extra)}</span></p>` : ''}
+          <p class="rc-f">Thank you! · Powered by ${esc(C.name)}</p></div>
+          <div class="dact"><button class="btn ghost" data-rp>${ic('printer', 16)} Print receipt</button><button class="btn" data-close>New sale</button></div>`,
+        (d) => $('[data-rp]', d).addEventListener('click', () => doPrint($('.receipt', d).outerHTML)), 'narrow');
+      });
+    };
+    drawGrid(); drawCart();
+    $('.search input', v).addEventListener('input', (e) => { ui.q[m.k] = e.target.value; drawGrid(); });
+    $$('[data-cat]', v).forEach((b) => b.addEventListener('click', () => { ui.cart[m.k + ':cat'] = b.dataset.cat; viewPOS(v, m); }));
+  }
+  function render2Bell() { const n = alertsList().length, bn = $('#bellN'); if (bn) { bn.hidden = !n; bn.textContent = n; } }
+
+  /* ---------- agenda ---------- */
+  function viewAgenda(v, m) {
+    const t = T[m.table], n = m.days || 7;
+    const ds = Array.from({ length: n }, (_, i) => addDays(i + ui.ag));
+    const ro = m.ro;
+    v.innerHTML = `<div class="phead"><div class="inline"><button class="iconbtn" data-ag="-${n}" aria-label="Earlier">${ic('chevL')}</button><b>${dfmt(ds[0])} – ${dfmt(ds[n - 1])}</b><button class="iconbtn" data-ag="${n}" aria-label="Later">${ic('chevR')}</button>${ui.ag ? '<button class="link" data-ag="0">Today</button>' : ''}</div>
+      ${ro ? '' : `<button class="btn" data-add>${ic('plus', 16)} ${esc(t.addLabel || 'Add ' + t.one)}</button>`}</div>
+      <div class="agenda">${ds.map((d) => {
+        const items = rowsOf(t.name).filter((r) => r[m.date] === d).sort((a, b) => String(a[m.time] || '').localeCompare(String(b[m.time] || '')));
+        const dd = parseD(d);
+        return `<section class="day${d === todayS ? ' today' : ''}"><h3><span>${WD[dd.getDay()]}</span><b>${dd.getDate()}</b><small>${MON[dd.getMonth()]}</small>${items.length ? `<i>${items.length}</i>` : ''}</h3>
+          ${items.map((r) => `<article class="ev" data-open="${t.name}" data-id="${esc(r.id)}" tabindex="0"><span class="et">${esc(r[m.time] || '')}</span><b>${esc(val(t, r, m.title))}</b><small>${esc(m.sub ? val(t, r, m.sub) : '')}</small>${t.statusF ? pill(val(t, r, t.statusF), toneOf(t.statusF, val(t, r, t.statusF))) : ''}</article>`).join('') || '<p class="lane-empty">Free</p>'}</section>`;
+      }).join('')}</div>`;
+    $$('[data-ag]', v).forEach((b) => b.addEventListener('click', () => { const x = +b.dataset.ag; ui.ag = x === 0 ? 0 : ui.ag + x; viewAgenda(v, m); }));
+    const add = $('[data-add]', v); if (add) add.addEventListener('click', () => form(t, null));
+    wireOpen(v);
+  }
+
+  /* ---------- reports ---------- */
+  function viewReports(v) {
+    const tabs = role.mods.map((x) => T[x.k] || (C.modules && C.modules[x.k] && T[C.modules[x.k].table || C.modules[x.k].sales])).filter(Boolean).filter((t, i, a) => a.indexOf(t) === i);
+    if (!tabs.length) { v.innerHTML = '<p class="muted">No reports for this role.</p>'; return; }
+    if (!ui.rep.table || !tabs.some((t) => t.name === ui.rep.table)) ui.rep.table = (tabs.find((t) => t.dateF) || tabs[0]).name;
+    const t = T[ui.rep.table];
+    const R = { month: ['This month', todayS.slice(0, 8) + '01'], d30: ['Last 30 days', addDays(-30)], quarter: ['Last 90 days', addDays(-90)], year: ['This year', todayS.slice(0, 5) + '01-01'], all: ['All time', ''] };
+    const from = R[ui.rep.range][1];
+    const rows = sorted(t, rowsOf(t.name).filter((r) => !t.dateF || !from || String(val(t, r, t.dateF) || '') >= from));
+    const moneyF = t.fields.filter((f) => f.type === 'money');
+    const groupF = [t.statusF, ...t.fields.filter((f) => (f.type === 'sel' || f.type === 'ref' || f.type === 'tag') && f !== t.statusF)].filter(Boolean).slice(0, 2);
+    const breakdown = (gf) => { const mp = new Map(); rows.forEach((r) => { const g = val(t, r, gf) || '—'; const o = mp.get(g) || { n: 0, s: 0 }; o.n++; if (moneyF[0]) o.s += Number(val(t, r, moneyF[0])) || 0; mp.set(g, o); }); return [...mp.entries()].sort((a, b) => b[1].n - a[1].n); };
+    const cols = t.fields.filter((f) => !f.hide).slice(0, 7);
+    v.innerHTML = `<div class="phead noprint"><div class="rsel">
+        <label><span>Report on</span><select id="rt">${tabs.map((x) => `<option value="${x.name}"${x === t ? ' selected' : ''}>${esc(x.label)}</option>`).join('')}</select></label>
+        <label><span>Period</span><select id="rr">${Object.entries(R).map(([k, x]) => `<option value="${k}"${k === ui.rep.range ? ' selected' : ''}>${x[0]}</option>`).join('')}</select></label></div>
+        <div class="acts"><button class="btn ghost" data-csv>${ic('download', 16)} CSV</button><button class="btn" data-pr>${ic('printer', 16)} Print or save PDF</button></div></div>
+      <div id="report"><div class="print-only">${printHead(t.label + ' report')}</div>
+      <p class="muted rmeta">${esc(t.label)} · ${R[ui.rep.range][0]}${t.dateF ? ` (by ${esc(t.dateF.label.toLowerCase())})` : ''} · generated ${dfmt(todayS)} by ${esc(role.person)}</p>
+      <div class="kpis sm"><div class="kpi"><span>Records</span><b>${rows.length}</b></div>${moneyF.slice(0, 3).map((f) => `<div class="kpi"><span>Total ${esc(f.label.toLowerCase())}</span><b>${moneyS(rows.reduce((a, r) => a + (Number(val(t, r, f)) || 0), 0))}</b></div>`).join('')}</div>
+      <div class="charts">${groupF.map((gf) => { const b = breakdown(gf); const mx = Math.max(1, ...b.map((x) => x[1].n)); return `<div class="card chart"><h3>By ${esc(gf.label.toLowerCase())}</h3><div class="bars">${b.slice(0, 8).map(([g, o]) => `<div class="brow"><span class="bl">${esc(g)}</span><span class="bt"><i style="width:${(o.n / mx) * 100}%"></i></span><span class="bv">${o.n}${moneyF[0] ? ' · ' + moneyS(o.s) : ''}</span></div>`).join('')}</div></div>`; }).join('')}</div>
+      <div class="card"><h3>Detail</h3>${rows.length ? `<div class="tw mini"><table><thead><tr>${t.code ? '<th>Ref</th>' : ''}${cols.map((f) => `<th class="${isNum(f) ? 'n' : ''}">${esc(f.label)}</th>`).join('')}</tr></thead><tbody>${rows.slice(0, 200).map((r) => `<tr>${t.code ? `<td class="ref" data-label="Ref">${esc(r.id)}</td>` : ''}${cols.map((f) => `<td class="${isNum(f) ? 'n' : ''}" data-label="${esc(f.label)}">${cell(t, r, f)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : '<p class="muted">No records in this period.</p>'}</div>
+      <div class="print-only">${printFoot()}</div></div>`;
+    $('#rt', v).addEventListener('change', (e) => { ui.rep.table = e.target.value; viewReports(v); });
+    $('#rr', v).addEventListener('change', (e) => { ui.rep.range = e.target.value; viewReports(v); });
+    $('[data-csv]', v).addEventListener('click', () => csv(t, rows));
+    $('[data-pr]', v).addEventListener('click', () => doPrint($('#report', v).innerHTML.replace(/class="print-only"/g, 'class=""')));
+  }
+
+  /* ---------- boot ---------- */
+  load();
+  applyTheme();
+  setFavicon();
+  role = C.roles.find((r) => r.id === S.role) || null;
+  if (role) { shell(); go(location.hash.slice(1) || role.mods[0].k); } else login();
+  window.addEventListener('hashchange', () => { if (role && location.hash.slice(1) !== curMod) go(location.hash.slice(1)); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JobCard · Garage &amp; workshop | Live demo by Nexora Digital</title>
+<meta name="description" content="Job cards, quotes, parts, mechanics and invoices for garages, panel beaters and workshops. Try the live demo of JobCard, built by Nexora Digital in Zimbabwe.">
+<meta name="theme-color" content="#374151">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%220%200%2040%2040%22%20aria-hidden%3D%22true%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g-jobcard%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23374151%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23f59e0b%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20rx%3D%2211%22%20fill%3D%22url(%23g-jobcard)%22%2F%3E%3Cpath%20d%3D%22M0%2028%20Q20%2018%2040%2026%20V40%20H0Z%22%20fill%3D%22%23fff%22%20opacity%3D%22.1%22%2F%3E%3Cg%20transform%3D%22translate(8%208)%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M14.7%206.3a1%201%200%200%200%200%201.4l1.6%201.6a1%201%200%200%200%201.4%200l3.77-3.77a6%206%200%200%201-7.94%207.94l-6.91%206.91a2.12%202.12%200%200%201-3-3l6.91-6.91a6%206%200%200%201%207.94-7.94z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>:root{
+  --brand:#1e3a8a;--brand2:#f59e0b;
+  --bg:#f4f5f8;--surface:#fff;--ink:#13161b;--muted:#5b6370;--line:#e3e6ec;--line2:#eef0f4;
+  --b-ink:color-mix(in srgb,var(--brand) 86%,#000);--b-soft:color-mix(in srgb,var(--brand) 8%,#fff);--b-mid:color-mix(in srgb,var(--brand) 22%,#fff);
+  --side:color-mix(in srgb,var(--brand) 80%,#05070b);--bar:var(--brand);
+  --ok:#137a46;--ok-bg:#e2f4ea;--warn:#935600;--warn-bg:#fff0d4;--bad:#b42318;--bad-bg:#fde6e3;--info:#1f5aa6;--info-bg:#e6eefa;--grey-bg:#eceef2;
+  --r:14px;--f:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --sh:0 1px 2px rgba(16,24,40,.05),0 8px 24px -12px rgba(16,24,40,.12);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1014;--surface:#161a20;--ink:#eceef2;--muted:#a0a8b4;--line:#2a3039;--line2:#20252d;
+  --b-ink:color-mix(in srgb,var(--brand) 38%,#fff);--b-soft:color-mix(in srgb,var(--brand) 18%,#161a20);--b-mid:color-mix(in srgb,var(--brand) 35%,#161a20);
+  --side:color-mix(in srgb,var(--brand) 45%,#07090c);--bar:color-mix(in srgb,var(--brand) 55%,#fff);
+  --ok:#5fd08e;--ok-bg:#11301f;--warn:#f2bd5a;--warn-bg:#33260d;--bad:#ff8b80;--bad-bg:#3b1613;--info:#8fb8f5;--info-bg:#142740;--grey-bg:#252a32;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.5);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1014;--surface:#161a20;--ink:#eceef2;--muted:#a0a8b4;--line:#2a3039;--line2:#20252d;
+  --b-ink:color-mix(in srgb,var(--brand) 38%,#fff);--b-soft:color-mix(in srgb,var(--brand) 18%,#161a20);--b-mid:color-mix(in srgb,var(--brand) 35%,#161a20);
+  --side:color-mix(in srgb,var(--brand) 45%,#07090c);--bar:color-mix(in srgb,var(--brand) 55%,#fff);
+  --ok:#5fd08e;--ok-bg:#11301f;--warn:#f2bd5a;--warn-bg:#33260d;--bad:#ff8b80;--bad-bg:#3b1613;--info:#8fb8f5;--info-bg:#142740;--grey-bg:#252a32;
+  --sh:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.5);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:14.5px/1.5 var(--f);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;line-height:1.2;letter-spacing:-.01em;text-wrap:balance}
+p{margin:0}
+a{color:var(--b-ink)}
+button{font:inherit;color:inherit}
+.i{flex:none}
+.muted{color:var(--muted)}.small{font-size:12.5px}.dim{color:var(--muted);opacity:.6}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--brand) 55%,#fff);outline-offset:2px;border-radius:8px}
+.inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:700;font-size:14px;padding:9px 15px;border-radius:10px;border:1px solid var(--brand);background:var(--brand);color:#fff;cursor:pointer;text-decoration:none;white-space:nowrap;transition:filter .15s,transform .05s}
+.btn:hover{filter:brightness(1.1)}.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{background:var(--b-soft);filter:none}
+.btn.danger{color:var(--bad)}.btn.danger.sure{background:var(--bad);color:#fff;border-color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn.big{width:100%;padding:13px;font-size:15px;margin-top:4px}
+.link{background:none;border:0;color:var(--b-ink);font-weight:700;cursor:pointer;padding:4px;display:inline-flex;align-items:center;gap:4px;font-size:13px}
+.iconbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:inline-grid;place-items:center;cursor:pointer;position:relative;color:var(--ink)}
+.iconbtn:hover{background:var(--b-soft)}
+.iconbtn i{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:var(--bad);color:#fff;font:700 11px/18px var(--f);font-style:normal;padding:0 4px;text-align:center}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;font-weight:700;font-size:11.5px;line-height:1;padding:5px 9px;border-radius:999px;white-space:nowrap;background:var(--info-bg);color:var(--info)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.grey{background:var(--grey-bg);color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--info);flex:none;display:inline-block}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--b-soft);color:var(--b-ink)}
+.stars{color:#e0a100;letter-spacing:1px}.stars i{color:var(--line);font-style:normal}
+.mbar{display:inline-block;width:70px;height:7px;border-radius:9px;background:var(--line);overflow:hidden;vertical-align:middle;margin-right:6px}.mbar i{display:block;height:100%;background:var(--bar)}
+
+/* login */
+.login{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);min-height:100vh;min-height:100dvh}
+.login-brand{position:relative;overflow:hidden;color:#fff;padding:48px clamp(24px,5vw,64px);display:flex;flex-direction:column;justify-content:space-between;gap:30px;
+  background:radial-gradient(1200px 500px at 110% -10%,color-mix(in srgb,var(--brand2) 55%,transparent),transparent 60%),linear-gradient(150deg,var(--brand),color-mix(in srgb,var(--brand) 55%,#05070b))}
+.login-brand::after{content:"";position:absolute;inset:auto -80px -120px auto;width:380px;height:380px;border-radius:50%;border:60px solid rgba(255,255,255,.06)}
+.lb-in{position:relative;z-index:1;display:grid;gap:22px;max-width:560px;margin-block:auto}
+.lb-logo{display:flex;align-items:center;gap:14px}
+.lb-logo svg{box-shadow:0 10px 30px -8px rgba(0,0,0,.5);border-radius:14px}
+.lb-logo b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em}
+.lb-logo span{opacity:.8;font-weight:600}
+.lb-in h1{font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.025em}
+.ticks{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.ticks li{display:flex;gap:10px;align-items:flex-start;font-weight:500}
+.ticks .i{margin-top:2px;padding:2px;border-radius:50%;background:rgba(255,255,255,.18);width:20px;height:20px}
+.lb-org{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);padding:10px 14px;border-radius:12px;width:fit-content}
+.lb-foot{position:relative;z-index:1;font-size:13px;opacity:.8}.lb-foot a{color:#fff;font-weight:700}
+.login-pick{display:flex;align-items:center;justify-content:center;padding:40px clamp(16px,4vw,48px)}
+.pick-in{width:100%;max-width:500px;display:grid;gap:14px}
+.pick-in h2{font-size:28px;font-weight:800}
+.demo-tag{display:inline-flex;align-items:center;gap:6px;width:fit-content;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--b-ink);background:var(--b-soft);padding:6px 10px;border-radius:999px}
+.roles{display:grid;gap:10px;margin-top:6px}
+.role{display:flex;align-items:center;gap:14px;text-align:left;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--surface);cursor:pointer;box-shadow:var(--sh);transition:border-color .15s,transform .15s}
+.role:hover{border-color:var(--brand);transform:translateY(-1px)}
+.role>.i{color:var(--muted);margin-left:auto}
+.rt{display:grid;gap:1px;min-width:0}
+.rt b{font-size:15px}.rt small{color:var(--b-ink);font-weight:700;font-size:12.5px}.rt em{font-style:normal;color:var(--muted);font-size:13px}
+.av{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand2));flex:none}
+.pick-cta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+@media (max-width:860px){
+  .login{grid-template-columns:1fr}
+  .login-brand{padding:28px 16px 26px;gap:18px}
+  .lb-in{gap:14px}.lb-in h1{font-size:24px}
+  .ticks li:nth-child(n+4){display:none}
+  .lb-foot{display:none}
+  .login-pick{padding:24px 16px 40px;align-items:flex-start}
+}
+
+/* app shell */
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh;min-height:100dvh}
+.side{background:var(--side);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;height:100dvh;padding:18px 12px}
+.side-brand{display:flex;align-items:center;gap:11px;padding:4px 8px 18px;border-bottom:1px solid rgba(255,255,255,.1)}
+.side-brand b{display:block;font-size:16px;font-weight:800;letter-spacing:-.01em}
+.side-brand span{display:block;font-size:12px;opacity:.7;line-height:1.3}
+.nav{display:grid;gap:2px;padding:14px 0;overflow-y:auto;align-content:start;flex:1}
+.nav button{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;border:0;background:none;color:rgba(255,255,255,.78);font-weight:600;cursor:pointer;text-align:left;position:relative;white-space:nowrap}
+.nav button:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav button[aria-current="page"]{background:rgba(255,255,255,.14);color:#fff}
+.nav button[aria-current="page"]::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:4px;border-radius:0 4px 4px 0;background:var(--brand2)}
+.side-foot{border-top:1px solid rgba(255,255,255,.1);padding-top:12px;display:grid;gap:2px}
+.me{display:flex;align-items:center;gap:10px;padding:6px 8px 10px}
+.me .av{width:36px;height:36px;font-size:12.5px;border-radius:10px;box-shadow:0 0 0 2px rgba(255,255,255,.2)}
+.me b{display:block;font-size:13.5px}.me small{opacity:.7;font-size:12px}
+.sf{display:flex;align-items:center;gap:9px;padding:8px 10px;border:0;background:none;color:rgba(255,255,255,.72);font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;text-decoration:none}
+.sf:hover{background:rgba(255,255,255,.08);color:#fff}
+.sf.credit{font-weight:500;font-size:12px;opacity:.8}.sf.credit b{color:#fff;margin-left:3px}
+.main{min-width:0;display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 28px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line)}
+.bar h1{font-size:22px;font-weight:800}
+.crumb{font-size:12.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
+.demo-pill{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--brand2);color:#111;padding:2px 7px;border-radius:5px}
+.bar-r{display:flex;align-items:center;gap:8px}
+.mob{display:none}
+#view{padding:24px 28px 60px;display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-content:start;outline:none;max-width:1400px;width:100%}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:sticky;top:0;z-index:20;height:auto;flex-direction:column;padding:10px 0 0;min-width:0}
+  .side-brand{padding:0 16px 8px;border:0}
+  .side-brand svg{width:30px;height:30px}
+  .nav{display:flex;overflow-x:auto;padding:0 10px 8px;gap:4px;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{padding:8px 12px;font-size:13.5px;flex:none}
+  .nav button[aria-current="page"]::before{left:12px;right:12px;top:auto;bottom:2px;width:auto;height:3px;border-radius:3px}
+  .side-foot{display:none}
+  .bar{position:static;padding:14px 16px}
+  .bar h1{font-size:19px}
+  .mob{display:inline-grid}
+  .crumb .co{display:none}
+  .kpi b{font-size:22px}
+  .bar .cta span{display:none}
+  .bar .cta{padding:9px 11px}
+  #view{padding:16px 16px 60px;gap:14px}
+}
+
+/* cards & dashboard */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);min-width:0}
+.card h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.cardhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.hello{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.hello h2{font-size:24px;font-weight:800}
+.quick{display:flex;gap:8px;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);position:relative;overflow:hidden;min-width:0}
+.kpi::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(var(--brand),var(--brand2))}
+.kpi span{font-size:12.5px;color:var(--muted);font-weight:600;display:block}
+.kpi b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:4px;overflow-wrap:anywhere}
+.kpi small{color:var(--muted);font-size:12px}
+.kpis.sm .kpi{padding:12px 16px}.kpis.sm .kpi b{font-size:20px}
+.alerts{display:grid;gap:4px}
+.alerts h3{margin-bottom:6px}
+.alerts.calm{display:flex;align-items:center;gap:10px;color:var(--ok);font-weight:600}
+.al{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:0;background:none;cursor:pointer;text-align:left;font-weight:600}
+.al:hover{background:var(--b-soft)}
+.al .i{margin-left:auto;color:var(--muted)}
+.al.bad{background:color-mix(in srgb,var(--bad-bg) 60%,transparent)}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.chart h3{margin-bottom:14px}
+.cols{display:flex;align-items:stretch;gap:10px;height:190px}
+.col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.cb{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.cb i{display:block;width:min(42px,80%);border-radius:7px 7px 3px 3px;background:var(--b-mid)}
+.col.now .cb i{background:linear-gradient(var(--brand2),var(--brand))}
+.cv{font-size:11.5px;font-weight:700;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.cl{font-size:12px;color:var(--muted);font-weight:600}
+.bars{display:grid;gap:10px}
+.brow{display:grid;grid-template-columns:minmax(80px,32%) 1fr auto;align-items:center;gap:10px;font-size:13px}
+.bl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.bt{height:10px;border-radius:9px;background:var(--line2);overflow:hidden}
+.bt i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--brand),color-mix(in srgb,var(--brand) 60%,#fff))}
+.bv{font-weight:700;font-variant-numeric:tabular-nums;font-size:12.5px;white-space:nowrap}
+.empty-s{padding:10px 0}
+
+/* page head & toolbar */
+.phead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{display:flex;align-items:center;gap:6px;padding:8px 12px;border:0;background:none;cursor:pointer;font-weight:600;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--b-soft);color:var(--b-ink)}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0 12px;flex:1 1 240px;max-width:380px;color:var(--muted)}
+.search input{border:0;background:none;padding:10px 0;font:inherit;color:var(--ink);width:100%;outline:none}
+.search:focus-within{border-color:var(--brand)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;max-width:100%}
+.chips::-webkit-scrollbar{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap}
+.chip i{font-style:normal;font-size:11px;background:var(--line2);padding:1px 6px;border-radius:9px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.chip[aria-pressed="true"] i{background:rgba(255,255,255,.22);color:#fff}
+.filterbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;background:var(--warn-bg);color:var(--warn);font-size:13.5px}
+
+/* tables */
+.tw{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:auto;box-shadow:var(--sh)}
+.tw.mini{box-shadow:none;border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line2);vertical-align:middle}
+th{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:color-mix(in srgb,var(--b-soft) 55%,var(--surface));white-space:nowrap;position:sticky;top:0;cursor:pointer;user-select:none}
+.tw.mini th{cursor:default}
+tbody tr{cursor:pointer;transition:background .1s}
+tbody tr:hover{background:var(--b-soft)}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{border-top:2px solid var(--line);border-bottom:0;background:color-mix(in srgb,var(--b-soft) 40%,var(--surface))}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.ref,.ref{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);white-space:nowrap}
+td.tt{font-weight:700}
+.count{text-align:right}
+.empty{display:grid;place-items:center;gap:8px;padding:40px;color:var(--muted);text-align:center}
+@media (max-width:700px){
+  .rt thead{display:none}
+  .rt,.rt tbody,.rt tr,.rt td,.rt tfoot{display:block}
+  .tw:has(.rt){background:none;border:0;box-shadow:none;overflow:visible}
+  .rt tbody tr{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;padding:8px 14px;box-shadow:var(--sh)}
+  .rt td{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border:0;text-align:right}
+  .rt td::before{content:attr(data-label);color:var(--muted);font-size:12.5px;font-weight:600;text-align:left}
+  .rt td.tt{font-size:15px}
+  .rt tfoot tr{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 14px;border-radius:12px;background:var(--b-soft)}
+  .rt tfoot td{background:none;border:0;padding:0}
+  .rt tfoot td:empty{display:none}
+}
+
+/* board */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:12px;overflow-x:auto;padding-bottom:8px;align-items:start}
+.lane{background:color-mix(in srgb,var(--line2) 70%,var(--bg));border-radius:var(--r);padding:10px;display:grid;gap:8px;min-height:120px}
+.lane-h{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;padding:4px 6px}
+.lane-h b{margin-left:auto;font-size:12px;background:var(--surface);border-radius:9px;padding:1px 8px;color:var(--muted)}
+.lane-empty{color:var(--muted);font-size:12.5px;text-align:center;padding:12px;opacity:.7}
+.bcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:4px;cursor:pointer;box-shadow:var(--sh)}
+.bcard:hover{border-color:var(--brand)}
+.bcard b{font-size:14px}
+.bf{font-size:12.5px;color:var(--muted)}
+.next{justify-self:start;margin-top:6px;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--b-soft);color:var(--b-ink);cursor:pointer}
+.next:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+/* dialog */
+dialog{border:0;border-radius:18px;padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 32px);background:var(--surface);color:var(--ink);box-shadow:0 30px 80px rgba(0,0,0,.35)}
+dialog.wide{width:min(760px,calc(100vw - 24px))}
+dialog.narrow{width:min(380px,calc(100vw - 24px))}
+dialog::backdrop{background:rgba(8,10,14,.55);backdrop-filter:blur(2px)}
+.dlg{padding:22px;display:grid;gap:16px;max-height:calc(100dvh - 32px);overflow:auto}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.dh h2{font-size:20px;font-weight:800;margin-top:2px}
+.x{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;flex:none}
+.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 18px;margin:0;padding:14px;border-radius:12px;background:color-mix(in srgb,var(--b-soft) 60%,var(--surface))}
+.dl div{min-width:0}.dl .wide{grid-column:1/-1}
+.dl dt{font-size:12px;color:var(--muted);font-weight:600}
+.dl dd{margin:2px 0 0;font-weight:600;overflow-wrap:anywhere}
+.rel{display:grid;gap:8px}
+.dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.frm{display:grid;gap:16px}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fgrid .wide{grid-column:1/-1}
+label{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:var(--muted)}
+input,select,textarea{font:14.5px var(--f);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
+.err{color:var(--bad);font-weight:700;font-size:13.5px}
+@media (max-width:560px){.fgrid{grid-template-columns:1fr}.dlg{padding:18px}}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#14171c;color:#fff;padding:11px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:1000;display:flex;align-items:center;gap:8px;box-shadow:0 12px 30px rgba(0,0,0,.3);max-width:calc(100vw - 32px);animation:tin .2s ease-out}
+.toast .i{color:#5fd08e}.toast.bad{background:var(--bad)}.toast.bad .i{color:#fff}
+@keyframes tin{from{opacity:0;transform:translate(-50%,8px)}}
+
+/* POS */
+.pos{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+.pos>section{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;min-width:0}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.pitem{display:grid;gap:4px;text-align:left;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);cursor:pointer;box-shadow:var(--sh);align-content:start;min-height:120px}
+.pitem:hover{border-color:var(--brand)}
+.pitem:disabled{opacity:.5;cursor:not-allowed}
+.pitem b{font-size:14px;line-height:1.3}
+.pcat{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--b-ink)}
+.pp{font-size:17px;font-weight:800;margin-top:auto;font-variant-numeric:tabular-nums}
+.ps{font-size:12px;color:var(--muted);font-weight:600}.ps.warn{color:var(--warn)}.ps.bad{color:var(--bad)}
+.cart{position:sticky;top:90px;display:grid;gap:12px}
+.cline{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding-bottom:10px;border-bottom:1px dashed var(--line)}
+.cline b{font-size:13.5px}.cline small{display:block;color:var(--muted);font-size:12px}
+.cline .lt{grid-column:2;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:800;font-size:16px}
+.cart-empty{display:grid;place-items:center;gap:6px;color:var(--muted);padding:24px 0;opacity:.75}
+.ctotal{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;font-weight:700;padding-top:4px}
+.ctotal b{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.methods{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.mth{display:block;position:relative}
+.mth input{position:absolute;opacity:0;pointer-events:none}
+.mth span{display:block;text-align:center;padding:9px 6px;border-radius:10px;border:1px solid var(--line);font-weight:700;color:var(--ink);font-size:13px;cursor:pointer}
+.mth input:checked+span{border-color:var(--brand);background:var(--b-soft);color:var(--b-ink);box-shadow:inset 0 0 0 1px var(--brand)}
+.mth input:focus-visible+span{outline:3px solid color-mix(in srgb,var(--brand) 55%,#fff)}
+@media (max-width:980px){.pos{grid-template-columns:minmax(0,1fr)}.cart{position:static}}
+.toolbar>*{min-width:0}
+.receipt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;display:grid;gap:6px;padding:16px;border:1px dashed var(--line);border-radius:12px}
+.rc-h{display:grid;justify-items:center;gap:4px;text-align:center;padding-bottom:8px;border-bottom:1px dashed var(--line);font-family:var(--f)}
+.rc-m,.rc-l,.rc-t{display:flex;justify-content:space-between;gap:10px}
+.rc-m{color:var(--muted);font-size:12px}
+.rc-t{font-weight:800;font-size:16px;border-top:1px dashed var(--line);padding-top:8px}
+.rc-f{text-align:center;color:var(--muted);font-size:12px;padding-top:6px}
+
+/* agenda */
+.agenda{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px;display:grid;gap:8px;align-content:start;min-height:200px;box-shadow:var(--sh)}
+.day.today{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand),var(--sh)}
+.day h3{display:flex;align-items:baseline;gap:6px;font-size:13px;padding:2px 4px 6px;border-bottom:1px solid var(--line2)}
+.day h3 span{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:11.5px;letter-spacing:.05em}
+.day h3 b{font-size:20px;font-weight:800}.day h3 small{color:var(--muted)}
+.day h3 i{margin-left:auto;font-style:normal;font-size:11px;font-weight:800;background:var(--b-soft);color:var(--b-ink);padding:1px 7px;border-radius:9px}
+.day.today h3 b{color:var(--b-ink)}
+.ev{display:grid;gap:2px;padding:9px 10px;border-radius:10px;background:var(--b-soft);border-left:3px solid var(--brand);cursor:pointer}
+.ev:hover{filter:brightness(.97)}
+.ev .et{font-size:11.5px;font-weight:800;color:var(--b-ink)}
+.ev b{font-size:13px;line-height:1.25}.ev small{font-size:12px;color:var(--muted)}
+.ev .pill{justify-self:start;margin-top:3px;font-size:10.5px;padding:3px 7px}
+@media (max-width:1100px){.agenda{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.day{min-height:0}}
+
+/* reports */
+.rsel{display:flex;gap:10px;flex-wrap:wrap}
+.rsel label{min-width:180px}
+.rmeta{margin-bottom:4px}
+#report{display:grid;gap:14px}
+
+/* print */
+.print-only{display:none}
+.ph{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:2px solid #222;margin-bottom:14px}
+.ph b{display:block;font-size:17px}.ph span{font-size:12px;color:#555}
+.ph h2{margin-left:auto;font-size:20px;text-transform:uppercase;letter-spacing:.06em}
+.pmeta{display:flex;gap:24px;margin-bottom:12px;font-size:13px}
+.ptab th{background:#f2f2f2;color:#333;width:38%;text-transform:none;letter-spacing:0;font-size:13px;position:static}
+.ptab th,.ptab td{border:1px solid #ddd}
+.pf{margin-top:18px;font-size:11px;color:#666;text-align:center}
+@media print{
+  body.printing .app>.side,body.printing .bar,body.printing #view,body.printing dialog,body.printing .toast{display:none!important}
+  body.printing .app{display:block}
+  body.printing #printdoc{display:block!important;color:#000}
+  body.printing #printdoc .print-only,body.printing #printdoc [class=""]{display:block}
+  body{background:#fff}
+  .card,.kpi,.tw{box-shadow:none!important;border-color:#ccc!important;background:#fff!important;color:#000}
+  .kpi::after{display:none}
+  th{background:#eee!important;color:#000!important}
+  .noprint{display:none!important}
+}
+
+@media (max-width:900px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .kpi{padding:12px 14px}.kpi b{font-size:20px}.kpi small{font-size:11.5px}
+  .tw.mini td,.tw.mini th{white-space:nowrap;padding:9px 10px}
+  .hello h2{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div id="app"><p style="padding:40px;font-family:system-ui">Loading JobCard demo…</p></div>
+<noscript><p style="padding:20px">This demo needs JavaScript switched on.</p></noscript>
+<script>window.SYS_ID="jobcard";window.__SYS=[];</script>
+<script>window.ICONS = {
+  home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+  users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+  user: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8',
+  cash: 'M2 6h20v12H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M6 12h.01M18 12h.01',
+  chart: 'M3 3v18h18M7 15v2M11 11v6M15 7v10M19 12v5',
+  box: 'M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8',
+  cart: 'M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h7.7a2 2 0 0 0 2-1.6L21 8H6M10 21h.01M17 21h.01',
+  calendar: 'M3 5h18v16H3zM16 3v4M8 3v4M3 10h18',
+  clipboard: 'M9 3h6v4H9zM9 5H5v16h14V5h-4M9 12h6M9 16h4',
+  file: 'M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6',
+  sliders: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6',
+  truck: 'M1 4h14v12H1zM15 9h4l4 4v3h-8M5.5 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4M18.5 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4',
+  wrench: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z',
+  heart: 'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z',
+  cross: 'M9 3h6v6h6v6h-6v6H9v-6H3V9h6z',
+  pill: 'M10.5 20.5a5 5 0 0 1-7-7l10-10a5 5 0 0 1 7 7zM8.5 8.5l7 7',
+  flask: 'M9 3h6M10 3v6L4 20h16L14 9V3M7 15h10',
+  book: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5',
+  cap: 'M22 10 12 5 2 10l10 5zM6 12v5c3 2 9 2 12 0v-5M22 10v6',
+  church: 'M12 2v6M9 5h6M5 22V12l7-4 7 4v10M10 22v-5h4v5M3 22h18',
+  building: 'M4 22V3h11v19M15 9h5v13M8 7h3M8 11h3M8 15h3M2 22h20',
+  key: 'M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3M7.5 21a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11',
+  leaf: 'M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10zM2 21c0-3 1.9-5.4 5.1-6C9.5 14.5 12 13 13 12',
+  sprout: 'M7 20h10M12 20v-8M12 12C12 8 9 6 5 6c0 4 3 6 7 6zM12 10c0-3 2-5 6-5 0 3-2 5-6 5z',
+  car: 'M5 17h14v-5l-2-5H7l-2 5zM5 12h14M7 17v3M17 17v3M8 14.5h.01M16 14.5h.01',
+  shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+  scissors: 'M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12',
+  dumbbell: 'M6 6v12M18 6v12M3 9v6M21 9v6M6 12h12',
+  ticket: 'M3 7a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-3a2 2 0 0 0 0-4zM14 5v2M14 11v2M14 17v2',
+  briefcase: 'M3 7h18v13H3zM8 7V4h8v3M3 13h18',
+  scale: 'M12 3v18M7 21h10M5 7h14M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z',
+  headset: 'M3 14v-2a9 9 0 0 1 18 0v2M3 14h3v6H4a1 1 0 0 1-1-1zM21 14h-3v6h2a1 1 0 0 0 1-1z',
+  alert: 'M12 3 2 21h20zM12 10v4M12 18h.01',
+  check: 'M20 6 9 17l-5-5',
+  clock: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20M12 6v6l4 2',
+  pin: 'M12 22s7-6.1 7-12a7 7 0 0 0-14 0c0 5.9 7 12 7 12zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5',
+  utensils: 'M3 2v7a3 3 0 0 0 6 0V2M6 2v20M19 15V2a5 5 0 0 0-4 5v8zM19 15v7',
+  bed: 'M2 20V5M2 17h20v3M22 17v-5a3 3 0 0 0-3-3H10v8M6 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4',
+  hammer: 'M14 4l6 6-3 3-6-6zM11 7l-8 8 3 3 8-8',
+  zap: 'M13 2 3 14h9l-1 8 10-12h-9z',
+  droplet: 'M12 22a7 7 0 0 0 7-7c0-4-7-13-7-13S5 11 5 15a7 7 0 0 0 7 7z',
+  tag: 'M2 12V2h10l10 10-10 10zM7 7h.01',
+  receipt: 'M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2zM9 7h6M9 11h6M9 15h4',
+  layers: 'M12 2 2 7l10 5 10-5zM2 12l10 5 10-5M2 17l10 5 10-5',
+  globe: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20',
+  coins: 'M8 14a6 6 0 1 0 0-12 6 6 0 0 0 0 12M18.1 10.4A6 6 0 1 1 10.3 18.4M7 6h1v4',
+  award: 'M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14M8.2 13.9 7 23l5-3 5 3-1.2-9.1',
+  search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16M21 21l-4.3-4.3',
+  plus: 'M12 5v14M5 12h14',
+  download: 'M12 3v12M7 10l5 5 5-5M5 21h14',
+  printer: 'M6 9V2h12v7M6 18H4v-7h16v7h-2M6 14h12v8H6z',
+  moon: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z',
+  sun: 'M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4',
+  logout: 'M9 21H5V3h4M16 17l5-5-5-5M21 12H9',
+  refresh: 'M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5',
+  x: 'M18 6 6 18M6 6l12 12',
+  grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+  list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+  kanban: 'M3 3h18v18H3zM9 3v18M15 3v18',
+  phone: 'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z',
+  mail: 'M3 5h18v14H3zM3 6l9 7 9-7',
+  star: 'M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.2-6.2 3.2L7 14.2 2 9.3l6.9-1z',
+  gauge: 'M12 14l4-4M3.3 19a10 10 0 1 1 17.4 0',
+  hardhat: 'M2 18h20v-2a10 10 0 0 0-20 0zM10 6v6M14 6v6M10 6a2 2 0 0 1 4 0',
+  bus: 'M4 17V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12M4 11h16M4 17h16M7 20v-3M17 20v-3M8 14h.01M16 14h.01',
+  target: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4',
+  door: 'M3 21h18M5 21V3h10v18M15 7h4v14M11 12h.01',
+  fuel: 'M3 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18M2 22h14M15 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3M6 7h6',
+  megaphone: 'M3 11v3a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 8a5 5 0 0 1 0 8',
+  lock: 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4',
+  bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0',
+  menu: 'M4 6h16M4 12h16M4 18h16',
+  arrow: 'M5 12h14M13 6l6 6-6 6',
+  chevL: 'M15 18l-6-6 6-6',
+  chevR: 'M9 18l6-6-6-6',
+  camera: 'M3 7h4l2-3h6l2 3h4v13H3zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8',
+  cow: 'M4 9c0-3 2-5 4-5h8c2 0 4 2 4 5v5a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6zM2 6l2 3M22 6l-2 3M9 15h.01M15 15h.01M10 11h.01M14 11h.01',
+  stethoscope: 'M5 3v6a5 5 0 0 0 10 0V3M10 14v2a5 5 0 0 0 10 0v-3M20 13a2 2 0 1 0 0-4 2 2 0 0 0 0 4'
+};
+</script>
+<script>/* Trades, industry & services */
+window.__SYS.push({
+  id: 'jobcard', name: 'JobCard', tag: 'Garage & workshop', group: 'Trades, industry & services', icon: 'wrench', color: '#374151', color2: '#f59e0b',
+  org: { name: 'Precision Auto Clinic', place: 'Graniteside, Harare', phone: '+263 242 771 305' },
+  blurb: 'Job cards, quotes, parts, mechanics and invoices for garages, panel beaters and workshops.',
+  headline: 'Every car in the workshop tracked from booking to collection.',
+  features: ['Job cards on a workshop board', 'Quotes the customer approves before work starts', 'Parts stock used on each job', 'Mechanic jobs and labour hours'],
+  roles: [
+    ['owner', 'Workshop owner', 'Mr Itai Chinembiri', 'Jobs, parts and money', ['dash', 'jobs', 'customers', 'parts', 'reports']],
+    ['service', 'Service advisor', 'Ms Rangarirai Mutasa', 'Book jobs, quote, invoice', ['jobs', 'customers', 'parts:r']],
+    ['mech', 'Mechanic', 'Tinotenda Mhembere', 'Own jobs only', ['jobs'], { jobs: 'mechanic=Tinotenda' }]
+  ],
+  tables: {
+    jobs: {
+      label: 'Job cards', icon: 'clipboard', code: 'JC', one: 'job card', addLabel: 'Open job card', board: 'default', desc: 'Vehicles in the workshop, moved along as work is done.',
+      fields: 'date:Booked in:date|reg:Reg number|vehicle:Vehicle|customer:Customer:ref:customers.name|problem:Work needed|mechanic:Mechanic:sel:Tinotenda,Farai,Alois|parts:Parts:money|labour:Labour:money|total:Total:=money|status:Status:status:Booked~info,Quoted~warn,In the bay~warn,Waiting parts~bad,Ready~ok,Collected~grey',
+      calc: { total: (r) => (+r.parts || 0) + (+r.labour || 0) },
+      card: ['vehicle', 'problem', 'mechanic'], print: 'Print invoice',
+      rows: [['d0', 'AEZ 4410', 'Toyota Hilux GD-6', 'Mr Owen Matsika', 'Major service', 'Tinotenda', 180, 120, 'In the bay'], ['d0', 'AFD 1932', 'Honda Fit', 'Ms Linda Sibanda', 'Brake pads & discs', 'Farai', 95, 40, 'Quoted'], ['d-1', 'ADH 7720', 'Mazda BT-50', 'Kopje Properties', 'Clutch replacement', 'Alois', 320, 150, 'Waiting parts'], ['d-1', 'ACK 3398', 'Toyota Aqua', 'Mr Brian Hove', 'Hybrid battery check', 'Tinotenda', 0, 35, 'Ready'], ['d0', 'AFP 8810', 'Nissan X-Trail', 'Mrs Grace Kandawasvika', 'Engine light on', 'Farai', 0, 0, 'Booked'], ['d-3', 'AEB 5521', 'Isuzu D-Max', 'Kopje Properties', 'Suspension bushes', 'Alois', 140, 90, 'Collected'], ['d-30', 'AEZ 4410', 'Toyota Hilux GD-6', 'Mr Owen Matsika', 'Tyres x4', 'Tinotenda', 560, 40, 'Collected'], ['d-62', 'ACK 3398', 'Toyota Aqua', 'Mr Brian Hove', 'Service', 'Farai', 75, 50, 'Collected']]
+    },
+    customers: {
+      label: 'Customers', icon: 'users', one: 'customer', desc: 'Customers and their cars.',
+      fields: 'name:Customer|phone:Phone:tel|cars:Vehicles|spent:Spent:=money|type:Type:sel:Private,Company fleet',
+      calc: { spent: (r, H) => H.where('jobs', 'customer=' + r.name + '&status=Collected').reduce((a, j) => a + (+j.parts || 0) + (+j.labour || 0), 0) },
+      related: [['jobs', 'customer', 'Job history', ['date', 'reg', 'problem', 'status']]],
+      rows: [['Mr Owen Matsika', '0772 330 118', 'AEZ 4410 Hilux', 'Private'], ['Ms Linda Sibanda', '0773 208 664', 'AFD 1932 Fit', 'Private'], ['Kopje Properties', '0242 339 140', 'ADH 7720, AEB 5521', 'Company fleet'], ['Mr Brian Hove', '0712 553 908', 'ACK 3398 Aqua', 'Private'], ['Mrs Grace Kandawasvika', '0784 118 220', 'AFP 8810 X-Trail', 'Private']]
+    },
+    parts: {
+      label: 'Parts stock', icon: 'box', one: 'part', desc: 'Parts and consumables on the shelf.',
+      fields: 'name:Part|fits:Fits|qty:Qty:num|reorder:Reorder at:num|cost:Cost:money|price:Sell price:money|status:Status:=status:OK~ok,Order now~bad',
+      calc: { status: (r) => +r.qty <= +r.reorder ? 'Order now' : 'OK' },
+      rows: [['Oil filter', 'Hilux / Fortuner', 12, 5, 6, 12], ['Engine oil 5W-30 5 L', 'Most', 18, 8, 22, 38], ['Brake pads (front)', 'Honda Fit', 2, 4, 18, 35], ['Clutch kit', 'Mazda BT-50', 0, 1, 210, 290], ['Air filter', 'Hilux', 6, 3, 8, 16], ['Spark plugs (set of 4)', 'Most petrol', 10, 4, 14, 28]]
+    }
+  },
+  dash: {
+    quick: [['Open job card', 'jobs', 1]],
+    kpis: [['Cars in the workshop', 'count:jobs?status!=Collected', 'num'], ['Ready to collect', 'count:jobs?status=Ready', 'num'], ['Work this month', (H) => H.where('jobs', 'date>=' + H.today.slice(0, 8) + '01').reduce((a, j) => a + (+j.parts || 0) + (+j.labour || 0), 0), 'money'], ['Waiting on parts', 'count:jobs?status=Waiting parts', 'num']],
+    alerts: [['jobs?status=Ready', '{n} car{s} ready: call the customer', 'info'], ['jobs?status=Waiting parts', '{n} job{s} waiting for parts', 'bad'], ['parts?status=Order now', '{n} part{s} to reorder', 'warn']],
+    charts: [['Workshop income by month', 'month:jobs.date.labour', 'money'], ['Jobs by mechanic', 'by:jobs.mechanic'], ['Jobs by stage', 'by:jobs.status']],
+    recent: [['jobs', 'Latest job cards', 5, ['reg', 'vehicle', 'problem', 'status']]]
+  }
+});
+
+window.__SYS.push({
+  id: 'sitebook', name: 'SiteBook', tag: 'Construction projects', group: 'Trades, industry & services', icon: 'hardhat', color: '#92400e', color2: '#fcd34d',
+  org: { name: 'Mvura Construction', place: 'Msasa, Harare', phone: '+263 242 487 551' },
+  blurb: 'Projects, site diaries, materials requests, payment certificates and labour for builders and contractors.',
+  headline: 'Every site, every bag of cement and every certificate under control.',
+  features: ['Projects with contract value, invoiced and progress', 'Daily site diary from the site agent\'s phone', 'Materials requests approved before buying', 'Labour and equipment hire tracked per site'],
+  roles: [
+    ['md', 'Managing director', 'Eng. Patrick Mavhunga', 'All projects and money', ['dash', 'projects', 'diary', 'materials', 'certs', 'reports']],
+    ['pm', 'Project manager', 'Ms Rumbidzai Kanhema', 'Projects and approvals', ['projects', 'materials', 'certs', 'diary:r']],
+    ['agent', 'Site agent', 'Mr Wellington Gwatidzo', 'Diary and requests', ['diary', 'materials'], { diary: 'project=Borrowdale townhouses' }]
+  ],
+  tables: {
+    projects: {
+      label: 'Projects', icon: 'building', code: 'MC', one: 'project', desc: 'Contracts with value, progress and money in.',
+      fields: 'name:Project|client:Client|site:Site|value:Contract value:money|invoiced:Certified:money|progress:Progress:bar|due:Completion:date|status:Status:status:Tender~info,On site~ok,Behind~bad,Snagging~warn,Complete~grey',
+      related: [['certs', 'project', 'Payment certificates', ['date', 'amount', 'status']], ['diary', 'project', 'Site diary', ['date', 'workers', 'work']]],
+      rows: [['Borrowdale townhouses', 'Kopje Properties', 'Borrowdale', 480000, 210000, 48, 'd+150', 'On site'], ['Ruwa clinic extension', 'Ministry of Health', 'Ruwa', 260000, 190000, 70, 'd+40', 'Behind'], ['Msasa warehouse', 'Zambezi Logistics', 'Msasa', 320000, 300000, 95, 'd+10', 'Snagging'], ['Chitungwiza school block', 'Chitungwiza Municipality', 'Unit L', 150000, 0, 0, 'd+260', 'Tender']]
+    },
+    diary: {
+      label: 'Site diary', icon: 'book', code: 'SD', one: 'diary entry', addLabel: 'Write today\'s diary', desc: 'Daily record from each site.',
+      fields: 'date:Date:date|project:Project:ref:projects.name|weather:Weather:sel:Sunny,Cloudy,Rain stopped work,Windy|workers:Workers on site:num|work:Work done:area|issues:Issues',
+      rows: [['d0', 'Borrowdale townhouses', 'Sunny', 34, 'Block C ring beam poured; roof trusses delivered.', ''], ['d-1', 'Borrowdale townhouses', 'Rain stopped work', 12, 'Rebar for ring beam.', 'Lost 4 hours to rain'], ['d0', 'Ruwa clinic extension', 'Sunny', 22, 'Plastering ward 2.', 'Plaster sand short'], ['d-2', 'Msasa warehouse', 'Cloudy', 9, 'Snag list items 1 to 14 closed.', '']]
+    },
+    materials: {
+      label: 'Materials requests', icon: 'clipboard', code: 'MR', one: 'request', addLabel: 'Request materials', board: 'default', desc: 'Site requests waiting for approval and delivery.',
+      fields: 'date:Date:date|project:Project:ref:projects.name|item:Material|qty:Quantity|cost:Est. cost:money|status:Status:status:Requested~warn,Approved~info,Ordered~info,Delivered~ok,Rejected~bad',
+      card: ['project', 'qty', 'cost'],
+      rows: [['d0', 'Ruwa clinic extension', 'Plaster sand', '20 t', 560, 'Requested'], ['d0', 'Borrowdale townhouses', 'IBR roof sheets 6 m', '180', 4300, 'Requested'], ['d-1', 'Borrowdale townhouses', 'Cement PPC', '300 bags', 3450, 'Approved'], ['d-3', 'Msasa warehouse', 'Paint (epoxy floor)', '40 L', 900, 'Ordered'], ['d-6', 'Ruwa clinic extension', 'Window frames', '24', 2880, 'Delivered']]
+    },
+    certs: {
+      label: 'Payment certificates', icon: 'receipt', code: 'PC', one: 'certificate', addLabel: 'New certificate', desc: 'Interim certificates claimed and paid.',
+      fields: 'date:Date:date|project:Project:ref:projects.name|amount:Amount:money|retention:Retention 5%:=money|net:Net due:=money|status:Status:status:Submitted~warn,Certified~info,Paid~ok',
+      calc: { retention: (r) => (+r.amount || 0) * 0.05, net: (r) => (+r.amount || 0) * 0.95 },
+      actions: [['Mark certified', 'status=Certified', 'status=Submitted'], ['Mark paid', 'status=Paid', 'status=Certified']],
+      rows: [['d-4', 'Borrowdale townhouses', 60000, 'Submitted'], ['d-20', 'Ruwa clinic extension', 45000, 'Certified'], ['d-34', 'Borrowdale townhouses', 80000, 'Paid'], ['d-50', 'Msasa warehouse', 90000, 'Paid'], ['d-80', 'Ruwa clinic extension', 70000, 'Paid'], ['d-110', 'Borrowdale townhouses', 70000, 'Paid']]
+    }
+  },
+  dash: {
+    quick: [['Write site diary', 'diary', 1], ['Request materials', 'materials']],
+    kpis: [['Work in hand', 'sum:projects.value?status!=Complete,Tender', 'money', 'Contract value'], ['Certified to date', 'sum:projects.invoiced', 'money'], ['Cash owed to us', 'sum:certs.net?status=Submitted,Certified', 'money'], ['Workers on site today', 'sum:diary.workers?date=today', 'num']],
+    alerts: [['projects?status=Behind', '{n} project{s} behind programme', 'bad'], ['materials?status=Requested', '{n} materials request{s} to approve', 'warn'], ['certs?status=Certified', '{n} certificate{s} certified, awaiting payment', 'info']],
+    charts: [['Certified by month', 'month:certs.date.amount', 'money'], ['Contract value by project', 'sum:projects.name.value', 'money'], ['Requests by stage', 'by:materials.status']],
+    recent: [['diary', 'Latest site diary', 4, ['date', 'project', 'workers', 'work']]]
+  }
+});
+
+window.__SYS.push({
+  id: 'plantcare', name: 'PlantCare', tag: 'Maintenance & work orders', group: 'Trades, industry & services', icon: 'gauge', color: '#075985', color2: '#f97316',
+  org: { name: 'Shamva Gold Processing Plant', place: 'Shamva', phone: '+263 71 220 9014' },
+  blurb: 'Equipment register, planned maintenance, breakdown work orders, spares and downtime for mines, factories and plants.',
+  headline: 'Fewer breakdowns, planned maintenance on time, and spares when you need them.',
+  features: ['Equipment register by area and criticality', 'Work orders from breakdown to closed', 'Planned maintenance with due dates', 'Spares store with minimum levels'],
+  roles: [
+    ['eng', 'Engineering manager', 'Eng. Tawanda Mhike', 'Plant reliability', ['dash', 'orders', 'equipment', 'pm', 'spares', 'reports']],
+    ['planner', 'Maintenance planner', 'Ms Agnes Chikomba', 'Plan and assign work', ['orders', 'pm', 'equipment:r', 'spares']],
+    ['tech', 'Artisan', 'Mr Kudakwashe Rusike', 'Own work orders', ['orders'], { orders: 'tech=Kudakwashe Rusike' }],
+    ['ops', 'Operator', 'Mr Joseph Chiwara', 'Report breakdowns', ['orders']]
+  ],
+  tables: {
+    equipment: {
+      label: 'Equipment', icon: 'sliders', code: 'EQ', one: 'machine', desc: 'Plant equipment with criticality and running hours.',
+      fields: 'name:Equipment|area:Area:sel:Crushing,Milling,CIL tanks,Elution,Tailings,Power|crit:Criticality:sel:A (stops plant),B (slows plant),C (can wait)|hours:Running hours:num|status:Status:status:Running~ok,Down~bad,Standby~grey',
+      related: [['orders', 'equipment', 'Work orders', ['date', 'job', 'status']]],
+      rows: [['Jaw crusher JC-01', 'Crushing', 'A (stops plant)', 18420, 'Running'], ['Conveyor CV-03', 'Crushing', 'B (slows plant)', 15110, 'Running'], ['Ball mill BM-01', 'Milling', 'A (stops plant)', 21300, 'Running'], ['Slurry pump SP-04', 'Milling', 'A (stops plant)', 9800, 'Down'], ['CIL agitator T3', 'CIL tanks', 'B (slows plant)', 26500, 'Running'], ['Elution heater EH-1', 'Elution', 'B (slows plant)', 7200, 'Standby'], ['Tailings pump TP-02', 'Tailings', 'B (slows plant)', 11030, 'Running'], ['Standby genset 500 kVA', 'Power', 'A (stops plant)', 1240, 'Standby']]
+    },
+    orders: {
+      label: 'Work orders', icon: 'wrench', code: 'WO', one: 'work order', addLabel: 'Raise work order', board: 'default', desc: 'Breakdowns and jobs from raised to closed.',
+      fields: 'date:Raised:date|equipment:Equipment:ref:equipment.name|job:Job|type:Type:sel:Breakdown,Planned,Inspection,Improvement|priority:Priority:sel:Urgent,High,Normal|tech:Assigned to:sel:Kudakwashe Rusike,Tendai Mafa,Simon Ndoro,Unassigned|downtime:Downtime (h):num|status:Status:status:Raised~bad,Assigned~warn,In progress~info,Waiting spares~bad,Closed~ok',
+      card: ['equipment', 'priority', 'tech'], print: 'Print work order',
+      onStatus: (r, H) => { const e = H.find('equipment', 'name', r.equipment); if (e && r.type === 'Breakdown') e.status = r.status === 'Closed' ? 'Running' : 'Down'; },
+      defaults: { tech: 'Unassigned' },
+      rows: [['d0', 'Slurry pump SP-04', 'Pump seized: replace impeller and bearings', 'Breakdown', 'Urgent', 'Kudakwashe Rusike', 6, 'In progress'], ['d0', 'Conveyor CV-03', 'Belt tracking off, idlers noisy', 'Inspection', 'High', 'Unassigned', 0, 'Raised'], ['d-1', 'Ball mill BM-01', 'Replace liners (planned shutdown)', 'Planned', 'High', 'Simon Ndoro', 0, 'Waiting spares'], ['d-2', 'CIL agitator T3', 'Gearbox oil change', 'Planned', 'Normal', 'Tendai Mafa', 0, 'Assigned'], ['d-4', 'Jaw crusher JC-01', 'Toggle plate cracked', 'Breakdown', 'Urgent', 'Kudakwashe Rusike', 9, 'Closed'], ['d-20', 'Tailings pump TP-02', 'Gland packing leak', 'Breakdown', 'High', 'Tendai Mafa', 3, 'Closed'], ['d-45', 'Jaw crusher JC-01', 'Bearing overheating', 'Breakdown', 'Urgent', 'Kudakwashe Rusike', 14, 'Closed'], ['d-80', 'Ball mill BM-01', 'Motor VSD fault', 'Breakdown', 'Urgent', 'Simon Ndoro', 11, 'Closed']]
+    },
+    pm: {
+      label: 'Planned maintenance', icon: 'calendar', code: 'PM', one: 'PM task', desc: 'Routine maintenance and when it is next due.',
+      fields: 'equipment:Equipment:ref:equipment.name|task:Task|every:Every (days):num|last:Last done:date|next:Next due:=text|status:Status:=status:Due soon~warn,Overdue~bad,OK~ok',
+      calc: { next: (r, H) => H.addDays(+r.every || 0, r.last), status: (r, H) => { const n = H.addDays(+r.every || 0, r.last); return n < H.today ? 'Overdue' : H.days(H.today, n) <= 7 ? 'Due soon' : 'OK'; } },
+      actions: [['Done today', 'last=today', '', 'Maintenance logged']],
+      rows: [['Ball mill BM-01', 'Grease trunnion bearings', 7, 'd-8'], ['Jaw crusher JC-01', 'Check toggle and tension rod', 14, 'd-10'], ['Standby genset 500 kVA', 'Test run under load', 30, 'd-12'], ['Slurry pump SP-04', 'Check gland and impeller wear', 30, 'd-40'], ['CIL agitator T3', 'Gearbox oil sample', 90, 'd-20']]
+    },
+    spares: {
+      label: 'Spares store', icon: 'box', one: 'spare', desc: 'Critical spares with minimum stock.',
+      fields: 'name:Spare|part:Part number|for:Used on|qty:In stock:num|min:Minimum:num|cost:Unit cost:money|status:Status:=status:OK~ok,Below minimum~bad',
+      calc: { status: (r) => +r.qty < +r.min ? 'Below minimum' : 'OK' },
+      rows: [['Impeller 8x6', 'WAR-8X6-IMP', 'Slurry pump SP-04', 0, 1, 1850], ['Bearing 22222 EK', 'SKF-22222EK', 'Ball mill, pumps', 4, 2, 420], ['Mill liners (set)', 'ML-BM01-SET', 'Ball mill BM-01', 0, 1, 26000], ['Conveyor idler 127 mm', 'IDL-127', 'Conveyors', 14, 10, 38], ['Toggle plate', 'JC-TP-900', 'Jaw crusher JC-01', 1, 1, 960]]
+    }
+  },
+  dash: {
+    quick: [['Raise work order', 'orders', 1]],
+    kpis: [['Open work orders', 'count:orders?status!=Closed', 'num'], ['Equipment down', 'count:equipment?status=Down', 'num'], ['Downtime (30 days)', 'sum:orders.downtime?date>=d-30', 'num', 'Hours lost to breakdowns'], ['PM compliance', (H) => H.count('pm', 'status!=Overdue') / Math.max(1, H.count('pm')) * 100, 'pct', 'Planned tasks on time']],
+    alerts: [['equipment?status=Down&crit~A', '{n} critical machine{s} down: plant at risk', 'bad'], ['orders?status=Raised', '{n} work order{s} not yet assigned', 'warn'], ['pm?status=Overdue', '{n} planned task{s} overdue', 'bad'], ['spares?status=Below minimum', '{n} critical spare{s} below minimum', 'warn']],
+    charts: [['Downtime hours by month', 'month:orders.date.downtime', 'num'], ['Work orders by type', 'by:orders.type'], ['Downtime by equipment', 'sum:orders.equipment.downtime', 'num']],
+    recent: [['orders', 'Latest work orders', 5, ['date', 'equipment', 'job', 'status']]]
+  }
+});
+
+window.__SYS.push({
+  id: 'guardian', name: 'Guardian', tag: 'Security company', group: 'Trades, industry & services', icon: 'shield', color: '#1e293b', color2: '#3b82f6',
+  org: { name: 'Sentinel Guard Services', place: 'Eastlea, Harare', phone: '+263 242 776 112' },
+  blurb: 'Client sites, guard roster, attendance, incidents, patrols and monthly billing for security companies.',
+  headline: 'Every post manned, every incident logged and every client billed.',
+  features: ['Client sites with guards needed per shift', 'Shift roster with present, late and absent', 'Incident reports from the post', 'Monthly invoices per site'],
+  roles: [
+    ['ops', 'Operations manager', 'Mr Tinashe Chirwa', 'All sites and billing', ['dash', 'roster', 'incidents', 'sites', 'guards', 'reports']],
+    ['super', 'Supervisor', 'Mr Ezra Mutandwa', 'Roster and incidents', ['roster', 'incidents', 'guards:r']],
+    ['client', 'Client view', 'Mrs Rose Chanakira', 'Own site only', ['roster:r', 'incidents:r'], { roster: 'site=Avondale Shopping Centre', incidents: 'site=Avondale Shopping Centre' }]
+  ],
+  tables: {
+    sites: {
+      label: 'Client sites', icon: 'building', one: 'site', desc: 'Sites guarded with monthly fee.',
+      fields: 'name:Site|client:Client|guards:Guards per shift:num|fee:Monthly fee:money|contractEnd:Contract ends:date|status:Status:status:Active~ok,Notice given~warn',
+      rows: [['Avondale Shopping Centre', 'Avondale Properties', 4, 2800, 'd+240', 'Active'], ['Graniteside warehouse', 'Zambezi Logistics', 2, 1300, 'd+90', 'Active'], ['Borrowdale residence', 'Mr & Mrs Chikowore', 1, 650, 'd+30', 'Notice given'], ['Msasa factory', 'Superior Plastics', 3, 2100, 'd+400', 'Active']]
+    },
+    guards: {
+      label: 'Guards', icon: 'users', code: 'SG', one: 'guard', desc: 'Guards with grade and certificate expiry.',
+      fields: 'name:Guard|grade:Grade:sel:Guard,Senior guard,Dog handler,Supervisor|site:Posted to:ref:sites.name|phone:Phone:tel|cert:Certificate expires:date|status:Status:=status:On duty~ok,Certificate expiring~warn,Certificate expired~bad',
+      calc: { status: (r, H) => r.cert < H.today ? 'Certificate expired' : H.days(H.today, r.cert) <= 30 ? 'Certificate expiring' : 'On duty' },
+      rows: [['Mr Blessing Chikwanha', 'Senior guard', 'Avondale Shopping Centre', '0772 118 553', 'd+200'], ['Mr Simba Mhlanga', 'Guard', 'Avondale Shopping Centre', '0773 904 221', 'd+20'], ['Ms Faith Nyoni', 'Guard', 'Graniteside warehouse', '0712 662 118', 'd+150'], ['Mr Lameck Banda', 'Dog handler', 'Msasa factory', '0784 553 330', 'd-5'], ['Mr Tobias Shoko', 'Guard', 'Borrowdale residence', '0775 202 664', 'd+300'], ['Mr Prince Dube', 'Guard', 'Msasa factory', '0778 118 904', 'd+90']]
+    },
+    roster: {
+      label: 'Roster & attendance', icon: 'clipboard', code: 'SH', one: 'shift', addLabel: 'Add shift', desc: 'Shifts by site with attendance.',
+      fields: 'date:Date:date|site:Site:ref:sites.name|guard:Guard:ref:guards.name|shift:Shift:sel:Day 06:00–18:00,Night 18:00–06:00|status:Attendance:status:Scheduled~info,Present~ok,Late~warn,Absent~bad',
+      actions: [['Mark present', 'status=Present', 'status=Scheduled'], ['Mark late', 'status=Late', 'status=Scheduled'], ['Mark absent', 'status=Absent', 'status=Scheduled']],
+      rows: [['d0', 'Avondale Shopping Centre', 'Mr Blessing Chikwanha', 'Day 06:00–18:00', 'Present'], ['d0', 'Avondale Shopping Centre', 'Mr Simba Mhlanga', 'Day 06:00–18:00', 'Late'], ['d0', 'Graniteside warehouse', 'Ms Faith Nyoni', 'Day 06:00–18:00', 'Present'], ['d0', 'Msasa factory', 'Mr Lameck Banda', 'Night 18:00–06:00', 'Scheduled'], ['d0', 'Msasa factory', 'Mr Prince Dube', 'Night 18:00–06:00', 'Scheduled'], ['d0', 'Borrowdale residence', 'Mr Tobias Shoko', 'Night 18:00–06:00', 'Scheduled'], ['d-1', 'Msasa factory', 'Mr Prince Dube', 'Night 18:00–06:00', 'Absent'], ['d-1', 'Avondale Shopping Centre', 'Mr Simba Mhlanga', 'Day 06:00–18:00', 'Present']]
+    },
+    incidents: {
+      label: 'Incidents', icon: 'alert', code: 'INC', one: 'incident', addLabel: 'Report incident', desc: 'Incidents reported from sites.',
+      fields: 'date:Date:date|site:Site:ref:sites.name|type:Type:sel:Theft,Attempted break-in,Trespass,Fire,Injury,Other|details:What happened:area|by:Reported by|status:Status:status:Open~bad,Police notified~warn,Closed~ok',
+      defaults: { by: 'me' },
+      rows: [['d-1', 'Avondale Shopping Centre', 'Theft', 'Shoplifter stopped at exit with 3 items; handed to shop manager.', 'Mr Blessing Chikwanha', 'Closed'], ['d-2', 'Msasa factory', 'Attempted break-in', 'Fence cut at north corner at 02:10. Dog unit responded.', 'Mr Lameck Banda', 'Police notified'], ['d0', 'Graniteside warehouse', 'Trespass', 'Two men loitering at gate, moved on.', 'Ms Faith Nyoni', 'Open']]
+    }
+  },
+  dash: {
+    kpis: [['Guards on duty today', 'count:roster?date=today&status=Present,Late', 'num'], ['Absent or late today', 'count:roster?date=today&status=Absent,Late', 'num'], ['Monthly billing', 'sum:sites.fee', 'money', 'All active sites'], ['Open incidents', 'count:incidents?status!=Closed', 'num']],
+    alerts: [['roster?date=today&status=Scheduled', '{n} shift{s} not yet confirmed', 'warn'], ['guards?status=Certificate expired', '{n} guard{s} with an expired certificate', 'bad'], ['incidents?status=Open', '{n} incident{s} still open', 'bad'], ['sites?status=Notice given', '{n} client{s} gave notice', 'warn']],
+    charts: [['Incidents by type', 'by:incidents.type'], ['Billing by site', 'sum:sites.name.fee', 'money'], ['Attendance', 'by:roster.status']],
+    recent: [['incidents', 'Latest incidents', 4, ['date', 'site', 'type', 'status']]]
+  }
+});
+
+window.__SYS.push({
+  id: 'sunco', name: 'SunCo', tag: 'Solar sales & installations', group: 'Trades, industry & services', icon: 'sun', color: '#a16207', color2: '#0ea5e9',
+  org: { name: 'Bright Sun Solar', place: 'Belvedere, Harare', phone: '+263 77 801 4450' },
+  blurb: 'Enquiries, site surveys, quotes, installations, panel and battery stock and after-sales service for solar companies.',
+  headline: 'From enquiry to switched on, every solar job in one pipeline.',
+  features: ['Enquiries pipeline from survey to installed', 'System size and price per job', 'Panels, inverters and batteries in stock', 'Warranty and service visits after install'],
+  roles: [
+    ['owner', 'Director', 'Mr Prosper Chinoda', 'Sales, jobs and stock', ['dash', 'leads', 'jobs', 'stock', 'service', 'reports']],
+    ['sales', 'Sales consultant', 'Ms Natasha Moyo', 'Enquiries and quotes', ['leads', 'stock:r']],
+    ['tech', 'Installer', 'Mr Tapiwa Gweshe', 'Installations and service', ['jobs', 'service']]
+  ],
+  tables: {
+    leads: {
+      label: 'Enquiries', icon: 'target', code: 'EN', one: 'enquiry', addLabel: 'New enquiry', board: 'default', desc: 'Customers who asked about solar, moved along to a sale.',
+      fields: 'date:Date:date|customer:Customer|area:Area|need:Wants to power|kw:Size (kW):num|quote:Quote:money|status:Status:status:New~info,Survey booked~warn,Quoted~warn,Deposit paid~ok,Lost~bad',
+      card: ['area', 'kw', 'quote'],
+      rows: [['d0', 'Mrs Linda Mabhena', 'Greendale', 'Whole house incl. borehole', 5, 0, 'New'], ['d-1', 'Mr Takunda Shumba', 'Waterfalls', 'Lights, fridge, TV', 3, 0, 'Survey booked'], ['d-3', 'Hilltop Lodge', 'Nyanga', 'Kitchen and 12 rooms', 15, 18500, 'Quoted'], ['d-6', 'Mr Paul Chigumira', 'Marlborough', 'Whole house', 8, 7600, 'Deposit paid'], ['d-12', 'Mrs R. Gondo', 'Mabvuku', 'Lights and phone charging', 1, 950, 'Lost']]
+    },
+    jobs: {
+      label: 'Installations', icon: 'zap', code: 'INS', one: 'installation', addLabel: 'Schedule install', board: true, desc: 'Systems sold and installed.',
+      fields: 'date:Install date:date|customer:Customer|kw:Size (kW):num|inverter:Inverter|battery:Battery|price:Price:money|paid:Paid:money|balance:Balance:=money|status:Status:status:Scheduled~warn,Installing~info,Switched on~ok',
+      calc: { balance: (r) => (+r.price || 0) - (+r.paid || 0) }, print: 'Print certificate',
+      rows: [['d+3', 'Mr Paul Chigumira', 8, 'Deye 8 kW hybrid', '2× 5.12 kWh lithium', 7600, 3800, 'Scheduled'], ['d0', 'Mrs Tendai Mupfumi', 5, 'Growatt 5 kW', '1× 5.12 kWh lithium', 4300, 4300, 'Installing'], ['d-10', 'Kwekwe Accountants', 10, 'Deye 10 kW hybrid', '3× 5.12 kWh lithium', 9800, 9800, 'Switched on'], ['d-40', 'Mr Brian Hove', 3, 'Must 3 kW', '1× 2.4 kWh lithium', 2100, 2100, 'Switched on'], ['d-75', 'Mutapa Clinic', 12, 'Deye 12 kW hybrid', '4× 5.12 kWh lithium', 12400, 12400, 'Switched on']]
+    },
+    stock: {
+      label: 'Stock', icon: 'box', one: 'item', desc: 'Panels, inverters, batteries and parts.',
+      fields: 'name:Item|cat:Type:sel:Panel,Inverter,Battery,Mounting,Cable|qty:In stock:num|reorder:Reorder at:num|cost:Cost:money|price:Sell price:money|status:Status:=status:OK~ok,Low~bad',
+      calc: { status: (r) => +r.qty <= +r.reorder ? 'Low' : 'OK' },
+      rows: [['Jinko 550 W panel', 'Panel', 64, 30, 95, 140], ['Deye 8 kW hybrid inverter', 'Inverter', 2, 3, 1450, 1950], ['Growatt 5 kW inverter', 'Inverter', 5, 2, 780, 1100], ['5.12 kWh lithium battery', 'Battery', 6, 6, 980, 1350], ['Roof mounting kit (4 panels)', 'Mounting', 20, 8, 60, 95], ['PV cable 6 mm (100 m)', 'Cable', 3, 2, 85, 130]]
+    },
+    service: {
+      label: 'Service visits', icon: 'wrench', code: 'SV', one: 'visit', addLabel: 'Book service', desc: 'After-sales checks and warranty call-outs.',
+      fields: 'date:Date:date|customer:Customer|reason:Reason:sel:Annual check,Battery not charging,Inverter error,Panel cleaning|tech:Technician|status:Status:status:Booked~warn,Done~ok',
+      rows: [['d+1', 'Mutapa Clinic', 'Annual check', 'Mr Tapiwa Gweshe', 'Booked'], ['d0', 'Mr Brian Hove', 'Inverter error', 'Mr Tapiwa Gweshe', 'Booked'], ['d-15', 'Kwekwe Accountants', 'Panel cleaning', 'Mr Tapiwa Gweshe', 'Done']]
+    }
+  },
+  dash: {
+    quick: [['New enquiry', 'leads', 1], ['Schedule install', 'jobs']],
+    kpis: [['Pipeline value', 'sum:leads.quote?status=Quoted,Survey booked', 'money', 'Quotes out'], ['Sales (90 days)', 'sum:jobs.price?date>=d-90', 'money'], ['kW installed', 'sum:jobs.kw?status=Switched on', 'num', 'Total solar switched on'], ['Balances to collect', 'sum:jobs.balance', 'money']],
+    alerts: [['leads?status=New', '{n} new lead{s} to call back', 'warn'], ['stock?status=Low', '{n} stock item{s} low', 'bad'], ['service?status=Booked&date<=today', '{n} service visit{s} today', 'info']],
+    charts: [['Install value by month', 'month:jobs.date.price', 'money'], ['Pipeline by stage', 'by:leads.status'], ['Stock on hand by type', 'sum:stock.cat.qty', 'num']],
+    recent: [['jobs', 'Installations', 5, ['date', 'customer', 'kw', 'price', 'status']]]
+  }
+});
+
+window.__SYS.push({
+  id: 'casefile', name: 'CaseFile', tag: 'Law firm practice', group: 'Trades, industry & services', icon: 'scale', color: '#1c1917', color2: '#d4a373',
+  org: { name: 'Mandizha & Partners Legal Practitioners', place: 'Harare CBD', phone: '+263 242 790 450' },
+  blurb: 'Clients, matters, court diary, time and fees, trust deposits and deadlines for law firms and legal departments.',
+  headline: 'Never miss a court date, and bill every hour you work.',
+  features: ['Matters with court, judge and next date', 'Court diary for the whole firm', 'Time sheets turned into fee notes', 'Trust account deposits per client'],
+  roles: [
+    ['partner', 'Senior partner', 'Adv. Tafadzwa Mandizha', 'All matters and fees', ['dash', 'diary', 'matters', 'time', 'clients', 'reports']],
+    ['assoc', 'Associate', 'Ms Chiedza Nhongo', 'Own matters and time', ['diary', 'matters', 'time'], { matters: 'lawyer=Ms Chiedza Nhongo', time: 'lawyer=Ms Chiedza Nhongo' }],
+    ['clerk', 'Legal secretary', 'Mrs Pauline Mhizha', 'Diary and clients', ['diary', 'clients', 'matters:r']]
+  ],
+  modules: { diary: { type: 'agenda', label: 'Court diary', icon: 'calendar', table: 'matters', date: 'next', time: 'court', title: 'name', sub: 'lawyer', days: 7 } },
+  tables: {
+    clients: {
+      label: 'Clients', icon: 'users', code: 'CL', one: 'client', desc: 'Clients and money held in trust.',
+      fields: 'name:Client|type:Type:sel:Individual,Company,Estate|phone:Phone:tel|email:Email:email|trust:Trust balance:money',
+      related: [['matters', 'client', 'Matters', ['name', 'type', 'status']]],
+      rows: [['Mr Garikai Mazvita', 'Individual', '0772 330 901', 'g.mazvita@mail.example', 1500], ['Zambezi Logistics (Pvt) Ltd', 'Company', '0242 621 773', 'legal@zl.example', 8000], ['Estate Late J. Dube', 'Estate', '0712 448 019', 'dube.estate@mail.example', 22000], ['Mrs Norah Chinyoka', 'Individual', '0784 118 662', 'norah.c@mail.example', 0]]
+    },
+    matters: {
+      label: 'Matters', icon: 'briefcase', code: 'MAT', one: 'matter', addLabel: 'Open matter', desc: 'Every case with the next date.',
+      fields: 'name:Matter|client:Client:ref:clients.name|type:Type:sel:Civil claim,Labour,Conveyancing,Estate,Criminal defence,Commercial|court:Court:sel:High Court Harare,Magistrates Court,Labour Court,Supreme Court,No court|lawyer:Lawyer:sel:Adv. Tafadzwa Mandizha,Ms Chiedza Nhongo,Mr Simbarashe Gutu|next:Next date:date|status:Status:status:Open~info,Hearing set~warn,Judgment reserved~warn,Closed~grey',
+      related: [['time', 'matter', 'Time recorded', ['date', 'hours', 'amount']]],
+      rows: [['Mazvita v ZESA Holdings', 'Mr Garikai Mazvita', 'Civil claim', 'High Court Harare', 'Adv. Tafadzwa Mandizha', 'd+2', 'Hearing set'], ['Zambezi Logistics: unfair dismissal', 'Zambezi Logistics (Pvt) Ltd', 'Labour', 'Labour Court', 'Ms Chiedza Nhongo', 'd+4', 'Hearing set'], ['Estate Late J. Dube', 'Estate Late J. Dube', 'Estate', 'No court', 'Mr Simbarashe Gutu', 'd+9', 'Open'], ['Transfer: Stand 4410 Borrowdale', 'Mrs Norah Chinyoka', 'Conveyancing', 'No court', 'Ms Chiedza Nhongo', 'd0', 'Open'], ['Zambezi Logistics v Kwacha Freight', 'Zambezi Logistics (Pvt) Ltd', 'Commercial', 'High Court Harare', 'Adv. Tafadzwa Mandizha', 'd+6', 'Judgment reserved']]
+    },
+    time: {
+      label: 'Time & fees', icon: 'clock', code: 'TM', one: 'time entry', addLabel: 'Record time', desc: 'Hours worked, turned into fees.',
+      fields: 'date:Date:date|matter:Matter:ref:matters.name|lawyer:Lawyer:sel:Adv. Tafadzwa Mandizha,Ms Chiedza Nhongo,Mr Simbarashe Gutu|work:Work done|hours:Hours:num|rate:Rate:money|amount:Fee:=money|status:Status:status:Unbilled~warn,Billed~info,Paid~ok',
+      calc: { amount: (r) => (+r.hours || 0) * (+r.rate || 0) },
+      actions: [['Bill client', 'status=Billed', 'status=Unbilled'], ['Mark paid', 'status=Paid', 'status=Billed']],
+      defaults: { rate: 120 }, print: 'Print fee note',
+      rows: [['d0', 'Transfer: Stand 4410 Borrowdale', 'Ms Chiedza Nhongo', 'Drafted deed of transfer', 2.5, 90, 'Unbilled'], ['d-1', 'Mazvita v ZESA Holdings', 'Adv. Tafadzwa Mandizha', 'Heads of argument', 6, 150, 'Unbilled'], ['d-3', 'Zambezi Logistics: unfair dismissal', 'Ms Chiedza Nhongo', 'Witness interviews', 4, 90, 'Unbilled'], ['d-15', 'Zambezi Logistics v Kwacha Freight', 'Adv. Tafadzwa Mandizha', 'Trial (day 2)', 8, 150, 'Billed'], ['d-40', 'Estate Late J. Dube', 'Mr Simbarashe Gutu', 'Inventory and advert', 3, 80, 'Paid'], ['d-70', 'Zambezi Logistics v Kwacha Freight', 'Adv. Tafadzwa Mandizha', 'Trial (day 1)', 8, 150, 'Paid']]
+    }
+  },
+  dash: {
+    quick: [['Record time', 'time', 1], ['Open matter', 'matters']],
+    kpis: [['Open matters', 'count:matters?status!=Closed', 'num'], ['Court dates this week', 'count:matters?next>=today&next<=d+7&court!=No court', 'num'], ['Unbilled fees', 'sum:time.amount?status=Unbilled', 'money', 'Work not yet billed'], ['Trust money held', 'sum:clients.trust', 'money']],
+    alerts: [['matters?next=today', '{n} matter{s} with a date today', 'bad'], ['matters?next>today&next<=d+3', '{n} matter{s} in the next 3 days', 'warn'], ['time?status=Billed&date<d-30', '{n} fee note{s} unpaid after 30 days', 'warn']],
+    charts: [['Fees by month', 'month:time.date.amount', 'money'], ['Matters by type', 'by:matters.type'], ['Fees by lawyer', 'sum:time.lawyer.amount', 'money']],
+    recent: [['matters', 'Upcoming dates', 5, ['name', 'court', 'next', 'status']]]
+  }
+});
+</script>
+<script>/* Nexora Digital demo engine: one config-driven app for every system demo. */
+(function () {
+  'use strict';
+  const ALL = window.__SYS || [];
+  const C = ALL.find((s) => s.id === window.SYS_ID) || ALL[0];
+  const ICONS = window.ICONS;
+  const ENGINE_V = 4;
+
+  /* ---------- small helpers ---------- */
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const ic = (n, s = 18) => `<svg class="i" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICONS[n] || ICONS.grid}"/></svg>`;
+  const split1 = (s, ch) => { const i = String(s).indexOf(ch); return i < 0 ? [s, ''] : [s.slice(0, i), s.slice(i + 1)]; };
+  const pad = (n) => String(n).padStart(2, '0');
+  const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const TODAY = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+  const todayS = iso(TODAY);
+  const parseD = (s) => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1); };
+  const addDays = (n, base) => { const d = base ? parseD(base) : new Date(TODAY); d.setDate(d.getDate() + n); return iso(d); };
+  const rel = (v) => { if (typeof v === 'string') { const m = v.match(/^d([+-]?\d+)$/); if (m) return addDays(+m[1]); } return v; };
+  const days = (a, b) => Math.round((parseD(b || todayS) - parseD(a)) / 864e5);
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dfmt = (s) => { if (!s || !/^\d{4}-\d\d/.test(s)) return esc(s); const d = parseD(s); return `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`; };
+  const CUR = C.currency || '$';
+  const money = (v) => (Number(v) < 0 ? '-' : '') + CUR + Math.abs(Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const moneyS = (v) => { const n = Number(v) || 0; return Math.abs(n) >= 100 || Number.isInteger(n) ? (n < 0 ? '-' : '') + CUR + Math.round(Math.abs(n)).toLocaleString('en-US') : money(n); };
+  const num = (v) => (Number(v) || 0).toLocaleString('en-US', { maximumFractionDigits: 1 });
+  const fmtV = (v, k) => k === 'money' ? moneyS(v) : k === 'pct' ? Math.round(v || 0) + '%' : k === 'days' ? num(v) + ' days' : k === 'raw' ? esc(v) : num(v);
+  const initials = (n) => String(n).replace(/^(Dr|Mr|Mrs|Ms|Pastor|Rev|Eng)\.?\s+/i, '').split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+  const nowT = () => { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+
+  /* ---------- logo ---------- */
+  function logo(size) {
+    const id = 'lg' + Math.random().toString(36).slice(2, 7);
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${C.color}"/><stop offset="1" stop-color="${C.color2}"/></linearGradient></defs><rect width="40" height="40" rx="11" fill="url(#${id})"/><path d="M0 28 Q20 18 40 26 V40 H0Z" fill="#fff" opacity=".1"/><g transform="translate(8 8)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${ICONS[C.icon]}"/></g></svg>`;
+  }
+
+  /* ---------- tables ---------- */
+  function parseFields(s) {
+    return s.split('|').map((p) => {
+      const [k0, label, type0 = 'text', opts = ''] = p.split(':');
+      const hide = k0[0] === '-', k = hide ? k0.slice(1) : k0;
+      let type = type0, calc = false;
+      if (type[0] === '=') { calc = true; type = type.slice(1) || 'text'; }
+      const o = opts ? opts.split(',').map((x) => { const [v, tone] = x.split('~'); return { v: v.trim(), tone: tone || '' }; }) : [];
+      return { k, label, type, opts: o, hide, calc };
+    });
+  }
+  const T = {};
+  Object.entries(C.tables).forEach(([name, t]) => {
+    t.name = name;
+    t.fields = parseFields(t.fields);
+    t.calc = t.calc || {};
+    t.statusF = t.fields.find((f) => f.type === 'status');
+    t.dateF = t.fields.find((f) => f.k === t.dateKey) || t.fields.find((f) => f.type === 'date');
+    t.titleF = t.fields.find((f) => f.k === t.title) || t.fields.find((f) => ['text', 'ref', 'sel'].includes(f.type) && !f.hide && !f.calc) || t.fields[0];
+    t.icon = t.icon || 'list';
+    t.one = t.one || t.label.replace(/s$/, '').toLowerCase();
+    T[name] = t;
+  });
+  const F = (t, k) => t.fields.find((f) => f.k === k);
+  const isNum = (f) => ['money', 'num', 'pct'].includes(f.type);
+  const makeId = (t, n) => t.code ? `${t.code}-${1000 + n}` : String(n);
+
+  /* ---------- storage ---------- */
+  const KEY = 'nexora-demo-' + C.id;
+  const VER = ENGINE_V + '.' + (C.v || 1);
+  let S;
+  function seedDB() {
+    const db = {}, seq = {};
+    Object.values(T).forEach((t) => {
+      const stored = t.fields.filter((f) => !f.calc);
+      db[t.name] = (t.rows || []).map((r, i) => {
+        const o = { id: makeId(t, i + 1) };
+        stored.forEach((f, j) => { o[f.k] = r[j] === undefined ? '' : rel(r[j]); });
+        return o;
+      });
+      seq[t.name] = (t.rows || []).length;
+    });
+    return { db, seq };
+  }
+  function freshState(keep) { const { db, seq } = seedDB(); return { v: VER, day: todayS, touched: false, db, seq, role: keep ? keep.role : null, theme: keep ? keep.theme : null }; }
+  function load() {
+    try {
+      const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (s && s.v === VER && s.db) { S = (s.day !== todayS && !s.touched) ? freshState(s) : s; return; }
+    } catch (e) { /* storage blocked */ }
+    S = freshState();
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
+  const touch = () => { S.touched = true; save(); };
+
+  /* ---------- values, filters, aggregates ---------- */
+  let role = null;
+  const H = {
+    get db() { return S.db; }, today: todayS, days, addDays, money, moneyS, num,
+    me: () => (role ? role.person : ''),
+    where: (tn, e) => where(tn, e),
+    sum: (tn, fk, e) => agg(`sum:${tn}.${fk}${e ? '?' + e : ''}`),
+    count: (tn, e) => agg(`count:${tn}${e ? '?' + e : ''}`),
+    find: (tn, k, v) => S.db[tn].find((r) => r[k] == v),
+    val: (tn, r, k) => val(T[tn], r, k)
+  };
+  function val(t, r, f) {
+    if (typeof f === 'string') f = F(t, f) || { k: f };
+    if (f.calc) { try { return t.calc[f.k](r, H); } catch (e) { return ''; } }
+    return r[f.k];
+  }
+  function resolve(v, t, r) {
+    v = String(v).trim();
+    if (v === 'today') return todayS;
+    if (v === 'me') return H.me();
+    const m = v.match(/^d([+-]?\d+)$/); if (m) return addDays(+m[1]);
+    if (v[0] === '@') return val(t, r, v.slice(1));
+    return v;
+  }
+  function cond(t, r, c) {
+    const m = c.match(/^([\w]+)\s*(<=|>=|!=|=|<|>|~)\s*(.*)$/);
+    if (!m) return true;
+    const [, k, op] = m;
+    const a = k === 'id' ? r.id : val(t, r, k);
+    const b = resolve(m[3], t, r);
+    const blankA = a == null || a === '';
+    if ((op === '=' || op === '!=') && String(b).includes(',')) { const inSet = String(b).split(',').includes(String(a)); return op === '=' ? inSet : !inSet; }
+    if (op === '=') return blankA ? b === '' : String(a) === String(b);
+    if (op === '!=') return blankA ? b !== '' : String(a) !== String(b);
+    if (op === '~') return String(a || '').toLowerCase().includes(String(b).toLowerCase());
+    if (blankA || b === '') return false;
+    const na = Number(a), nb = Number(b);
+    const n = !isNaN(na) && !isNaN(nb);
+    const x = n ? na : String(a), y = n ? nb : String(b);
+    return op === '<' ? x < y : op === '>' ? x > y : op === '<=' ? x <= y : x >= y;
+  }
+  const matchExpr = (t, r, e) => !e || (typeof e === 'function' ? e(r, H) : e.split('&').every((c) => cond(t, r, c.trim())));
+  const rowsOf = (tn) => { const sc = role && role.scope && role.scope[tn]; return sc ? S.db[tn].filter((r) => matchExpr(T[tn], r, sc)) : S.db[tn]; };
+  const where = (tn, e) => rowsOf(tn).filter((r) => matchExpr(T[tn], r, e));
+  function agg(spec) {
+    if (typeof spec === 'function') return spec(H);
+    const [kind, rest] = split1(spec, ':');
+    const [path, e] = split1(rest, '?');
+    const [tn, fk] = path.split('.');
+    const rows = where(tn, e), t = T[tn];
+    if (kind === 'count') return rows.length;
+    const vals = rows.map((r) => Number(val(t, r, fk)) || 0);
+    const s = vals.reduce((a, b) => a + b, 0);
+    if (kind === 'sum') return s;
+    if (kind === 'avg') return vals.length ? s / vals.length : 0;
+    if (kind === 'max') return vals.length ? Math.max(...vals) : 0;
+    if (kind === 'min') return vals.length ? Math.min(...vals) : 0;
+    return 0;
+  }
+  function series(spec) {
+    const [kind, rest] = split1(spec, ':');
+    const [path, e] = split1(rest, '?');
+    const p = path.split('.'), t = T[p[0]], rows = where(p[0], e);
+    if (kind === 'month') {
+      const out = [];
+      for (let i = 5; i >= 0; i--) { const d = new Date(TODAY.getFullYear(), TODAY.getMonth() - i, 1); out.push([`${d.getFullYear()}-${pad(d.getMonth() + 1)}`, MON[d.getMonth()], 0]); }
+      rows.forEach((r) => { const ym = String(val(t, r, p[1]) || '').slice(0, 7); const o = out.find((x) => x[0] === ym); if (o) o[2] += p[2] ? Number(val(t, r, p[2])) || 0 : 1; });
+      return out.map((x) => [x[1], x[2]]);
+    }
+    const gf = F(t, p[1]); const map = new Map();
+    const pre = gf && gf.opts.length && gf.type !== 'ref';
+    if (pre) gf.opts.forEach((o) => map.set(o.v, 0));
+    rows.forEach((r) => { const g = val(t, r, p[1]) || 'Other'; map.set(g, (map.get(g) || 0) + (kind === 'sum' ? Number(val(t, r, p[2])) || 0 : 1)); });
+    let arr = [...map.entries()];
+    if (!pre) arr.sort((a, b) => b[1] - a[1]);
+    return arr.slice(0, 8);
+  }
+
+  /* ---------- formatting ---------- */
+  const OK = /\b(paid|active|done|complete|completed|approved|in stock|delivered|available|closed|resolved|passed|present|won|ready|served|checked out|cleared|current|valid|fit|returned|hired|confirmed|attended|settled|good|operational|signed|in service|received|issued|on track|live|healthy|repaid|fulfilled|vacant|in date|compliant|reconciled|sold|harvested|dispatched|checked in|in use|placed)\b/i;
+  const BAD = /\b(overdue|late|failed|fail|cancelled|canceled|rejected|lost|arrears|critical|absent|expired|out of stock|defaulted|urgent|high|breached|lapsed|blocked|faulty|stolen|missing|no show|declined|suspended|dead|written off|offline|damaged|severe)\b/i;
+  const WARN = /\b(pending|due|draft|in progress|open|waiting|on leave|booked|partial|review|scheduled|low|awaiting|sent|quoted|new|preparing|in transit|under repair|maintenance|medium|follow up|interview|shortlisted|probation|occupied|grace|reserved|planned|ordered|on hold|expiring|renewal|serviced soon|negotiation|proposal)\b/i;
+  function toneOf(f, v) {
+    const o = f && f.opts.find((x) => x.v === v);
+    if (o && o.tone) return o.tone;
+    const s = String(v);
+    return BAD.test(s) ? 'bad' : OK.test(s) ? 'ok' : WARN.test(s) ? 'warn' : 'info';
+  }
+  const pill = (v, tone) => `<span class="pill ${tone || 'info'}">${esc(v)}</span>`;
+  function cell(t, r, f) {
+    const v = val(t, r, f);
+    if (v === '' || v == null) return '<span class="dim">—</span>';
+    switch (f.type) {
+      case 'money': return money(v);
+      case 'num': return num(v);
+      case 'pct': return Math.round(v) + '%';
+      case 'date': return dfmt(v);
+      case 'status': return pill(v, toneOf(f, v));
+      case 'tag': return `<span class="tag">${esc(v)}</span>`;
+      case 'stars': return '<span class="stars">' + '★'.repeat(+v) + '<i>' + '★'.repeat(Math.max(0, 5 - v)) + '</i></span>';
+      case 'bar': return `<span class="mbar"><i style="width:${Math.max(0, Math.min(100, +v))}%"></i></span><span class="small">${Math.round(v)}%</span>`;
+      default: return esc(v);
+    }
+  }
+
+  /* ---------- roles & modules ---------- */
+  C.roles = C.roles.map((x) => Array.isArray(x) ? { id: x[0], title: x[1], person: x[2], desc: x[3], scope: x[5] || null, mods: x[4].map((m) => { const [k, ro] = m.split(':'); return { k, ro: ro === 'r' }; }) } : x);
+  function modMeta(k) {
+    if (k === 'dash') return { k, type: 'dash', label: (C.dash && C.dash.label) || 'Dashboard', icon: 'home' };
+    if (k === 'reports') return { k, type: 'reports', label: 'Reports', icon: 'chart' };
+    if (C.modules && C.modules[k]) return Object.assign({ k }, C.modules[k]);
+    if (T[k]) return { k, type: 'table', label: T[k].label, icon: T[k].icon, table: k };
+    return null;
+  }
+  const myMods = () => role.mods.map((m) => Object.assign(modMeta(m.k) || {}, { ro: m.ro })).filter((m) => m.type);
+  const canSee = (k) => role && role.mods.some((m) => m.k === k);
+
+  /* ---------- ui state ---------- */
+  let curMod = null;
+  const ui = { q: {}, status: {}, filter: null, view: {}, sort: {}, cart: {}, ag: 0, rep: { table: null, range: 'month' } };
+  const contactHref = '../contact.html?plan=' + encodeURIComponent(C.name + ' (' + C.tag + ') system');
+
+  /* ---------- dialogs & toast ---------- */
+  function dlg(html, wire, cls) {
+    const d = document.createElement('dialog');
+    d.className = cls || '';
+    d.innerHTML = `<div class="dlg">${html}</div>`;
+    document.body.appendChild(d);
+    d.addEventListener('close', () => d.remove());
+    d.addEventListener('click', (e) => { if (e.target === d || e.target.closest('[data-close]')) d.close(); });
+    if (wire) wire(d);
+    d.showModal();
+    return d;
+  }
+  function toast(msg, bad) {
+    const el = document.createElement('div');
+    el.className = 'toast' + (bad ? ' bad' : '');
+    el.setAttribute('role', 'status');
+    el.innerHTML = ic(bad ? 'alert' : 'check', 16) + esc(msg);
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2600);
+  }
+
+  /* ---------- theme ---------- */
+  function applyTheme() {
+    const r = document.documentElement;
+    r.style.setProperty('--brand', C.color);
+    r.style.setProperty('--brand2', C.color2);
+    if (S.theme) r.dataset.theme = S.theme; else delete r.dataset.theme;
+  }
+  const isDark = () => S.theme ? S.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  function setFavicon() {
+    let l = $('link[rel="icon"]');
+    if (!l) { l = document.createElement('link'); l.rel = 'icon'; document.head.appendChild(l); }
+    l.href = 'data:image/svg+xml,' + encodeURIComponent(logo(64));
+  }
+
+  /* ---------- login ---------- */
+  function login() {
+    role = null;
+    document.title = `${C.name} · ${C.tag} | Live demo by Nexora Digital`;
+    $('#app').innerHTML = `<div class="login">
+      <section class="login-brand">
+        <div class="lb-in">
+          <div class="lb-logo">${logo(58)}<div><b>${esc(C.name)}</b><span>${esc(C.tag)}</span></div></div>
+          <h1>${esc(C.headline || C.blurb)}</h1>
+          <ul class="ticks">${(C.features || []).map((f) => `<li>${ic('check', 16)}${esc(f)}</li>`).join('')}</ul>
+          <p class="lb-org">${ic('building', 16)}<span>Sample organisation: <b>${esc(C.org.name)}</b>, ${esc(C.org.place)}</span></p>
+        </div>
+        <p class="lb-foot">Built by <a href="../index.html">Nexora Digital</a> · Harare, Zimbabwe</p>
+      </section>
+      <section class="login-pick"><div class="pick-in">
+        <span class="demo-tag">${ic('zap', 14)} Live demo</span>
+        <h2>Sign in as…</h2>
+        <p class="muted">Each role sees its own screens and permissions. This demo runs on sample data in your browser, so try anything.</p>
+        <div class="roles">${C.roles.map((r) => `<button class="role" data-role="${r.id}">
+          <span class="av">${initials(r.person)}</span>
+          <span class="rt"><b>${esc(r.title)}</b><small>${esc(r.person)}</small><em>${esc(r.desc)}</em></span>${ic('arrow', 18)}</button>`).join('')}</div>
+        <div class="pick-cta"><a class="btn" href="${contactHref}">${ic('zap', 16)} Get this system for your business</a><a class="btn ghost" href="./">See all demos</a></div>
+      </div></section></div>`;
+    $$('[data-role]').forEach((b) => b.addEventListener('click', () => {
+      role = C.roles.find((r) => r.id === b.dataset.role);
+      S.role = role.id; save();
+      shell(); go(role.mods[0].k);
+    }));
+  }
+
+  /* ---------- app shell ---------- */
+  function alertsList() {
+    return ((C.dash && C.dash.alerts) || []).map((a) => {
+      const [path, e] = split1(a[0], '?');
+      const n = where(path, e).length;
+      return { table: path, expr: e, n, text: a[1].replace('{n}', n).replace('{s}', n === 1 ? '' : 's'), tone: a[2] || 'warn' };
+    }).filter((a) => a.n > 0);
+  }
+  function shell() {
+    document.title = `${C.name} · ${C.org.name}`;
+    $('#app').innerHTML = `<div class="app">
+      <aside class="side">
+        <div class="side-brand">${logo(36)}<div><b>${esc(C.name)}</b><span>${esc(C.org.name)}</span></div></div>
+        <nav class="nav" aria-label="Main">${myMods().map((m) => `<button data-go="${m.k}">${ic(m.icon)}<span>${esc(m.label)}</span></button>`).join('')}</nav>
+        <div class="side-foot">
+          <div class="me"><span class="av">${initials(role.person)}</span><div><b>${esc(role.person)}</b><small>${esc(role.title)}</small></div></div>
+          <button class="sf" data-switch>${ic('logout', 16)} Switch role</button>
+          <button class="sf" data-reset>${ic('refresh', 16)} Reset demo data</button>
+          <a class="sf credit" href="../index.html">Built by <b>Nexora Digital</b></a>
+        </div>
+      </aside>
+      <div class="main">
+        <header class="bar">
+          <div class="bar-t"><span class="crumb"><span class="co">${esc(C.org.name)} ·</span> <span class="demo-pill">Demo</span></span><h1 id="title"></h1></div>
+          <div class="bar-r">
+            <button class="iconbtn" data-bell aria-label="Alerts">${ic('bell')}<i id="bellN" hidden></i></button>
+            <button class="iconbtn" data-theme aria-label="Switch light or dark">${ic(isDark() ? 'sun' : 'moon')}</button>
+            <button class="iconbtn mob" data-switch aria-label="Switch role">${ic('logout')}</button>
+            <a class="btn cta" href="${contactHref}">${ic('zap', 16)}<span>Get this system</span></a>
+          </div>
+        </header>
+        <main id="view" tabindex="-1"></main>
+        <div id="printdoc" class="print-only"></div>
+      </div></div>`;
+    $$('[data-go]').forEach((b) => b.addEventListener('click', () => { ui.filter = null; go(b.dataset.go); }));
+    $$('[data-switch]').forEach((b) => b.addEventListener('click', () => { S.role = null; save(); history.replaceState(null, '', location.pathname); login(); }));
+    $('[data-reset]').addEventListener('click', () => dlg(`<div class="dh"><h2>Reset demo data?</h2><button class="x" data-close aria-label="Close">${ic('x')}</button></div><p class="muted">Every change you made goes back to the original sample data.</p><div class="dact"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="doReset">Reset data</button></div>`,
+      (d) => $('#doReset', d).addEventListener('click', () => { const keep = S; S = freshState(keep); save(); d.close(); toast('Sample data restored'); render(); })));
+    $('[data-theme]').addEventListener('click', (e) => { S.theme = isDark() ? 'light' : 'dark'; save(); applyTheme(); e.currentTarget.innerHTML = ic(isDark() ? 'sun' : 'moon'); });
+    $('[data-bell]').addEventListener('click', () => { if (canSee('dash')) go('dash'); else toast(alertsList().length ? alertsList().map((a) => a.text).join(' · ') : 'No alerts right now'); });
+  }
+  function go(k) {
+    if (!canSee(k)) k = role.mods[0].k;
+    curMod = k;
+    if (location.hash.slice(1) !== k) history.replaceState(null, '', '#' + k);
+    $$('[data-go]').forEach((b) => b.setAttribute('aria-current', b.dataset.go === k ? 'page' : 'false'));
+    const a = $(`[data-go="${k}"]`); if (a && a.scrollIntoView && innerWidth < 900) a.scrollIntoView({ inline: 'center', block: 'nearest' });
+    render();
+    window.scrollTo(0, 0);
+  }
+  function render() {
+    const m = myMods().find((x) => x.k === curMod);
+    $('#title').textContent = m.label;
+    const n = alertsList().length, bn = $('#bellN');
+    bn.hidden = !n; bn.textContent = n;
+    const v = $('#view');
+    if (m.type === 'dash') viewDash(v);
+    else if (m.type === 'table') viewTable(v, m);
+    else if (m.type === 'pos') viewPOS(v, m);
+    else if (m.type === 'agenda') viewAgenda(v, m);
+    else if (m.type === 'reports') viewReports(v);
+  }
+
+  /* ---------- dashboard ---------- */
+  function chartHTML(c) {
+    const [title, spec, kind] = c;
+    const s = series(spec), max = Math.max(1, ...s.map((x) => Math.abs(x[1])));
+    if (spec.startsWith('month:')) {
+      return `<div class="card chart"><h3>${esc(title)}</h3><div class="cols">${s.map(([l, v], i) => `<div class="col${i === s.length - 1 ? ' now' : ''}"><span class="cv">${fmtV(v, kind)}</span><div class="cb"><i style="height:${Math.max(2, (v / max) * 100)}%"></i></div><span class="cl">${esc(l)}</span></div>`).join('')}</div></div>`;
+    }
+    return `<div class="card chart"><h3>${esc(title)}</h3><div class="bars">${s.map(([l, v]) => `<div class="brow"><span class="bl">${esc(l)}</span><span class="bt"><i style="width:${Math.max(1.5, (v / max) * 100)}%"></i></span><span class="bv">${fmtV(v, kind)}</span></div>`).join('') || '<p class="muted small">No data yet</p>'}</div></div>`;
+  }
+  function miniTable(t, rows, cols) {
+    const fs = (cols ? cols.map((k) => F(t, k)) : t.fields.filter((f) => !f.hide).slice(0, 4)).filter(Boolean);
+    if (!rows.length) return '<p class="muted small empty-s">Nothing to show yet.</p>';
+    return `<div class="tw mini"><table><thead><tr>${fs.map((f) => `<th class="${isNum(f) ? 'n' : ''}">${esc(f.label)}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr data-open="${t.name}" data-id="${esc(r.id)}" tabindex="0">${fs.map((f) => `<td class="${isNum(f) ? 'n' : ''}" data-label="${esc(f.label)}">${cell(t, r, f)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  }
+  function viewDash(v) {
+    const d = C.dash || {};
+    const h = new Date().getHours();
+    const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    const first = role.person.replace(/^(Dr|Mr|Mrs|Ms|Pastor|Rev|Eng)\.?\s+/i, '').split(' ')[0];
+    const al = alertsList();
+    v.innerHTML = `<div class="hello"><div><h2>${greet}, ${esc(first)}</h2><p class="muted">${WD[TODAY.getDay()]} ${dfmt(todayS)} · here is how ${esc(C.org.name)} is doing today.</p></div>
+        ${d.quick ? `<div class="quick">${d.quick.filter((q) => canSee(q[1])).map((q) => `<button class="btn ${q[2] ? '' : 'ghost'}" data-quick="${q[1]}">${ic('plus', 16)}${esc(q[0])}</button>`).join('')}</div>` : ''}</div>
+      <div class="kpis">${(d.kpis || []).map(([label, spec, kind, sub]) => `<div class="kpi"><span>${esc(label)}</span><b>${fmtV(agg(spec), kind)}</b>${sub ? `<small>${esc(typeof sub === 'function' ? sub(H) : sub)}</small>` : ''}</div>`).join('')}</div>
+      ${al.length ? `<div class="card alerts"><h3>${ic('bell', 16)} Needs attention</h3>${al.map((a) => `<button class="al ${a.tone}" data-al="${esc(a.table)}" data-ex="${esc(a.expr)}" data-tx="${esc(a.text)}"><span class="dot ${a.tone}"></span><span>${esc(a.text)}</span>${canSee(a.table) ? ic('chevR', 16) : ''}</button>`).join('')}</div>` : `<div class="card alerts calm">${ic('check', 18)} All clear. Nothing needs attention right now.</div>`}
+      <div class="charts">${(d.charts || []).map(chartHTML).join('')}</div>
+      ${(d.recent || []).filter((x) => canSee(x[0])).map(([tn, title, n, cols]) => { const t = T[tn]; const rows = sorted(t, rowsOf(tn).slice()).slice(0, n || 5); return `<div class="card"><div class="cardhead"><h3>${esc(title)}</h3><button class="link" data-go2="${tn}">View all ${ic('chevR', 14)}</button></div>${miniTable(t, rows, cols)}</div>`; }).join('')}`;
+    $$('[data-al]', v).forEach((b) => b.addEventListener('click', () => { if (!canSee(b.dataset.al)) return; ui.filter = { table: b.dataset.al, expr: b.dataset.ex, text: b.dataset.tx }; ui.status[b.dataset.al] = 'All'; ui.view[b.dataset.al] = 'list'; go(b.dataset.al); }));
+    $$('[data-go2]', v).forEach((b) => b.addEventListener('click', () => go(b.dataset.go2)));
+    $$('[data-quick]', v).forEach((b) => b.addEventListener('click', () => { const m = modMeta(b.dataset.quick); if (m.type === 'table') form(T[m.table], null); else go(m.k); }));
+    wireOpen(v);
+  }
+  function wireOpen(root) {
+    $$('[data-open]', root).forEach((tr) => {
+      const open = () => { const t = T[tr.dataset.open]; const r = S.db[t.name].find((x) => String(x.id) === tr.dataset.id); if (r) detail(t, r, !canEdit(t.name)); };
+      tr.addEventListener('click', open);
+      tr.addEventListener('keydown', (e) => { if (e.key === 'Enter') open(); });
+    });
+  }
+  const canEdit = (tn) => role.mods.some((m) => m.k === tn && !m.ro) || Object.values(C.modules || {}).some((m) => (m.table === tn || m.sales === tn) && role.mods.some((x) => C.modules[x.k] === m && !x.ro));
+
+  /* ---------- table module ---------- */
+  function sorted(t, rows) {
+    const s = ui.sort[t.name];
+    const k = s ? s.k : t.dateF ? t.dateF.k : null;
+    const dir = s ? s.dir : -1;
+    if (!k) return rows;
+    const f = F(t, k) || { k };
+    return rows.sort((a, b) => {
+      let x = k === 'id' ? a.id : val(t, a, f), y = k === 'id' ? b.id : val(t, b, f);
+      const nx = Number(x), ny = Number(y);
+      if (x !== '' && y !== '' && !isNaN(nx) && !isNaN(ny)) return (nx - ny) * dir;
+      return String(x || '').localeCompare(String(y || '')) * dir;
+    });
+  }
+  function rowsFor(t) {
+    let rows = rowsOf(t.name).slice();
+    if (ui.filter && ui.filter.table === t.name) rows = rows.filter((r) => matchExpr(t, r, ui.filter.expr));
+    const st = ui.status[t.name];
+    if (st && st !== 'All' && t.statusF && ui.view[t.name] !== 'board') rows = rows.filter((r) => val(t, r, t.statusF) === st);
+    const q = (ui.q[t.name] || '').toLowerCase().trim();
+    if (q) rows = rows.filter((r) => String(r.id).toLowerCase().includes(q) || t.fields.some((f) => String(val(t, r, f) == null ? '' : val(t, r, f)).toLowerCase().includes(q)));
+    return sorted(t, rows);
+  }
+  function viewTable(v, m) {
+    const t = T[m.table];
+    const ro = m.ro;
+    const view = ui.view[t.name] || (t.board === 'default' ? 'board' : 'list');
+    ui.view[t.name] = view;
+    const st = ui.status[t.name] || 'All';
+    v.innerHTML = `<div class="phead"><div><p class="muted">${esc(t.desc || '')}</p></div>
+        <div class="acts">
+          ${t.board ? `<div class="seg" role="group" aria-label="View"><button data-view="list" aria-pressed="${view === 'list'}">${ic('list', 16)} List</button><button data-view="board" aria-pressed="${view === 'board'}">${ic('kanban', 16)} Board</button></div>` : ''}
+          <button class="btn ghost" data-csv>${ic('download', 16)}<span>CSV</span></button>
+          ${ro ? '<span class="pill grey">View only</span>' : `<button class="btn" data-add>${ic('plus', 16)} ${esc(t.addLabel || 'Add ' + t.one)}</button>`}
+        </div></div>
+      ${t.stats ? `<div class="kpis sm">${t.stats.map(([l, s, k]) => `<div class="kpi"><span>${esc(l)}</span><b>${fmtV(agg(s), k)}</b></div>`).join('')}</div>` : ''}
+      <div class="toolbar">
+        <label class="search">${ic('search', 16)}<input type="search" placeholder="Search ${esc(t.label.toLowerCase())}" value="${esc(ui.q[t.name] || '')}" aria-label="Search"></label>
+        ${t.statusF && view === 'list' ? `<div class="chips">${['All', ...t.statusF.opts.map((o) => o.v)].map((o) => `<button class="chip" data-st="${esc(o)}" aria-pressed="${o === st}">${esc(o)}<i>${o === 'All' ? rowsOf(t.name).length : rowsOf(t.name).filter((r) => val(t, r, t.statusF) === o).length}</i></button>`).join('')}</div>` : ''}
+      </div>
+      ${ui.filter && ui.filter.table === t.name ? `<div class="filterbar">${ic('bell', 14)} Showing: <b>${esc(ui.filter.text)}</b><button class="link" data-clear>Show everything</button></div>` : ''}
+      <div id="rows"></div>`;
+    const draw = () => {
+      const rows = rowsFor(t);
+      $('#rows', v).innerHTML = view === 'board' ? boardHTML(t, rows, ro) : listHTML(t, rows);
+      wireOpen($('#rows', v));
+      $$('[data-sort]', v).forEach((th) => th.addEventListener('click', () => { const k = th.dataset.sort; const s = ui.sort[t.name]; ui.sort[t.name] = { k, dir: s && s.k === k ? -s.dir : (t.fields.find((f) => f.k === k) && isNum(F(t, k)) ? -1 : 1) }; draw(); }));
+      $$('[data-next]', v).forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); const r = S.db[t.name].find((x) => String(x.id) === b.dataset.next); r[t.statusF.k] = b.dataset.to; if (t.onStatus) t.onStatus(r, H); touch(); toast(`${val(t, r, t.titleF)} moved to ${b.dataset.to}`); draw(); }));
+    };
+    draw();
+    $('.search input', v).addEventListener('input', (e) => { ui.q[t.name] = e.target.value; draw(); });
+    $$('[data-st]', v).forEach((b) => b.addEventListener('click', () => { ui.status[t.name] = b.dataset.st; viewTable(v, m); }));
+    $$('[data-view]', v).forEach((b) => b.addEventListener('click', () => { ui.view[t.name] = b.dataset.view; viewTable(v, m); }));
+    const clr = $('[data-clear]', v); if (clr) clr.addEventListener('click', () => { ui.filter = null; viewTable(v, m); });
+    const add = $('[data-add]', v); if (add) add.addEventListener('click', () => form(t, null));
+    $('[data-csv]', v).addEventListener('click', () => csv(t, rowsFor(t)));
+  }
+  function listHTML(t, rows) {
+    const cols = t.fields.filter((f) => !f.hide);
+    if (!rows.length) return `<div class="card empty">${ic('search', 28)}<p>No ${esc(t.label.toLowerCase())} match. Try another search or filter.</p></div>`;
+    const sum = cols.map((f) => f.type === 'money' && !t.noTotal ? rows.reduce((a, r) => a + (Number(val(t, r, f)) || 0), 0) : null);
+    const s = ui.sort[t.name];
+    const arrow = (k) => s && s.k === k ? (s.dir > 0 ? ' ↑' : ' ↓') : '';
+    return `<div class="tw"><table class="rt"><thead><tr>${t.code ? `<th data-sort="id">Ref${arrow('id')}</th>` : ''}${cols.map((f) => `<th class="${isNum(f) ? 'n' : ''}" data-sort="${f.k}">${esc(f.label)}${arrow(f.k)}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map((r) => `<tr data-open="${t.name}" data-id="${esc(r.id)}" tabindex="0">${t.code ? `<td class="ref" data-label="Ref">${esc(r.id)}</td>` : ''}${cols.map((f, i) => `<td class="${isNum(f) ? 'n' : ''}${f === t.titleF ? ' tt' : ''}" data-label="${esc(f.label)}">${cell(t, r, f)}</td>`).join('')}</tr>`).join('')}</tbody>
+      ${sum.some((x) => x !== null) ? `<tfoot><tr>${t.code ? '<td></td>' : ''}${cols.map((f, i) => `<td class="${isNum(f) ? 'n' : ''}">${i === 0 && sum[0] === null ? `<b>${rows.length} total</b>` : sum[i] !== null ? `<b>${money(sum[i])}</b>` : ''}</td>`).join('')}</tr></tfoot>` : ''}
+      </table></div><p class="muted small count">${rows.length} of ${rowsOf(t.name).length} ${esc(t.label.toLowerCase())}</p>`;
+  }
+  function boardHTML(t, rows, ro) {
+    const opts = t.statusF.opts;
+    const cardF = (t.card || t.fields.filter((f) => !f.hide && f !== t.titleF && f !== t.statusF).slice(0, 3).map((f) => f.k)).map((k) => F(t, k)).filter(Boolean);
+    return `<div class="board">${opts.map((o, i) => {
+      const rs = rows.filter((r) => val(t, r, t.statusF) === o.v);
+      const nx = opts[i + 1];
+      return `<section class="lane"><div class="lane-h"><span class="dot ${o.tone || toneOf(t.statusF, o.v)}"></span>${esc(o.v)}<b>${rs.length}</b></div>
+        ${rs.map((r) => `<article class="bcard" data-open="${t.name}" data-id="${esc(r.id)}" tabindex="0">
+          ${t.code ? `<span class="ref">${esc(r.id)}</span>` : ''}<b>${esc(val(t, r, t.titleF))}</b>
+          ${cardF.map((f) => { const x = val(t, r, f); return x === '' || x == null ? '' : `<span class="bf">${esc(f.label)}: ${cell(t, r, f)}</span>`; }).join('')}
+          ${!ro && nx ? `<button class="next" data-next="${esc(r.id)}" data-to="${esc(nx.v)}">${esc(nx.v)} ${ic('arrow', 14)}</button>` : ''}
+        </article>`).join('') || '<p class="lane-empty">Nothing here</p>'}
+      </section>`;
+    }).join('')}</div>`;
+  }
+
+  /* ---------- record detail ---------- */
+  function detail(t, r, ro) {
+    const acts = (t.actions || []).filter((a) => !ro && matchExpr(t, r, a[2]));
+    const rel2 = (t.related || []).map(([tn, fk, title, cols]) => {
+      const rt = T[tn]; const key = val(t, r, t.titleF);
+      const rows = sorted(rt, rowsOf(tn).filter((x) => x[fk] === key || x[fk] === r.id)).slice(0, 8);
+      return `<div class="rel"><h3>${esc(title)} <span class="muted small">(${rows.length})</span></h3>${miniTable(rt, rows, cols)}</div>`;
+    }).join('');
+    dlg(`<div class="dh"><div><span class="ref">${t.code ? esc(r.id) : esc(t.label)}</span><h2>${esc(val(t, r, t.titleF))}</h2></div>
+        <div class="inline">${t.statusF ? pill(val(t, r, t.statusF), toneOf(t.statusF, val(t, r, t.statusF))) : ''}<button class="x" data-close aria-label="Close">${ic('x')}</button></div></div>
+      <dl class="dl">${t.fields.filter((f) => f !== t.titleF).map((f) => `<div class="${f.type === 'area' ? 'wide' : ''}"><dt>${esc(f.label)}</dt><dd>${cell(t, r, f)}</dd></div>`).join('')}</dl>
+      ${rel2}
+      <div class="dact">${acts.map((a, i) => `<button class="btn" data-act="${i}">${esc(a[0])}</button>`).join('')}
+        ${t.print ? `<button class="btn ghost" data-print>${ic('printer', 16)} ${esc(t.print)}</button>` : ''}
+        ${!ro ? `<button class="btn ghost" data-edit>Edit</button><button class="btn ghost danger" data-del>Delete</button>` : ''}</div>`,
+    (d) => {
+      $$('[data-act]', d).forEach((b) => b.addEventListener('click', () => {
+        const a = acts[+b.dataset.act];
+        if (typeof a[1] === 'function') a[1](r, H);
+        else a[1].split('&').forEach((p) => { const [k, x] = split1(p, '='); const rv = resolve(x, t, r); const f = F(t, k); r[k] = f && isNum(f) ? Number(rv) || 0 : rv; });
+        if (t.onStatus) t.onStatus(r, H);
+        touch(); d.close(); toast(a[3] || `${a[0]}: done`); render();
+      }));
+      const p = $('[data-print]', d); if (p) p.addEventListener('click', () => printRecord(t, r));
+      const e = $('[data-edit]', d); if (e) e.addEventListener('click', () => { d.close(); form(t, r); });
+      const del = $('[data-del]', d);
+      if (del) del.addEventListener('click', () => {
+        if (del.dataset.sure) { S.db[t.name] = S.db[t.name].filter((x) => x !== r); touch(); d.close(); toast(`${t.one[0].toUpperCase() + t.one.slice(1)} deleted`); render(); return; }
+        del.dataset.sure = '1'; del.textContent = 'Tap again to delete'; del.classList.add('sure');
+      });
+      wireOpen(d);
+    }, 'wide');
+  }
+
+  /* ---------- add / edit form ---------- */
+  function optionsFor(f) {
+    if (f.type === 'ref') { const [tn, fk] = f.opts[0].v.split('.'); return S.db[tn].map((r) => val(T[tn], r, fk || T[tn].titleF.k)); }
+    return f.opts.map((o) => o.v);
+  }
+  function input(f, v, req) {
+    const n = `name="${f.k}"`, rq = req ? ' required' : '';
+    const vv = esc(v == null ? '' : v);
+    let el;
+    if (['sel', 'status', 'ref'].includes(f.type)) el = `<select ${n}${rq}>${f.type === 'ref' && !req ? '<option value=""></option>' : ''}${optionsFor(f).map((o) => `<option${String(o) === String(v) ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+    else if (f.type === 'area') el = `<textarea ${n} rows="3"${rq}>${vv}</textarea>`;
+    else if (f.type === 'money' || f.type === 'num' || f.type === 'pct' || f.type === 'bar') el = `<input ${n} type="number" step="any" inputmode="decimal" value="${vv}"${rq}>`;
+    else if (f.type === 'stars') el = `<select ${n}>${[5, 4, 3, 2, 1].map((x) => `<option value="${x}"${+v === x ? ' selected' : ''}>${'★'.repeat(x)}</option>`).join('')}</select>`;
+    else el = `<input ${n} type="${{ date: 'date', time: 'time', email: 'email', tel: 'tel' }[f.type] || 'text'}" value="${vv}"${rq}${f.type === 'tel' ? ' inputmode="tel"' : ''}>`;
+    return `<label class="${f.type === 'area' ? 'wide' : ''}"><span>${esc(f.label)}</span>${el}</label>`;
+  }
+  function dflt(t, f) {
+    const d = t.defaults && t.defaults[f.k];
+    if (d !== undefined) return resolve(d, t, {});
+    if (f.type === 'status' || f.type === 'sel' || f.type === 'stars') return f.type === 'stars' ? 5 : (f.opts[0] || {}).v;
+    if (f.type === 'ref') return optionsFor(f)[0];
+    if (f === t.dateF) return todayS;
+    return '';
+  }
+  function form(t, r) {
+    const isNew = !r;
+    const fs = t.fields.filter((f) => !f.calc && !(t.noForm || []).includes(f.k));
+    dlg(`<form class="frm" novalidate><div class="dh"><h2>${isNew ? esc(t.addLabel || 'Add ' + t.one) : 'Edit ' + esc(t.one)}</h2><button type="button" class="x" data-close aria-label="Close">${ic('x')}</button></div>
+      <div class="fgrid">${fs.map((f, i) => input(f, r ? r[f.k] : dflt(t, f), i === 0)).join('')}</div>
+      <p class="err" hidden></p>
+      <div class="dact"><button type="button" class="btn ghost" data-close>Cancel</button><button class="btn" type="submit">${isNew ? 'Save' : 'Save changes'}</button></div></form>`,
+    (d) => $('form', d).addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target), vals = {};
+      fs.forEach((f) => { const x = fd.get(f.k); vals[f.k] = isNum(f) || f.type === 'stars' ? (x === '' || x == null ? '' : Number(x)) : (x == null ? '' : String(x).trim()); });
+      if (vals[fs[0].k] === '') { const er = $('.err', d); er.hidden = false; er.textContent = `${fs[0].label} is needed.`; return; }
+      if (isNew) {
+        S.seq[t.name] = (S.seq[t.name] || 0) + 1;
+        const o = Object.assign({ id: makeId(t, S.seq[t.name]) }, vals);
+        S.db[t.name].unshift(o);
+        if (t.onAdd) t.onAdd(o, H);
+      } else { Object.assign(r, vals); if (t.onStatus) t.onStatus(r, H); }
+      touch(); d.close();
+      toast(isNew ? `${t.one[0].toUpperCase() + t.one.slice(1)} saved` : 'Changes saved');
+      render();
+    }), 'wide');
+  }
+
+  /* ---------- printing & CSV ---------- */
+  const printHead = (title) => `<div class="ph">${logo(44)}<div><b>${esc(C.org.name)}</b><span>${esc(C.org.place)}${C.org.phone ? ' · ' + esc(C.org.phone) : ''}</span></div><h2>${esc(title)}</h2></div>`;
+  const printFoot = () => `<p class="pf">Printed ${dfmt(todayS)} from ${esc(C.name)} · Built by Nexora Digital · nexoradigitalzim.com</p>`;
+  function doPrint(html) {
+    const p = $('#printdoc'); p.innerHTML = html;
+    document.body.classList.add('printing');
+    const done = () => { document.body.classList.remove('printing'); p.innerHTML = ''; window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    setTimeout(() => { window.print(); setTimeout(done, 500); }, 50);
+  }
+  function printRecord(t, r) {
+    doPrint(`${printHead(t.print.replace(/^Print\s+/i, ''))}<div class="pmeta"><span>Ref <b>${esc(r.id)}</b></span><span>Date <b>${dfmt(t.dateF ? val(t, r, t.dateF) : todayS)}</b></span></div>
+      <table class="ptab"><tbody>${t.fields.map((f) => `<tr><th>${esc(f.label)}</th><td>${cell(t, r, f)}</td></tr>`).join('')}</tbody></table>${printFoot()}`);
+  }
+  function csv(t, rows) {
+    const fs = t.fields;
+    const q = (x) => `"${String(x == null ? '' : x).replace(/"/g, '""')}"`;
+    const lines = [['Ref', ...fs.map((f) => f.label)].map(q).join(','), ...rows.map((r) => [r.id, ...fs.map((f) => val(t, r, f))].map(q).join(','))];
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `${C.id}-${t.name}-${todayS}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    toast(`${rows.length} rows downloaded`);
+  }
+
+  /* ---------- point of sale ---------- */
+  function viewPOS(v, m) {
+    const t = T[m.items], st = T[m.sales];
+    const cart = ui.cart[m.k] = ui.cart[m.k] || {};
+    const cats = m.cat ? ['All', ...new Set(S.db[t.name].map((r) => r[m.cat]))] : null;
+    const cat = ui.cart[m.k + ':cat'] || 'All';
+    v.innerHTML = `<div class="pos"><section>
+        <div class="toolbar"><label class="search">${ic('search', 16)}<input type="search" placeholder="Search or scan a code" aria-label="Search products" value="${esc(ui.q[m.k] || '')}"></label>
+        ${cats ? `<div class="chips">${cats.map((c) => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === cat}">${esc(c)}</button>`).join('')}</div>` : ''}</div>
+        <div class="pgrid" id="pgrid"></div></section>
+      <aside class="card cart" id="cart"></aside></div>`;
+    const drawGrid = () => {
+      const q = (ui.q[m.k] || '').toLowerCase();
+      const items = S.db[t.name].filter((r) => (cat === 'All' || r[m.cat] === cat) && (!q || JSON.stringify(r).toLowerCase().includes(q)));
+      $('#pgrid', v).innerHTML = items.map((r) => {
+        const stock = m.stock ? Number(r[m.stock]) : Infinity;
+        const low = m.reorder ? stock <= Number(r[m.reorder]) : stock <= 5;
+        return `<button class="pitem" data-pi="${esc(r.id)}" ${stock <= 0 ? 'disabled' : ''}>
+          <span class="pcat">${esc(m.cat ? r[m.cat] : '')}</span><b>${esc(r[m.name])}</b>
+          <span class="pp">${money(r[m.price])}</span>
+          ${m.stock ? `<span class="ps ${stock <= 0 ? 'bad' : low ? 'warn' : ''}">${stock <= 0 ? 'Out of stock' : num(stock) + ' in stock'}</span>` : ''}</button>`;
+      }).join('') || '<p class="muted">Nothing matches.</p>';
+      $$('[data-pi]', v).forEach((b) => b.addEventListener('click', () => {
+        const r = S.db[t.name].find((x) => String(x.id) === b.dataset.pi);
+        const q2 = (cart[r.id] || 0) + 1;
+        if (m.stock && q2 > Number(r[m.stock])) return toast(`Only ${r[m.stock]} in stock`, true);
+        cart[r.id] = q2; drawCart();
+      }));
+    };
+    const lines = () => Object.entries(cart).map(([id, q]) => ({ r: S.db[t.name].find((x) => String(x.id) === id), q })).filter((l) => l.r);
+    const drawCart = () => {
+      const ls = lines(); const total = ls.reduce((a, l) => a + l.q * Number(l.r[m.price]), 0);
+      $('#cart', v).innerHTML = `<div class="cardhead"><h3>${esc(m.cartTitle || 'Current sale')}</h3>${ls.length ? '<button class="link" data-clr>Clear</button>' : ''}</div>
+        ${ls.length ? ls.map((l) => `<div class="cline"><div><b>${esc(l.r[m.name])}</b><small>${money(l.r[m.price])} each</small></div>
+          <div class="qty"><button data-dq="${esc(l.r.id)}" aria-label="One less">−</button><b>${l.q}</b><button data-iq="${esc(l.r.id)}" aria-label="One more">+</button></div><span class="lt">${money(l.q * l.r[m.price])}</span></div>`).join('') : `<div class="cart-empty">${ic('cart', 30)}<p>Tap items to add them</p></div>`}
+        <div class="ctotal"><span>Total</span><b>${money(total)}</b></div>
+        ${m.extra ? `<label><span>${esc(m.extra.label)}</span><select id="pxtra">${m.extra.opts.map((o) => `<option>${esc(o)}</option>`).join('')}</select></label>` : ''}
+        <label><span>Customer (optional)</span><input id="pcust" placeholder="Name or phone"></label>
+        <div class="methods" role="radiogroup" aria-label="Payment method">${(m.methods || ['Cash', 'EcoCash', 'Card']).map((x, i) => `<label class="mth"><input type="radio" name="pm" value="${esc(x)}" ${i ? '' : 'checked'}><span>${esc(x)}</span></label>`).join('')}</div>
+        <button class="btn big" data-pay ${ls.length ? '' : 'disabled'}>${ic('check', 18)} ${esc(m.payLabel || 'Complete sale')} · ${money(total)}</button>`;
+      const c = $('#cart', v);
+      $$('[data-iq]', c).forEach((b) => b.addEventListener('click', () => { const r = S.db[t.name].find((x) => String(x.id) === b.dataset.iq); if (m.stock && cart[r.id] + 1 > Number(r[m.stock])) return toast(`Only ${r[m.stock]} in stock`, true); cart[r.id]++; drawCart(); }));
+      $$('[data-dq]', c).forEach((b) => b.addEventListener('click', () => { cart[b.dataset.dq]--; if (cart[b.dataset.dq] <= 0) delete cart[b.dataset.dq]; drawCart(); }));
+      const clr = $('[data-clr]', c); if (clr) clr.addEventListener('click', () => { Object.keys(cart).forEach((k) => delete cart[k]); drawCart(); });
+      const pay = $('[data-pay]', c);
+      pay.addEventListener('click', () => {
+        const method = ($('input[name="pm"]:checked', c) || {}).value;
+        const cust = $('#pcust', c).value.trim();
+        const extra = m.extra ? $('#pxtra', c).value : '';
+        S.seq[st.name] = (S.seq[st.name] || 0) + 1;
+        const row = { id: makeId(st, S.seq[st.name]) };
+        const data = { date: todayS, time: nowT(), items: ls.map((l) => `${l.q}× ${l.r[m.name]}`).join(', '), qty: ls.reduce((a, l) => a + l.q, 0), total, method, cashier: role.person, customer: cust || 'Walk-in' };
+        if (m.extra) data[m.extra.k] = extra;
+        st.fields.forEach((f) => { if (!f.calc) row[f.k] = f.k in data ? data[f.k] : f.type === 'status' ? (m.saleStatus || f.opts[0].v) : ''; });
+        S.db[st.name].unshift(row);
+        if (m.stock) ls.forEach((l) => { l.r[m.stock] = Number(l.r[m.stock]) - l.q; });
+        touch();
+        Object.keys(cart).forEach((k) => delete cart[k]);
+        drawGrid(); drawCart(); render2Bell();
+        dlg(`<div class="receipt"><div class="rc-h">${logo(40)}<b>${esc(C.org.name)}</b><small>${esc(C.org.place)}</small></div>
+          <p class="rc-m"><span>${esc(row.id)}</span><span>${dfmt(todayS)} ${data.time}</span></p>
+          ${ls.map((l) => `<p class="rc-l"><span>${l.q} × ${esc(l.r[m.name])}</span><span>${money(l.q * l.r[m.price])}</span></p>`).join('')}
+          <p class="rc-t"><span>Total</span><span>${money(total)}</span></p><p class="rc-m"><span>Paid by ${esc(method)}</span><span>${esc(role.person)}</span></p>
+          ${m.extra ? `<p class="rc-m"><span>${esc(m.extra.label)}</span><span>${esc(extra)}</span></p>` : ''}
+          <p class="rc-f">Thank you! · Powered by ${esc(C.name)}</p></div>
+          <div class="dact"><button class="btn ghost" data-rp>${ic('printer', 16)} Print receipt</button><button class="btn" data-close>New sale</button></div>`,
+        (d) => $('[data-rp]', d).addEventListener('click', () => doPrint($('.receipt', d).outerHTML)), 'narrow');
+      });
+    };
+    drawGrid(); drawCart();
+    $('.search input', v).addEventListener('input', (e) => { ui.q[m.k] = e.target.value; drawGrid(); });
+    $$('[data-cat]', v).forEach((b) => b.addEventListener('click', () => { ui.cart[m.k + ':cat'] = b.dataset.cat; viewPOS(v, m); }));
+  }
+  function render2Bell() { const n = alertsList().length, bn = $('#bellN'); if (bn) { bn.hidden = !n; bn.textContent = n; } }
+
+  /* ---------- agenda ---------- */
+  function viewAgenda(v, m) {
+    const t = T[m.table], n = m.days || 7;
+    const ds = Array.from({ length: n }, (_, i) => addDays(i + ui.ag));
+    const ro = m.ro;
+    v.innerHTML = `<div class="phead"><div class="inline"><button class="iconbtn" data-ag="-${n}" aria-label="Earlier">${ic('chevL')}</button><b>${dfmt(ds[0])} – ${dfmt(ds[n - 1])}</b><button class="iconbtn" data-ag="${n}" aria-label="Later">${ic('chevR')}</button>${ui.ag ? '<button class="link" data-ag="0">Today</button>' : ''}</div>
+      ${ro ? '' : `<button class="btn" data-add>${ic('plus', 16)} ${esc(t.addLabel || 'Add ' + t.one)}</button>`}</div>
+      <div class="agenda">${ds.map((d) => {
+        const items = rowsOf(t.name).filter((r) => r[m.date] === d).sort((a, b) => String(a[m.time] || '').localeCompare(String(b[m.time] || '')));
+        const dd = parseD(d);
+        return `<section class="day${d === todayS ? ' today' : ''}"><h3><span>${WD[dd.getDay()]}</span><b>${dd.getDate()}</b><small>${MON[dd.getMonth()]}</small>${items.length ? `<i>${items.length}</i>` : ''}</h3>
+          ${items.map((r) => `<article class="ev" data-open="${t.name}" data-id="${esc(r.id)}" tabindex="0"><span class="et">${esc(r[m.time] || '')}</span><b>${esc(val(t, r, m.title))}</b><small>${esc(m.sub ? val(t, r, m.sub) : '')}</small>${t.statusF ? pill(val(t, r, t.statusF), toneOf(t.statusF, val(t, r, t.statusF))) : ''}</article>`).join('') || '<p class="lane-empty">Free</p>'}</section>`;
+      }).join('')}</div>`;
+    $$('[data-ag]', v).forEach((b) => b.addEventListener('click', () => { const x = +b.dataset.ag; ui.ag = x === 0 ? 0 : ui.ag + x; viewAgenda(v, m); }));
+    const add = $('[data-add]', v); if (add) add.addEventListener('click', () => form(t, null));
+    wireOpen(v);
+  }
+
+  /* ---------- reports ---------- */
+  function viewReports(v) {
+    const tabs = role.mods.map((x) => T[x.k] || (C.modules && C.modules[x.k] && T[C.modules[x.k].table || C.modules[x.k].sales])).filter(Boolean).filter((t, i, a) => a.indexOf(t) === i);
+    if (!tabs.length) { v.innerHTML = '<p class="muted">No reports for this role.</p>'; return; }
+    if (!ui.rep.table || !tabs.some((t) => t.name === ui.rep.table)) ui.rep.table = (tabs.find((t) => t.dateF) || tabs[0]).name;
+    const t = T[ui.rep.table];
+    const R = { month: ['This month', todayS.slice(0, 8) + '01'], d30: ['Last 30 days', addDays(-30)], quarter: ['Last 90 days', addDays(-90)], year: ['This year', todayS.slice(0, 5) + '01-01'], all: ['All time', ''] };
+    const from = R[ui.rep.range][1];
+    const rows = sorted(t, rowsOf(t.name).filter((r) => !t.dateF || !from || String(val(t, r, t.dateF) || '') >= from));
+    const moneyF = t.fields.filter((f) => f.type === 'money');
+    const groupF = [t.statusF, ...t.fields.filter((f) => (f.type === 'sel' || f.type === 'ref' || f.type === 'tag') && f !== t.statusF)].filter(Boolean).slice(0, 2);
+    const breakdown = (gf) => { const mp = new Map(); rows.forEach((r) => { const g = val(t, r, gf) || '—'; const o = mp.get(g) || { n: 0, s: 0 }; o.n++; if (moneyF[0]) o.s += Number(val(t, r, moneyF[0])) || 0; mp.set(g, o); }); return [...mp.entries()].sort((a, b) => b[1].n - a[1].n); };
+    const cols = t.fields.filter((f) => !f.hide).slice(0, 7);
+    v.innerHTML = `<div class="phead noprint"><div class="rsel">
+        <label><span>Report on</span><select id="rt">${tabs.map((x) => `<option value="${x.name}"${x === t ? ' selected' : ''}>${esc(x.label)}</option>`).join('')}</select></label>
+        <label><span>Period</span><select id="rr">${Object.entries(R).map(([k, x]) => `<option value="${k}"${k === ui.rep.range ? ' selected' : ''}>${x[0]}</option>`).join('')}</select></label></div>
+        <div class="acts"><button class="btn ghost" data-csv>${ic('download', 16)} CSV</button><button class="btn" data-pr>${ic('printer', 16)} Print or save PDF</button></div></div>
+      <div id="report"><div class="print-only">${printHead(t.label + ' report')}</div>
+      <p class="muted rmeta">${esc(t.label)} · ${R[ui.rep.range][0]}${t.dateF ? ` (by ${esc(t.dateF.label.toLowerCase())})` : ''} · generated ${dfmt(todayS)} by ${esc(role.person)}</p>
+      <div class="kpis sm"><div class="kpi"><span>Records</span><b>${rows.length}</b></div>${moneyF.slice(0, 3).map((f) => `<div class="kpi"><span>Total ${esc(f.label.toLowerCase())}</span><b>${moneyS(rows.reduce((a, r) => a + (Number(val(t, r, f)) || 0), 0))}</b></div>`).join('')}</div>
+      <div class="charts">${groupF.map((gf) => { const b = breakdown(gf); const mx = Math.max(1, ...b.map((x) => x[1].n)); return `<div class="card chart"><h3>By ${esc(gf.label.toLowerCase())}</h3><div class="bars">${b.slice(0, 8).map(([g, o]) => `<div class="brow"><span class="bl">${esc(g)}</span><span class="bt"><i style="width:${(o.n / mx) * 100}%"></i></span><span class="bv">${o.n}${moneyF[0] ? ' · ' + moneyS(o.s) : ''}</span></div>`).join('')}</div></div>`; }).join('')}</div>
+      <div class="card"><h3>Detail</h3>${rows.length ? `<div class="tw mini"><table><thead><tr>${t.code ? '<th>Ref</th>' : ''}${cols.map((f) => `<th class="${isNum(f) ? 'n' : ''}">${esc(f.label)}</th>`).join('')}</tr></thead><tbody>${rows.slice(0, 200).map((r) => `<tr>${t.code ? `<td class="ref" data-label="Ref">${esc(r.id)}</td>` : ''}${cols.map((f) => `<td class="${isNum(f) ? 'n' : ''}" data-label="${esc(f.label)}">${cell(t, r, f)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : '<p class="muted">No records in this period.</p>'}</div>
+      <div class="print-only">${printFoot()}</div></div>`;
+    $('#rt', v).addEventListener('change', (e) => { ui.rep.table = e.target.value; viewReports(v); });
+    $('#rr', v).addEventListener('change', (e) => { ui.rep.range = e.target.value; viewReports(v); });
+    $('[data-csv]', v).addEventListener('click', () => csv(t, rows));
+    $('[data-pr]', v).addEventListener('click', () => doPrint($('#report', v).innerHTML.replace(/class="print-only"/g, 'class=""')));
+  }
+
+  /* ---------- boot ---------- */
+  load();
+  applyTheme();
+  setFavicon();
+  role = C.roles.find((r) => r.id === S.role) || null;
+  if (role) { shell(); go(location.hash.slice(1) || role.mods[0].k); } else login();
+  window.addEventListener('hashchange', () => { if (role && location.hash.slice(1) !== curMod) go(location.hash.slice(1)); });
+})();
+</script>
+</body>
+</html>

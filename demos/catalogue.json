@@ -1,0 +1,469 @@
+[
+ {
+  "group": "Departments in any business",
+  "systems": [
+   {
+    "id": "payday",
+    "name": "PayDay HR",
+    "tag": "HR, leave & payroll",
+    "group": "Departments in any business",
+    "color": "#3730a3",
+    "color2": "#22d3ee",
+    "icon": "users",
+    "blurb": "Employee files, leave requests and approvals, payroll with PAYE, NSSA and payslips, and staff self-service.",
+    "roles": 3,
+    "mods": 3
+   },
+   {
+    "id": "talentdesk",
+    "name": "TalentDesk",
+    "tag": "Recruitment & hiring",
+    "group": "Departments in any business",
+    "color": "#6b21a8",
+    "color2": "#facc15",
+    "icon": "briefcase",
+    "blurb": "Vacancies, CVs, shortlists, interviews and offers in one hiring pipeline for HR teams and recruitment agencies.",
+    "roles": 2,
+    "mods": 2
+   },
+   {
+    "id": "pipeline",
+    "name": "Pipeline CRM",
+    "tag": "Sales & customers",
+    "group": "Departments in any business",
+    "color": "#0c4a6e",
+    "color2": "#f43f5e",
+    "icon": "target",
+    "blurb": "Leads, deals, follow-ups, customers and sales targets for sales teams of any size.",
+    "roles": 2,
+    "mods": 3
+   },
+   {
+    "id": "buyright",
+    "name": "BuyRight",
+    "tag": "Procurement & purchase orders",
+    "group": "Departments in any business",
+    "color": "#155e75",
+    "color2": "#a3e635",
+    "icon": "clipboard",
+    "blurb": "Purchase requisitions, approvals, quotations, purchase orders, deliveries and supplier ratings for procurement teams.",
+    "roles": 3,
+    "mods": 3
+   },
+   {
+    "id": "assetbook",
+    "name": "AssetBook",
+    "tag": "Asset register",
+    "group": "Departments in any business",
+    "color": "#334155",
+    "color2": "#38bdf8",
+    "icon": "layers",
+    "blurb": "Fixed asset register with tags, locations, custodians, depreciation, maintenance and disposals for audits.",
+    "roles": 3,
+    "mods": 2
+   },
+   {
+    "id": "helpdesk",
+    "name": "HelpDesk",
+    "tag": "IT & customer support tickets",
+    "group": "Departments in any business",
+    "color": "#1d4ed8",
+    "color2": "#a855f7",
+    "icon": "headset",
+    "blurb": "Support tickets with priority, response times, agents and customer satisfaction for IT teams and service desks.",
+    "roles": 2,
+    "mods": 2
+   },
+   {
+    "id": "frontgate",
+    "name": "FrontGate",
+    "tag": "Visitors & reception",
+    "group": "Departments in any business",
+    "color": "#0f766e",
+    "color2": "#fbbf24",
+    "icon": "door",
+    "blurb": "Visitor sign-in, host notifications, badges, pre-booked guests, deliveries and evacuation lists for receptions and gates.",
+    "roles": 3,
+    "mods": 2
+   },
+   {
+    "id": "safesite",
+    "name": "SafeSite",
+    "tag": "Health, safety & environment (SHEQ)",
+    "group": "Departments in any business",
+    "color": "#b91c1c",
+    "color2": "#facc15",
+    "icon": "alert",
+    "blurb": "Incident reporting, investigations, inspections, toolbox talks, PPE issue and safety statistics for SHEQ teams.",
+    "roles": 3,
+    "mods": 4
+   },
+   {
+    "id": "doctrack",
+    "name": "DocTrack",
+    "tag": "Contracts & compliance register",
+    "group": "Departments in any business",
+    "color": "#475569",
+    "color2": "#14b8a6",
+    "icon": "file",
+    "blurb": "Contracts, licences, permits, insurance and compliance certificates with owners, values and expiry reminders.",
+    "roles": 2,
+    "mods": 2
+   },
+   {
+    "id": "skilllog",
+    "name": "SkillLog",
+    "tag": "Training & certifications",
+    "group": "Departments in any business",
+    "color": "#9a3412",
+    "color2": "#fdba74",
+    "icon": "award",
+    "blurb": "Training courses, sessions, attendance, certificates, tickets and expiry dates for training providers and HR.",
+    "roles": 3,
+    "mods": 3
+   }
+  ]
+ },
+ {
+  "group": "Education & community",
+  "systems": [
+   {
+    "id": "chikoro",
+    "name": "Chikoro",
+    "tag": "School management",
+    "group": "Education & community",
+    "color": "#1e40af",
+    "color2": "#f59e0b",
+    "icon": "cap",
+    "blurb": "Pupils, fees, results, report cards and attendance for primary and secondary schools.",
+    "roles": 4,
+    "mods": 5
+   },
+   {
+    "id": "ungano",
+    "name": "Ungano",
+    "tag": "Church management",
+    "group": "Education & community",
+    "color": "#6d28d9",
+    "color2": "#f472b6",
+    "icon": "church",
+    "blurb": "Members, cell groups, tithes and offerings, pledges, services and events.",
+    "roles": 4,
+    "mods": 4
+   },
+   {
+    "id": "nhengo",
+    "name": "Nhengo",
+    "tag": "Membership & associations",
+    "group": "Education & community",
+    "color": "#0f766e",
+    "color2": "#84cc16",
+    "icon": "award",
+    "blurb": "Members, subscriptions, renewals, CPD events and certificates for clubs, unions and professional bodies.",
+    "roles": 3,
+    "mods": 3
+   },
+   {
+    "id": "mukando",
+    "name": "Mukando",
+    "tag": "Savings clubs & burial societies",
+    "group": "Education & community",
+    "color": "#b45309",
+    "color2": "#facc15",
+    "icon": "coins",
+    "blurb": "Monthly contributions, member loans with interest, payouts and burial cover for savings groups.",
+    "roles": 3,
+    "mods": 4
+   },
+   {
+    "id": "rubatsiro",
+    "name": "Rubatsiro",
+    "tag": "NGO projects & beneficiaries",
+    "group": "Education & community",
+    "color": "#0e7490",
+    "color2": "#22c55e",
+    "icon": "globe",
+    "blurb": "Donor projects, budgets, beneficiaries, distributions and field visits with donor reports.",
+    "roles": 3,
+    "mods": 4
+   }
+  ]
+ },
+ {
+  "group": "Shops, food & hospitality",
+  "systems": [
+   {
+    "id": "stockwise",
+    "name": "Stockwise POS",
+    "tag": "Shop & hardware point of sale",
+    "group": "Shops, food & hospitality",
+    "color": "#047857",
+    "color2": "#facc15",
+    "icon": "cart",
+    "blurb": "Fast tills, stock levels, reorder alerts, supplier orders and credit accounts for shops and hardware stores.",
+    "roles": 3,
+    "mods": 4
+   },
+   {
+    "id": "kitchenpass",
+    "name": "Kitchen Pass",
+    "tag": "Restaurant, bar & takeaway",
+    "group": "Shops, food & hospitality",
+    "color": "#9f1239",
+    "color2": "#fb923c",
+    "icon": "utensils",
+    "blurb": "Table orders, kitchen screen, bills, table bookings and pantry stock for restaurants, bars and takeaways.",
+    "roles": 4,
+    "mods": 4
+   },
+   {
+    "id": "staylodge",
+    "name": "StayLodge",
+    "tag": "Hotel, lodge & guest house",
+    "group": "Shops, food & hospitality",
+    "color": "#115e59",
+    "color2": "#eab308",
+    "icon": "bed",
+    "blurb": "Rooms, reservations, check-in and check-out, guest bills and housekeeping for lodges and hotels.",
+    "roles": 3,
+    "mods": 3
+   },
+   {
+    "id": "glowbook",
+    "name": "GlowBook",
+    "tag": "Salon, barber & spa",
+    "group": "Shops, food & hospitality",
+    "color": "#be185d",
+    "color2": "#fbbf24",
+    "icon": "scissors",
+    "blurb": "Appointments, stylists, client history, product sales and commissions for salons, barbers and spas.",
+    "roles": 3,
+    "mods": 5
+   },
+   {
+    "id": "fittrack",
+    "name": "FitTrack",
+    "tag": "Gym & fitness centre",
+    "group": "Shops, food & hospitality",
+    "color": "#b91c1c",
+    "color2": "#f97316",
+    "icon": "dumbbell",
+    "blurb": "Memberships, renewals, check-ins at the door, classes and payments for gyms and fitness studios.",
+    "roles": 3,
+    "mods": 4
+   },
+   {
+    "id": "gatepass",
+    "name": "GatePass",
+    "tag": "Events & ticketing",
+    "group": "Shops, food & hospitality",
+    "color": "#5b21b6",
+    "color2": "#06b6d4",
+    "icon": "ticket",
+    "blurb": "Ticket tiers, box office sales, gate check-in, sponsors and event budgets for promoters and venues.",
+    "roles": 3,
+    "mods": 3
+   }
+  ]
+ },
+ {
+  "group": "Health & care",
+  "systems": [
+   {
+    "id": "utano",
+    "name": "Utano Clinic",
+    "tag": "Clinic, surgery & lab",
+    "group": "Health & care",
+    "color": "#0369a1",
+    "color2": "#14b8a6",
+    "icon": "stethoscope",
+    "blurb": "Patient records, appointments, consultations, lab tests, billing and medical aid claims for clinics and surgeries.",
+    "roles": 4,
+    "mods": 4
+   },
+   {
+    "id": "mushonga",
+    "name": "Mushonga",
+    "tag": "Pharmacy point of sale & stock",
+    "group": "Health & care",
+    "color": "#15803d",
+    "color2": "#22d3ee",
+    "icon": "pill",
+    "blurb": "Dispensing till, prescriptions, batch and expiry tracking, reorders and medical aid sales for pharmacies.",
+    "roles": 2,
+    "mods": 3
+   },
+   {
+    "id": "restwell",
+    "name": "RestWell",
+    "tag": "Funeral cover & parlour",
+    "group": "Health & care",
+    "color": "#334155",
+    "color2": "#a78bfa",
+    "icon": "shield",
+    "blurb": "Funeral policies, monthly premiums, lapses, claims and funeral bookings for funeral parlours and burial schemes.",
+    "roles": 3,
+    "mods": 4
+   }
+  ]
+ },
+ {
+  "group": "Money & finance",
+  "systems": [
+   {
+    "id": "marilend",
+    "name": "MariLend",
+    "tag": "Microfinance & loans",
+    "group": "Money & finance",
+    "color": "#065f46",
+    "color2": "#fbbf24",
+    "icon": "cash",
+    "blurb": "Loan applications, approvals, repayment schedules, arrears and collections for microlenders and credit schemes.",
+    "roles": 3,
+    "mods": 4
+   },
+   {
+    "id": "bhuku",
+    "name": "Bhuku Books",
+    "tag": "Invoicing, expenses & accounts",
+    "group": "Money & finance",
+    "color": "#1d4ed8",
+    "color2": "#38bdf8",
+    "icon": "receipt",
+    "blurb": "Quotes, invoices, payments received, expenses, debtors and profit for small and medium businesses.",
+    "roles": 3,
+    "mods": 4
+   }
+  ]
+ },
+ {
+  "group": "Property, farming & transport",
+  "systems": [
+   {
+    "id": "imba",
+    "name": "Imba Rentals",
+    "tag": "Property & rentals",
+    "group": "Property, farming & transport",
+    "color": "#9a3412",
+    "color2": "#fb923c",
+    "icon": "key",
+    "blurb": "Properties, units, tenants, leases, rent collection, arrears and repairs for landlords and property managers.",
+    "roles": 3,
+    "mods": 4
+   },
+   {
+    "id": "munda",
+    "name": "Munda Farm",
+    "tag": "Farm records",
+    "group": "Property, farming & transport",
+    "color": "#3f6212",
+    "color2": "#eab308",
+    "icon": "sprout",
+    "blurb": "Fields and crops, livestock, inputs store, farm sales, workers and daily tasks for commercial and smallholder farms.",
+    "roles": 3,
+    "mods": 5
+   },
+   {
+    "id": "fleetline",
+    "name": "FleetLine",
+    "tag": "Fleet & transport",
+    "group": "Property, farming & transport",
+    "color": "#1e3a8a",
+    "color2": "#f97316",
+    "icon": "truck",
+    "blurb": "Vehicles, drivers, trips, fuel, services, licences and breakdowns for haulage, buses and company fleets.",
+    "roles": 3,
+    "mods": 4
+   },
+   {
+    "id": "tumira",
+    "name": "Tumira",
+    "tag": "Courier & deliveries",
+    "group": "Property, farming & transport",
+    "color": "#c2410c",
+    "color2": "#fde047",
+    "icon": "box",
+    "blurb": "Parcel booking, tracking numbers, riders, cash on delivery and branch-to-branch transfers for couriers.",
+    "roles": 3,
+    "mods": 3
+   }
+  ]
+ },
+ {
+  "group": "Trades, industry & services",
+  "systems": [
+   {
+    "id": "jobcard",
+    "name": "JobCard",
+    "tag": "Garage & workshop",
+    "group": "Trades, industry & services",
+    "color": "#374151",
+    "color2": "#f59e0b",
+    "icon": "wrench",
+    "blurb": "Job cards, quotes, parts, mechanics and invoices for garages, panel beaters and workshops.",
+    "roles": 3,
+    "mods": 3
+   },
+   {
+    "id": "sitebook",
+    "name": "SiteBook",
+    "tag": "Construction projects",
+    "group": "Trades, industry & services",
+    "color": "#92400e",
+    "color2": "#fcd34d",
+    "icon": "hardhat",
+    "blurb": "Projects, site diaries, materials requests, payment certificates and labour for builders and contractors.",
+    "roles": 3,
+    "mods": 4
+   },
+   {
+    "id": "plantcare",
+    "name": "PlantCare",
+    "tag": "Maintenance & work orders",
+    "group": "Trades, industry & services",
+    "color": "#075985",
+    "color2": "#f97316",
+    "icon": "gauge",
+    "blurb": "Equipment register, planned maintenance, breakdown work orders, spares and downtime for mines, factories and plants.",
+    "roles": 4,
+    "mods": 4
+   },
+   {
+    "id": "guardian",
+    "name": "Guardian",
+    "tag": "Security company",
+    "group": "Trades, industry & services",
+    "color": "#1e293b",
+    "color2": "#3b82f6",
+    "icon": "shield",
+    "blurb": "Client sites, guard roster, attendance, incidents, patrols and monthly billing for security companies.",
+    "roles": 3,
+    "mods": 4
+   },
+   {
+    "id": "sunco",
+    "name": "SunCo",
+    "tag": "Solar sales & installations",
+    "group": "Trades, industry & services",
+    "color": "#a16207",
+    "color2": "#0ea5e9",
+    "icon": "sun",
+    "blurb": "Enquiries, site surveys, quotes, installations, panel and battery stock and after-sales service for solar companies.",
+    "roles": 3,
+    "mods": 4
+   },
+   {
+    "id": "casefile",
+    "name": "CaseFile",
+    "tag": "Law firm practice",
+    "group": "Trades, industry & services",
+    "color": "#1c1917",
+    "color2": "#d4a373",
+    "icon": "scale",
+    "blurb": "Clients, matters, court diary, time and fees, trust deposits and deadlines for law firms and legal departments.",
+    "roles": 3,
+    "mods": 3
+   }
+  ]
+ }
+]
