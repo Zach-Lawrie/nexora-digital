@@ -6,7 +6,13 @@ const STAFF = ['admin', 'manager', 'foreman', 'tech'];
 const BOSS = ['admin', 'manager'];
 const SUPERVISE = ['admin', 'manager', 'foreman'];
 const DISCIPLINES = ['Electrical', 'Mechanical', 'Automation', 'Instrumentation'];
-const TYPES = ['Preventive maintenance', 'Corrective maintenance', 'Breakdown', 'Installation', 'Inspection', 'Testing & commissioning', 'Calibration'];
+const TYPE_GROUPS = [
+  ['General', ['Preventive maintenance', 'Corrective maintenance', 'Breakdown', 'Inspection', 'Installation', 'Modification / upgrade', 'Shutdown / overhaul', 'Commissioning', 'Testing & commissioning']],
+  ['Electrical testing', ['Electrical testing (IR, earth, RCD)', 'Test & tag (portable appliances)', 'Thermographic survey', 'Motor testing', 'Protection relay testing', 'Switching & isolation (HV/LV)']],
+  ['Automation & instrumentation', ['Point-to-point (I/O check)', 'Loop check', 'Calibration', 'PLC / SCADA work']],
+  ['Mechanical', ['Vibration analysis', 'Laser alignment', 'Lubrication route', 'Pump / gearbox overhaul', 'Conveyor inspection', 'Pressure / leak test', 'Lifting equipment inspection', 'Welding & fabrication']],
+];
+const TYPES = TYPE_GROUPS.flatMap((g) => g[1]);
 const PRIORITIES = ['Urgent', 'High', 'Normal', 'Low'];
 const STATUSES = ['requested', 'open', 'assigned', 'in_progress', 'on_hold', 'completed', 'reviewed', 'approved', 'sent', 'closed', 'cancelled'];
 const LABEL = { requested: 'Requested', open: 'Open', assigned: 'Assigned', in_progress: 'In progress', on_hold: 'On hold', completed: 'Completed', reviewed: 'Reviewed', approved: 'Approved', sent: 'Sent to client', closed: 'Closed', cancelled: 'Cancelled' };
@@ -40,11 +46,76 @@ const T = {
 };
 T.Instrumentation = T.Automation;
 const CAL = ['Reference instrument certificate valid', 'As-found reading', 'Adjustment made', 'As-left reading', 'Result within tolerance', 'Calibration sticker fitted'];
+const TYPE_CHECKS = {
+  'Commissioning': ['Pre-commissioning checks signed off', 'Latest drawings, IO list and procedures on site', 'Mechanical completion confirmed', 'Energised under permit', 'Function tests done (test sheet)', 'Interlocks, trips and E-stops proven', 'Performance / load test done', 'Punch list issued to client', 'Operators trained', 'Handover pack given (as-builts, manuals, test sheets)'],
+  'Electrical testing (IR, earth, RCD)': ['Circuits identified and isolated', 'Test instrument in calibration', 'Insulation resistance recorded', 'Earth continuity / electrode resistance recorded', 'RCDs tested', 'Polarity verified', 'Results within limits or defects listed'],
+  'Test & tag (portable appliances)': ['Test instrument in calibration', 'Items listed with location', 'Visual check of leads, plugs and casing', 'Electrical tests done', 'Tags fitted with next test date', 'Failed items removed from service and labelled', 'Register given to client'],
+  'Thermographic survey': ['Equipment at 40% load or more', 'Camera emissivity and settings correct', 'All panels and connections scanned', 'Hot spots recorded with temperature rise', 'Images saved to the job', 'Priority repairs listed'],
+  'Motor testing': ['Motor isolated, terminals accessible', 'Insulation resistance to earth', 'Winding resistance balanced', 'Polarisation index (if required)', 'Running current measured', 'Bearing noise and vibration checked', 'Motor reconnected and rotation checked'],
+  'Protection relay testing': ['Approved settings sheet on site', 'CT / VT ratios verified', 'Secondary injection tests done', 'Trip circuit tested to breaker', 'Settings backed up', 'Results within tolerance'],
+  'Switching & isolation (HV/LV)': ['Switching program approved', 'Switching operator authorised', 'Arc flash PPE to rating', 'Isolation points locked and tagged', 'Absence of voltage verified', 'Earths applied (HV)', 'Permit issued to work party', 'Restoration done and recorded'],
+  'Point-to-point (I/O check)': ['IO list and drawings at latest revision', 'Panel powered and PLC online', 'Each field device wired to the correct terminal', 'Each signal seen at PLC and HMI', 'Tags and labels correct', 'Faults recorded and fixed'],
+  'Loop check': ['Loop drawings available', 'Calibrator in date', 'Signal injected at the field device', 'PLC / DCS reading matches', 'Alarms and trips at setpoints', 'Loop sheet signed'],
+  'PLC / SCADA work': ['Backup taken before change', 'Change approved (management of change)', 'Change tested offline / simulation', 'Change downloaded', 'Function tested with operations', 'Backup after change and documented'],
+  'Vibration analysis': ['Machine at normal running load', 'Measurement points marked', 'Readings taken H / V / A at DE and NDE', 'Compared with limits and history', 'Spectrum saved for high points', 'Recommendations issued'],
+  'Laser alignment': ['Machine isolated and locked', 'Soft foot checked and corrected', 'Thermal growth allowance set', 'As-found readings recorded', 'Shims and moves done', 'As-left within tolerance', 'Coupling guard refitted'],
+  'Lubrication route': ['Correct lubricant per chart', 'Grease points cleaned before greasing', 'Quantities as per schedule', 'Oil levels topped up', 'Leaks reported', 'Lube chart updated'],
+  'Pump / gearbox overhaul': ['Unit isolated, drained and removed', 'Parts cleaned and inspected', 'Wear measured and recorded', 'Bearings and seals replaced', 'Reassembled to spec (torques recorded)', 'Alignment done', 'Run test: noise, temperature, vibration, leaks'],
+  'Conveyor inspection': ['Belt condition and splices', 'Belt tracking', 'Idlers and pulleys', 'Scrapers and skirting', 'Pull-wires and E-stops tested', 'Guards in place', 'Drive, gearbox and coupling'],
+  'Pressure / leak test': ['Test procedure and limits approved', 'Gauges calibrated', 'System isolated and vented', 'Pressure raised in stages', 'Hold time completed', 'No leaks, drop within limit', 'Pressure released safely'],
+  'Lifting equipment inspection': ['Register and SWL markings checked', 'Slings, chains and shackles inspected', 'Hooks and safety latches', 'Hoist brake and limit switches', 'Load test (if due)', 'Tagged with colour code and next date'],
+  'Welding & fabrication': ['Hot work permit issued', 'Fire watch and extinguisher in place', 'Welder qualified for the work', 'Material and consumables correct', 'Weld visual inspection', 'NDT done if required', 'Painted / protected'],
+  'Modification / upgrade': ['Management of change approved', 'Drawings marked up', 'Materials checked', 'Work done to drawing', 'Tested', 'As-builts and documents updated'],
+  'Shutdown / overhaul': ['Shutdown plan and scope agreed', 'Isolations per isolation list', 'Work packs issued', 'Progress tracked against plan', 'Quality checks done', 'Isolations removed and plant handed back'],
+};
+TYPE_CHECKS['Testing & commissioning'] = TYPE_CHECKS['Commissioning'];
+
+/* ---------- test sheets ---------- */
+const isN = (v) => v !== '' && v != null && !isNaN(Number(v));
+const N = (v) => Number(v);
+const COLOURS = ['Red', 'Green', 'Blue', 'Yellow', 'White', 'Orange'];
+const SHEETS = {
+  func: { title: 'Function and commissioning tests', limits: 'Each function must perform as expected', cols: [['step', 'Step', 'text'], ['test', 'Function tested', 'text'], ['expected', 'Expected', 'text'], ['actual', 'Actual', 'text'], ['outcome', 'Outcome', 'sel', ['Pass', 'Fail']]], rule: (r) => r.outcome || '' },
+  punch: { title: 'Punch list', limits: 'A = before start-up, B = before handover, C = can wait', cols: [['item', 'Item', 'text'], ['cat', 'Category', 'sel', ['A', 'B', 'C']], ['owner', 'Responsible', 'text'], ['status', 'Status', 'sel', ['Open', 'Closed']]], rule: (r) => r.status === 'Closed' ? 'Pass' : r.cat === 'A' ? 'Fail' : 'Open' },
+  p2p: { title: 'Point-to-point / I/O check', limits: 'Field device, PLC and HMI must all be OK', cols: [['tag', 'Tag', 'text'], ['desc', 'Description', 'text'], ['io', 'Type', 'sel', ['DI', 'DO', 'AI', 'AO']], ['addr', 'PLC address', 'text'], ['term', 'Terminal', 'text'], ['field', 'Field', 'sel', ['OK', 'Fault']], ['plc', 'PLC', 'sel', ['OK', 'Fault']], ['hmi', 'HMI', 'sel', ['OK', 'Fault', 'N/A']]], rule: (r) => [r.field, r.plc, r.hmi].includes('Fault') ? 'Fail' : r.field && r.plc ? 'Pass' : '' },
+  loop: { title: 'Loop check / calibration', limits: 'As-left error within tolerance', cols: [['tag', 'Tag', 'text'], ['desc', 'Description', 'text'], ['range', 'Range', 'text'], ['found', 'As found error %', 'num'], ['left', 'As left error %', 'num'], ['tol', 'Tolerance %', 'num']], rule: (r) => isN(r.left) ? (Math.abs(N(r.left)) <= (isN(r.tol) ? N(r.tol) : 0.5) ? 'Pass' : 'Fail') : '' },
+  ir: { title: 'Insulation resistance test', limits: 'Minimum 1 MΩ unless stated (LV)', cols: [['circuit', 'Circuit / cable', 'text'], ['size', 'Size', 'text'], ['volts', 'Test V', 'sel', ['250', '500', '1000', '2500', '5000']], ['l1', 'L1-E MΩ', 'num'], ['l2', 'L2-E MΩ', 'num'], ['l3', 'L3-E MΩ', 'num'], ['ne', 'N-E MΩ', 'num'], ['ll', 'L-L MΩ', 'num'], ['min', 'Min MΩ', 'num']], rule: (r) => { const v = ['l1', 'l2', 'l3', 'ne', 'll'].filter((k) => isN(r[k])).map((k) => N(r[k])); return v.length ? (Math.min(...v) >= (isN(r.min) ? N(r.min) : 1) ? 'Pass' : 'Fail') : ''; } },
+  earth: { title: 'Earth and continuity test', limits: 'Result at or below the limit', cols: [['location', 'Location', 'text'], ['kind', 'Test', 'sel', ['Earth electrode', 'Main earth bar', 'Continuity (R1+R2)', 'Equipment bonding']], ['value', 'Result Ω', 'num'], ['limit', 'Limit Ω', 'num']], rule: (r) => isN(r.value) ? (N(r.value) <= (isN(r.limit) ? N(r.limit) : 10) ? 'Pass' : 'Fail') : '' },
+  rcd: { title: 'RCD test', limits: 'No trip at ½×, trip ≤ 300 ms at 1×, ≤ 40 ms at 5×', cols: [['circuit', 'Circuit', 'text'], ['rating', 'Rating mA', 'sel', ['10', '30', '100', '300']], ['half', '½× test', 'sel', ['No trip', 'Tripped']], ['x1', '1× ms', 'num'], ['x5', '5× ms', 'num'], ['button', 'Test button', 'sel', ['OK', 'Fail']]], rule: (r) => (r.half === 'Tripped' || (isN(r.x1) && N(r.x1) > 300) || (isN(r.x5) && N(r.x5) > 40) || r.button === 'Fail') ? 'Fail' : (isN(r.x1) ? 'Pass' : '') },
+  tt: { title: 'Test and tag register', limits: 'AS/NZS 3760: earth ≤ 1 Ω (Class I), insulation ≥ 1 MΩ, leakage ≤ 5 mA, RCD ≤ 300 ms', due: true, cols: [['tag_no', 'Tag no.', 'text'], ['item', 'Item', 'text'], ['location', 'Location', 'text'], ['class', 'Class', 'sel', ['I', 'II']], ['visual', 'Visual', 'sel', ['Pass', 'Fail']], ['earth', 'Earth Ω', 'num'], ['ir', 'Insul. MΩ', 'num'], ['leak', 'Leakage mA', 'num'], ['rcd', 'RCD ms', 'num'], ['tag', 'Tag colour', 'sel', COLOURS], ['interval', 'Retest', 'sel', ['3 months', '6 months', '12 months', '5 years']]], rule: (r) => (r.visual === 'Fail' || (r.class !== 'II' && isN(r.earth) && N(r.earth) > 1) || (isN(r.ir) && N(r.ir) < 1) || (isN(r.leak) && N(r.leak) > 5) || (isN(r.rcd) && N(r.rcd) > 300)) ? 'Fail' : r.visual ? 'Pass' : '' },
+  motor: { title: 'Motor test', limits: 'IR ≥ 1 MΩ, winding imbalance ≤ 5%, current imbalance ≤ 10%, vibration ≤ 7.1 mm/s', cols: [['tag', 'Motor tag', 'text'], ['kw', 'kW', 'num'], ['ir', 'IR MΩ', 'num'], ['uv', 'U-V Ω', 'num'], ['vw', 'V-W Ω', 'num'], ['wu', 'W-U Ω', 'num'], ['i1', 'L1 A', 'num'], ['i2', 'L2 A', 'num'], ['i3', 'L3 A', 'num'], ['vib', 'Vib mm/s', 'num']], rule: (r) => {
+    const imb = (a) => { a = a.filter(isN).map(N); if (a.length < 2) return 0; const avg = a.reduce((x, y) => x + y, 0) / a.length; return avg ? (Math.max(...a) - Math.min(...a)) / avg * 100 : 0; };
+    if (!isN(r.ir) && !isN(r.uv)) return '';
+    return (isN(r.ir) && N(r.ir) < 1) || imb([r.uv, r.vw, r.wu]) > 5 || imb([r.i1, r.i2, r.i3]) > 10 || (isN(r.vib) && N(r.vib) > 7.1) ? 'Fail' : 'Pass'; } },
+  thermo: { title: 'Thermographic survey', limits: 'Temperature rise over reference below 10 °C; 10 °C or more needs action', cols: [['location', 'Panel / location', 'text'], ['component', 'Component', 'text'], ['temp', 'Hot spot °C', 'num'], ['ref', 'Reference °C', 'num'], ['load', 'Load %', 'num']], rule: (r) => isN(r.temp) && isN(r.ref) ? (N(r.temp) - N(r.ref) >= 10 ? 'Fail' : 'Pass') : '' },
+  relay: { title: 'Protection relay test', limits: 'Trip time within tolerance of expected', cols: [['relay', 'Relay', 'text'], ['func', 'Function', 'text'], ['setting', 'Setting', 'text'], ['injected', 'Injected', 'text'], ['trip', 'Trip ms', 'num'], ['expected', 'Expected ms', 'num'], ['tol', 'Tol %', 'num']], rule: (r) => isN(r.trip) && isN(r.expected) && N(r.expected) ? (Math.abs(N(r.trip) - N(r.expected)) / N(r.expected) * 100 <= (isN(r.tol) ? N(r.tol) : 5) ? 'Pass' : 'Fail') : '' },
+  loto: { title: 'Isolation and lock-out register', limits: 'Every isolation verified before work', cols: [['point', 'Isolation point', 'text'], ['device', 'Device', 'text'], ['energy', 'Energy', 'sel', ['Electrical', 'Mechanical', 'Hydraulic', 'Pneumatic', 'Thermal', 'Chemical']], ['lock', 'Lock / tag no.', 'text'], ['by', 'Isolated by', 'text'], ['verified', 'Verified dead', 'sel', ['Yes', 'No']], ['removed', 'Removed by', 'text']], rule: (r) => r.verified === 'Yes' ? 'Pass' : r.verified === 'No' ? 'Fail' : '' },
+  vib: { title: 'Vibration readings', limits: 'Overall velocity at or below the limit (default 4.5 mm/s)', cols: [['machine', 'Machine', 'text'], ['point', 'Point', 'sel', ['Motor DE', 'Motor NDE', 'Pump DE', 'Pump NDE', 'Gearbox in', 'Gearbox out', 'Fan DE', 'Fan NDE']], ['h', 'H mm/s', 'num'], ['v', 'V mm/s', 'num'], ['a', 'A mm/s', 'num'], ['limit', 'Limit mm/s', 'num']], rule: (r) => { const v = ['h', 'v', 'a'].filter((k) => isN(r[k])).map((k) => N(r[k])); return v.length ? (Math.max(...v) <= (isN(r.limit) ? N(r.limit) : 4.5) ? 'Pass' : 'Fail') : ''; } },
+  align: { title: 'Shaft alignment', limits: 'As-left offset and angularity within tolerance', cols: [['machine', 'Machine', 'text'], ['stage', 'Stage', 'sel', ['As found', 'As left']], ['oh', 'Offset H mm', 'num'], ['ov', 'Offset V mm', 'num'], ['ah', 'Angle H mm/100', 'num'], ['av', 'Angle V mm/100', 'num'], ['tol', 'Tolerance mm', 'num']], rule: (r) => { if (r.stage !== 'As left') return ''; const v = ['oh', 'ov', 'ah', 'av'].filter((k) => isN(r[k])).map((k) => Math.abs(N(r[k]))); return v.length ? (Math.max(...v) <= (isN(r.tol) ? N(r.tol) : 0.05) ? 'Pass' : 'Fail') : ''; } },
+  torque: { title: 'Bolt torque record', limits: 'Applied torque within ±5% of spec', cols: [['location', 'Joint / location', 'text'], ['size', 'Bolt size', 'text'], ['qty', 'Qty', 'num'], ['spec', 'Spec Nm', 'num'], ['applied', 'Applied Nm', 'num'], ['marked', 'Marked', 'sel', ['Yes', 'No']]], rule: (r) => isN(r.spec) && isN(r.applied) ? (Math.abs(N(r.applied) - N(r.spec)) <= N(r.spec) * 0.05 ? 'Pass' : 'Fail') : '' },
+  pressure: { title: 'Pressure / leak test', limits: 'Pressure drop during hold within allowed %', cols: [['system', 'System / line', 'text'], ['medium', 'Medium', 'sel', ['Water', 'Air', 'Nitrogen', 'Oil']], ['test', 'Test bar', 'num'], ['hold', 'Hold min', 'num'], ['start', 'Start bar', 'num'], ['end', 'End bar', 'num'], ['allowed', 'Allowed drop %', 'num']], rule: (r) => isN(r.start) && isN(r.end) && N(r.start) ? ((N(r.start) - N(r.end)) / N(r.start) * 100 <= (isN(r.allowed) ? N(r.allowed) : 2) ? 'Pass' : 'Fail') : '' },
+  lift: { title: 'Lifting equipment register', limits: 'Visual and load test must pass; tagged with next date', due: true, cols: [['tag_no', 'ID no.', 'text'], ['item', 'Item', 'text'], ['location', 'Location', 'text'], ['swl', 'SWL', 'text'], ['visual', 'Visual', 'sel', ['Pass', 'Fail']], ['load', 'Load test', 'sel', ['Passed', 'Not required', 'Failed']], ['tag', 'Tag colour', 'sel', COLOURS], ['interval', 'Retest', 'sel', ['3 months', '6 months', '12 months']]], rule: (r) => r.visual === 'Fail' || r.load === 'Failed' ? 'Fail' : r.visual ? 'Pass' : '' },
+};
+const BY_DISC = (d, e, m, a) => (disc) => disc === 'Electrical' ? e : disc === 'Mechanical' ? m : a;
+const TYPE_SHEETS = {
+  'Commissioning': BY_DISC(0, ['func', 'ir', 'rcd', 'punch'], ['func', 'vib', 'align', 'punch'], ['func', 'p2p', 'loop', 'punch']),
+  'Testing & commissioning': BY_DISC(0, ['func', 'ir', 'rcd', 'punch'], ['func', 'vib', 'align', 'punch'], ['func', 'p2p', 'loop', 'punch']),
+  'Installation': BY_DISC(0, ['ir'], ['torque', 'align'], ['p2p']),
+  'Electrical testing (IR, earth, RCD)': () => ['ir', 'earth', 'rcd'], 'Test & tag (portable appliances)': () => ['tt'], 'Thermographic survey': () => ['thermo'],
+  'Motor testing': () => ['motor'], 'Protection relay testing': () => ['relay'], 'Switching & isolation (HV/LV)': () => ['loto'], 'Point-to-point (I/O check)': () => ['p2p'],
+  'Loop check': () => ['loop'], 'Calibration': () => ['loop'], 'Vibration analysis': () => ['vib'], 'Laser alignment': () => ['align'], 'Pump / gearbox overhaul': () => ['vib', 'torque'],
+  'Pressure / leak test': () => ['pressure'], 'Lifting equipment inspection': () => ['lift'], 'Shutdown / overhaul': () => ['loto', 'punch'],
+};
+const sheetsFor = (discipline, type) => (TYPE_SHEETS[type] ? TYPE_SHEETS[type](discipline) : []);
+const monthsOf = (v) => ({ '3 months': 3, '6 months': 6, '12 months': 12, '5 years': 60 }[v] || 12);
+function addMonths(d, m) { const x = new Date(d + 'T00:00:00Z'); x.setUTCMonth(x.getUTCMonth() + m); return x.toISOString().slice(0, 10); }
+const sheetDefs = () => Object.fromEntries(Object.entries(SHEETS).map(([k, v]) => [k, { title: v.title, limits: v.limits, due: !!v.due, cols: v.cols }]));
 function templateFor(discipline, type) {
   const d = T[discipline] || T.Electrical;
   let main, name;
+  if (TYPE_CHECKS[type]) return [['Safety before work', SAFETY], [type.replace(/ \(.*\)$/, '') + ' checks', TYPE_CHECKS[type]], ['Handover', HANDOVER]];
   if (type === 'Inspection') { main = d.insp; name = 'Inspection'; }
-  else if (type === 'Installation' || type === 'Testing & commissioning') { main = d.inst; name = type === 'Installation' ? 'Installation' : 'Testing & commissioning'; }
+  else if (type === 'Installation') { main = d.inst; name = 'Installation'; }
   else if (type === 'Calibration') { main = CAL; name = 'Calibration'; }
   else { main = d.maint; name = 'Work'; }
   return [['Safety before work', SAFETY], [name + ' checks', main], ['Handover', HANDOVER]];
@@ -161,6 +232,7 @@ async function createWO(env, user, d) {
     } catch (e) { if (!/UNIQUE/i.test(String(e.message))) throw e; number = number.replace(/\d+$/, (x) => String(+x + 1).padStart(3, '0')); }
   }
   const id = r.meta.last_row_id;
+  await run(env.DB, 'UPDATE work_orders SET sheets=? WHERE id=?', sheetsFor(d.discipline, d.type).join(','), id);
   const stmts = []; let sort = 0;
   for (const [section, items] of templateFor(d.discipline, d.type)) for (const item of items) stmts.push(env.DB.prepare('INSERT INTO checklist (wo_id, section, item, sort) VALUES (?,?,?,?)').bind(id, section, item, sort++));
   await env.DB.batch(stmts);
@@ -235,7 +307,7 @@ on('POST', '/me/profile', async ({ env, user, body }) => {
 /* lookups for forms */
 on('GET', '/lookups', async ({ env, user }) => {
   need(user);
-  const out = { disciplines: DISCIPLINES, types: TYPES, priorities: PRIORITIES, statuses: STATUSES, labels: LABEL };
+  const out = { disciplines: DISCIPLINES, types: TYPES, type_groups: TYPE_GROUPS, sheets: sheetDefs(), priorities: PRIORITIES, statuses: STATUSES, labels: LABEL };
   if (user.role === 'client') {
     out.clients = await all(env.DB, 'SELECT id, name FROM clients WHERE id=?', user.client_id || -1);
     out.sites = await all(env.DB, 'SELECT id, client_id, name, address FROM sites WHERE client_id=? ORDER BY name', user.client_id || -1);
@@ -269,6 +341,7 @@ on('GET', '/dashboard', async ({ env, user }) => {
       (SELECT COUNT(*) FROM work_orders w WHERE (w.lead_id=u.id OR EXISTS (SELECT 1 FROM wo_team t WHERE t.wo_id=w.id AND t.user_id=u.id)) AND w.status IN ('assigned','in_progress','on_hold')) AS jobs,
       (SELECT COALESCE(SUM(hours),0) FROM time_logs l WHERE l.user_id=u.id AND l.date>=?) AS hours
       FROM users u WHERE u.status='active' AND u.role='tech' ORDER BY jobs DESC, u.name`, month);
+    out.tags_due = (await one(env.DB, `SELECT COUNT(*) n FROM test_rows t JOIN work_orders w ON w.id=t.wo_id WHERE t.sheet IN ('tt','lift') AND t.next_due IS NOT NULL AND t.next_due <= ? AND w.status <> 'cancelled'`, addDays(today(), 30))).n;
     out.pm_due = await all(env.DB, `SELECT p.id, p.title, p.next_due, p.every_days, a.tag, a.name AS asset FROM pm_plans p JOIN assets a ON a.id=p.asset_id WHERE p.active=1 ORDER BY p.next_due LIMIT 8`);
     const s = await settings(env);
     out.value_month = (await one(env.DB, `SELECT COALESCE(SUM(l.hours),0)*? + COALESCE((SELECT SUM(m.qty*m.unit_cost) FROM materials m WHERE m.created_at>=?),0) v FROM time_logs l WHERE l.date>=?`, Number(s.labour_rate) || 0, month, month)).v;
@@ -331,6 +404,9 @@ async function fullWO(env, wo, user, pub) {
     time: await all(env.DB, 'SELECT * FROM time_logs WHERE wo_id=? ORDER BY date, id', wo.id),
     materials: await all(env.DB, 'SELECT * FROM materials WHERE wo_id=? ORDER BY id', wo.id),
     photos: await all(env.DB, 'SELECT id, caption, stage, user_id, created_at FROM photos WHERE wo_id=? ORDER BY id', wo.id),
+    sheets: String(det.sheets || '').split(',').filter((k) => SHEETS[k]),
+    tests: (await all(env.DB, 'SELECT * FROM test_rows WHERE wo_id=? ORDER BY sheet, sort, id', wo.id)).map((t) => ({ ...t, data: JSON.parse(t.data || '{}') })),
+    sheet_defs: sheetDefs(),
   };
   if (!pub) {
     out.activity = await all(env.DB, 'SELECT * FROM activity WHERE wo_id=? ORDER BY id DESC', wo.id);
@@ -448,6 +524,10 @@ on('POST', '/wo/:id/status', async ({ env, user, params, body }) => {
     if (fails.n) fail(400, 'Add a note to every failed checklist item explaining what was found.');
     if (!str(wo.work_done)) fail(400, 'Write what work was done before submitting.');
     if (!(await one(env.DB, 'SELECT id FROM time_logs WHERE wo_id=?', wo.id))) fail(400, 'Log the hours worked before submitting.');
+    const shs = String(wo.sheets || '').split(',').filter((x) => SHEETS[x]);
+    const cs = {}; for (const k of shs) cs[k] = await one(env.DB, `SELECT COUNT(*) n, SUM(CASE WHEN result='Fail' AND COALESCE(remarks,'')='' THEN 1 ELSE 0 END) f FROM test_rows WHERE wo_id=? AND sheet=?`, wo.id, k);
+    for (const k of shs) if (!cs[k].n) fail(400, `Add results to the "${SHEETS[k].title}" sheet, or remove the sheet if it does not apply.`);
+    for (const k of shs) if (cs[k].f) fail(400, `Add a remark to every failed line on the "${SHEETS[k].title}" sheet.`);
     const sign = String(body.sign || '');
     if (!/^data:image\/png;base64,[A-Za-z0-9+/=]{200,}$/.test(sign) || sign.length > 300000) fail(400, 'Sign the job card to submit it.');
     set.tech_sign = sign; set.tech_sign_name = str(body.sign_name, 100) || user.name; set.completed_at = now();
@@ -584,6 +664,63 @@ on('GET', '/photo/:id', async ({ env, user, params, url }) => {
   need(user); await loadWO(env, p.wo_id, user);
   return photoResponse(p);
 });
+on('POST', '/wo/:id/sheets', async ({ env, user, params, body }) => {
+  need(user, ...STAFF);
+  const wo = await loadWO(env, params.id, user);
+  await needWork(env, wo, user);
+  const list = String(wo.sheets || '').split(',').filter((k) => SHEETS[k]);
+  if (body.add) { if (!SHEETS[body.add]) fail(400, 'Unknown test sheet.'); if (!list.includes(body.add)) list.push(body.add); await log(env, wo, user, 'test', `Added the ${SHEETS[body.add].title} sheet.`); }
+  if (body.remove) {
+    const n = await one(env.DB, 'SELECT COUNT(*) n FROM test_rows WHERE wo_id=? AND sheet=?', wo.id, body.remove);
+    if (n.n) fail(400, 'Delete the lines on this sheet first.');
+    const i = list.indexOf(body.remove); if (i >= 0) list.splice(i, 1);
+  }
+  await run(env.DB, 'UPDATE work_orders SET sheets=? WHERE id=?', list.join(','), wo.id);
+  return json({ sheets: list });
+});
+on('POST', '/wo/:id/test', async ({ env, user, params, body }) => {
+  need(user, ...STAFF);
+  const wo = await loadWO(env, params.id, user);
+  await needWork(env, wo, user);
+  if (body.remove) { await run(env.DB, 'DELETE FROM test_rows WHERE id=? AND wo_id=?', Number(body.remove) || 0, wo.id); return json({ ok: true }); }
+  const sh = SHEETS[body.sheet];
+  if (!sh) fail(400, 'Unknown test sheet.');
+  const data = {};
+  for (const [k, , t, opts] of sh.cols) {
+    let v = body.data ? body.data[k] : '';
+    v = v == null ? '' : String(v).trim().slice(0, 120);
+    if (t === 'num' && v !== '' && !isN(v)) fail(400, `"${sh.cols.find((c) => c[0] === k)[1]}" must be a number.`);
+    if (t === 'sel' && v !== '' && !opts.includes(v)) v = '';
+    data[k] = v;
+  }
+  if (!Object.values(data).some((v) => v !== '')) fail(400, 'Fill in at least one value.');
+  const result = sh.rule(data) || '';
+  const date = dateOr(body.test_date) || today();
+  const due = sh.due && result === 'Pass' ? addMonths(date, monthsOf(data.interval)) : null;
+  const remarks = str(body.remarks, 300);
+  const list = String(wo.sheets || '').split(',').filter((k) => SHEETS[k]);
+  if (!list.includes(body.sheet)) { list.push(body.sheet); await run(env.DB, 'UPDATE work_orders SET sheets=? WHERE id=?', list.join(','), wo.id); }
+  if (body.id) {
+    const r = await one(env.DB, 'SELECT id FROM test_rows WHERE id=? AND wo_id=?', Number(body.id), wo.id);
+    if (!r) fail(404, 'Line not found.');
+    await run(env.DB, 'UPDATE test_rows SET data=?, result=?, remarks=?, test_date=?, next_due=? WHERE id=?', JSON.stringify(data), result, remarks, date, due, r.id);
+  } else {
+    const mx = await one(env.DB, 'SELECT COALESCE(MAX(sort),0) m FROM test_rows WHERE wo_id=? AND sheet=?', wo.id, body.sheet);
+    await run(env.DB, 'INSERT INTO test_rows (wo_id, sheet, data, result, remarks, test_date, next_due, sort, added_by) VALUES (?,?,?,?,?,?,?,?,?)', wo.id, body.sheet, JSON.stringify(data), result, remarks, date, due, mx.m + 1, user.id);
+  }
+  return json({ result, next_due: due });
+});
+on('GET', '/register', async ({ env, user }) => {
+  need(user);
+  const where = user.role === 'client' ? ' AND w.client_id=?' : '';
+  const rows = await all(env.DB, `SELECT t.id, t.sheet, t.data, t.result, t.remarks, t.test_date, t.next_due, w.id AS wo_id, w.number, c.name AS client, s.name AS site, u.name AS tester
+    FROM test_rows t JOIN work_orders w ON w.id=t.wo_id LEFT JOIN clients c ON c.id=w.client_id LEFT JOIN sites s ON s.id=w.site_id LEFT JOIN users u ON u.id=t.added_by
+    WHERE t.sheet IN ('tt','lift') AND w.status NOT IN ('cancelled')${where} ORDER BY t.test_date DESC, t.id DESC`, ...(user.role === 'client' ? [user.client_id || -1] : []));
+  const seen = new Set(), items = [];
+  for (const r of rows) { const d = JSON.parse(r.data || '{}'); const key = r.sheet + '|' + (r.client || '') + '|' + (d.tag_no || 'row' + r.id); if (seen.has(key)) continue; seen.add(key); items.push({ ...r, data: d }); }
+  return json({ items, today: today() });
+});
+
 /* reports */
 on('GET', '/report/:id', async ({ env, user, params }) => {
   need(user);
@@ -735,9 +872,12 @@ on('GET', '/export/:kind', async ({ env, user, params, url }) => {
       FROM time_logs t JOIN work_orders w ON w.id=t.wo_id LEFT JOIN clients c ON c.id=w.client_id WHERE t.date BETWEEN ? AND ? ORDER BY t.date, t.worker`],
     materials: [`SELECT substr(m.created_at,1,10) AS "Date", w.number AS "Work order", c.name AS "Client", m.item AS "Item", m.qty AS "Qty", m.unit AS "Unit", m.unit_cost AS "Unit cost", ROUND(m.qty*m.unit_cost,2) AS "Total"
       FROM materials m JOIN work_orders w ON w.id=m.wo_id LEFT JOIN clients c ON c.id=w.client_id WHERE substr(m.created_at,1,10) BETWEEN ? AND ? ORDER BY m.id`],
+    tests: [`SELECT t.test_date AS "Date", w.number AS "Work order", c.name AS "Client", s.name AS "Site", t.sheet AS "Sheet", t.data AS "Readings", t.result AS "Result", t.remarks AS "Remarks", t.next_due AS "Next due", u.name AS "Tested by"
+      FROM test_rows t JOIN work_orders w ON w.id=t.wo_id LEFT JOIN clients c ON c.id=w.client_id LEFT JOIN sites s ON s.id=w.site_id LEFT JOIN users u ON u.id=t.added_by WHERE t.test_date BETWEEN ? AND ? ORDER BY t.test_date, w.number`],
   }[params.kind];
   if (!Q) fail(404, 'Unknown export.');
   const rows = await all(env.DB, Q[0], from, to);
+  if (params.kind === 'tests') rows.forEach((r) => { const sh = SHEETS[r.Sheet]; const d = JSON.parse(r.Readings || '{}'); r.Readings = sh ? sh.cols.filter((c) => d[c[0]] !== '' && d[c[0]] != null).map((c) => `${c[1]}: ${d[c[0]]}`).join('; ') : r.Readings; r.Sheet = sh ? sh.title : r.Sheet; });
   const head = [...Q[0].matchAll(/ AS "([^"]+)"/g)].map((m) => m[1]);
   const csv = [head.map(csvCell).join(','), ...rows.map((r) => head.map((h) => csvCell(r[h])).join(','))].join('\r\n');
   return new Response('﻿' + csv, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="${params.kind}-${from}-to-${to}.csv"`, 'cache-control': 'no-store' } });

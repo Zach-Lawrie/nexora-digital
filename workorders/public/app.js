@@ -63,6 +63,7 @@
     try { return await fn(); } catch (e) { if (errEl) errEl.textContent = e.message; else toast(e.message, true); } finally { if (btn) btn.disabled = false; }
   }
   const formData = (f) => Object.fromEntries(new FormData(f).entries());
+  const typeOpts = (sel, blank) => (blank != null ? `<option value="">${esc(blank)}</option>` : '') + (LK.type_groups || [['Types', LK.types]]).map(([g, l]) => `<optgroup label="${esc(g)}">${l.map((t) => `<option${t === sel ? ' selected' : ''}>${esc(t)}</option>`).join('')}</optgroup>`).join('');
   const opt = (list, sel, blank) => (blank != null ? `<option value="">${esc(blank)}</option>` : '') + list.map((o) => { const [v, l] = Array.isArray(o) ? o : [o, o]; return `<option value="${esc(v)}"${String(v) === String(sel ?? '') ? ' selected' : ''}>${esc(l)}</option>`; }).join('');
 
   /* ---------- signature pad ---------- */
@@ -134,16 +135,16 @@
   /* ---------- shell ---------- */
   function navItems() {
     const r = ME.role;
-    if (r === 'client') return [['#/', 'home', 'My jobs'], ['#/new', 'plus', 'Request work'], ['#/assets', 'tag', 'Equipment'], ['#/account', 'user', 'Account']];
-    if (r === 'tech') return [['#/', 'home', 'My jobs'], ['#/jobs', 'list', 'Job history'], ['#/account', 'user', 'Account']];
-    const n = [['#/', 'home', 'Dashboard'], ['#/jobs', 'list', 'Work orders'], ['#/board', 'board', 'Board'], ['#/new', 'plus', 'New work order'], ['#/assets', 'tag', 'Assets'], ['#/pm', 'cal', 'Maintenance plans'], ['#/clients', 'building', 'Clients & sites'], ['#/reports', 'chart', 'Reports']];
+    if (r === 'client') return [['#/', 'home', 'My jobs'], ['#/new', 'plus', 'Request work'], ['#/assets', 'tag', 'Equipment'], ['#/register', 'shield', 'Tagged items'], ['#/account', 'user', 'Account']];
+    if (r === 'tech') return [['#/', 'home', 'My jobs'], ['#/jobs', 'list', 'Job history'], ['#/register', 'shield', 'Test & tag'], ['#/account', 'user', 'Account']];
+    const n = [['#/', 'home', 'Dashboard'], ['#/jobs', 'list', 'Work orders'], ['#/board', 'board', 'Board'], ['#/new', 'plus', 'New work order'], ['#/assets', 'tag', 'Assets'], ['#/pm', 'cal', 'Maintenance plans'], ['#/register', 'shield', 'Test & tag register'], ['#/clients', 'building', 'Clients & sites'], ['#/reports', 'chart', 'Reports']];
     if (BOSS()) n.push(['#/users', 'users', 'People & logins'], ['#/settings', 'gear', 'Settings']);
     n.push(['#/account', 'user', 'My account']);
     return n;
   }
   function shell() {
     const items = navItems();
-    const tab = ME.role === 'client' ? items : ME.role === 'tech' ? items : [items[0], items[1], items[3], items[4], ['#/more', 'gear', 'More']];
+    const tab = ME.role === 'client' ? [items[0], items[1], items[2], items[3], items[4]] : ME.role === 'tech' ? items : [items[0], items[1], items[3], items[4], ['#/more', 'gear', 'More']];
     document.body.innerHTML = `<div class="app">
       <aside class="side"><div class="brand">${logoHTML()}<div><b>${esc(SET.short || 'Basa')}</b><span>Work orders</span></div></div>
         <nav class="nav" aria-label="Main">${items.map(([h, i, l]) => `<a href="${h}">${ic(i)}<span>${l}</span></a>`).join('')}</nav>
@@ -194,6 +195,7 @@
       else if (parts[0] === 'new') await newJob(v, parts[1]);
       else if (parts[0] === 'assets') await assets(v);
       else if (parts[0] === 'pm') await pm(v);
+      else if (parts[0] === 'register') await register(v);
       else if (parts[0] === 'clients') await clients(v);
       else if (parts[0] === 'users') await users(v);
       else if (parts[0] === 'reports') await reports(v);
@@ -236,6 +238,7 @@
         <a class="kpi" href="#/jobs?s=in_progress"><span>In progress</span><b>${by(['in_progress']).length}</b><small>Technicians on site</small></a>
         <a class="kpi ${late.length ? 'alert' : ''}" href="#/jobs?s=late"><span>Overdue</span><b>${late.length}</b><small>Past the due date</small></a>
         <a class="kpi" href="#/jobs?s=completed"><span>To review</span><b>${by(['completed', 'reviewed']).length}</b><small>Submitted by technicians</small></a>
+        ${d.tags_due ? `<a class="kpi alert" href="#/register"><span>Tagged items due</span><b>${d.tags_due}</b><small>Overdue or due in 30 days</small></a>` : ''}
         <div class="kpi"><span>Hours this month</span><b>${Number(d.hours_month).toLocaleString()}</b><small>Logged by the team</small></div>
         <div class="kpi"><span>Work value this month</span><b>${money(d.value_month).replace(/\.00$/, '')}</b><small>Labour + materials, ex VAT</small></div>
       </div>
@@ -323,7 +326,7 @@
       <label class="f">Short title<input name="title" required maxlength="160" placeholder="For example: Conveyor motor overheating"></label>
       <div class="grid3">
         <label class="f">Discipline<select name="discipline" required>${opt(LK.disciplines, pre ? pre.discipline : '', 'Choose…')}</select></label>
-        <label class="f">Type of work<select name="type" required>${opt(LK.types, isC ? 'Corrective maintenance' : '', 'Choose…')}</select></label>
+        <label class="f">Type of work<select name="type" required>${typeOpts(isC ? 'Corrective maintenance' : '', 'Choose…')}</select></label>
         <label class="f">Priority<select name="priority">${opt(LK.priorities, 'Normal')}</select></label>
       </div>
       <div class="grid3">
@@ -398,7 +401,7 @@
       if (SUP() && ['requested', 'open', 'assigned', 'on_hold', 'in_progress'].includes(st)) A.push(['cancel', 'Cancel job', 'bad']);
       A.push(['report', ['approved', 'sent', 'closed'].includes(st) ? 'Report (PDF)' : 'Preview report', 'ghost']);
     }
-    const tabs = ME.role === 'client' ? [['details', 'Details'], ['activity', 'Messages']] : [['details', 'Details'], ['checklist', `Checklist<span class="n">${ckDone}/${d.checklist.length}</span>`], ['team', `Team & hours<span class="n">${hours}h</span>`], ['materials', `Materials<span class="n">${d.materials.length}</span>`], ['photos', `Photos<span class="n">${d.photos.length}</span>`], ['activity', 'Activity']];
+    const tabs = ME.role === 'client' ? [['details', 'Details'], ['activity', 'Messages']] : [['details', 'Details'], ['checklist', `Checklist<span class="n">${ckDone}/${d.checklist.length}</span>`], ['team', `Team & hours<span class="n">${hours}h</span>`], ['tests', `Tests<span class="n">${d.tests.length}</span>`], ['materials', `Materials<span class="n">${d.materials.length}</span>`], ['photos', `Photos<span class="n">${d.photos.length}</span>`], ['activity', 'Activity']];
     if (!tabs.some((t) => t[0] === tab)) tab = 'details';
     let banner = '';
     if (st === 'assigned' && onTeamMe && safetyOpen) banner = `<div class="banner warn">${ic('shield')}<span>Before you start: complete the ${safetyOpen} safety check${safetyOpen > 1 ? 's' : ''} in the Checklist tab (JHA, permit, LOTO, test before touch, PPE).</span></div>`;
@@ -420,6 +423,7 @@
     if (tab === 'details') tabDetails(T, d, can, reload);
     if (tab === 'checklist') tabChecklist(T, d, can, reload);
     if (tab === 'team') tabTeam(T, d, can, reload, hours);
+    if (tab === 'tests') tabTests(T, d, can, reload);
     if (tab === 'materials') tabMaterials(T, d, can, reload, mat);
     if (tab === 'photos') tabPhotos(T, d, can, reload);
     if (tab === 'activity') tabActivity(T, d, reload);
@@ -515,6 +519,51 @@
     if (hf) hf.addEventListener('submit', (e) => { e.preventDefault(); const x = formData(hf); const body = { date: x.date, hours: x.hours, note: x.note }; if (x.who.startsWith('t')) body.team_id = x.who.slice(1); if (x.who.startsWith('u')) body.user_id = x.who.slice(1); busy(e.submitter, async () => { await api(`/wo/${w.id}/time`, body); toast('Hours logged'); reload(); }, $('#he', T)); });
     $$('[data-rt]', T).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/wo/${w.id}/time`, { remove: b.dataset.rt }); reload(); }));
   }
+  function tabTests(T, d, can, reload) {
+    const w = d.wo, defs = d.sheet_defs, ro = !can.work;
+    const avail = Object.keys(defs).filter((k) => !d.sheets.includes(k));
+    const rp = (r) => r ? `<span class="pill ${r === 'Pass' ? 's-approved' : r === 'Fail' ? 's-on_hold' : 's-in_progress'}">${esc(r)}</span>` : '<span class="muted tiny">—</span>';
+    T.innerHTML = `<div class="card between"><div><h2>Test sheets</h2><p class="muted small">Results are checked against the limits automatically. Everything here goes on the client report.</p></div>
+        ${ro ? '' : `<form class="row" id="as"><select name="sheet" aria-label="Test sheet" style="max-width:280px">${opt(avail.map((k) => [k, defs[k].title]), '', 'Add a test sheet…')}</select><button class="btn ghost">${ic('plus', 16)} Add</button></form>`}</div>
+      ${d.sheets.length ? '' : '<p class="empty">No test sheets on this job. Add one above if you need to record test results.</p>'}
+      ${d.sheets.map((k) => {
+        const S = defs[k], rows = d.tests.filter((t) => t.sheet === k);
+        const pass = rows.filter((r) => r.result === 'Pass').length, failN = rows.filter((r) => r.result === 'Fail').length;
+        return `<section class="card stack" data-sheet="${k}"><div class="between"><div><h2>${esc(S.title)}</h2><p class="muted tiny">${esc(S.limits)}</p></div>
+          <div class="row"><span class="pill">${rows.length} line${rows.length === 1 ? '' : 's'}</span>${pass ? `<span class="pill s-approved">${pass} pass</span>` : ''}${failN ? `<span class="pill s-on_hold">${failN} fail</span>` : ''}
+          ${ro ? '' : `<button class="btn sm" data-addrow="${k}">${ic('plus', 14)} Add line</button>${rows.length ? '' : `<button class="link" data-rmsheet="${k}">Remove sheet</button>`}`}</div></div>
+          ${rows.length ? `<div class="tw" style="box-shadow:none"><table><thead><tr><th>#</th>${S.cols.map((c) => `<th>${esc(c[1])}</th>`).join('')}<th>Result</th><th>Remarks</th>${S.due ? '<th>Next due</th>' : ''}</tr></thead><tbody>
+            ${rows.map((r, i) => `<tr class="${ro ? '' : 'click'}" data-row="${r.id}"><td>${i + 1}</td>${S.cols.map((c) => `<td>${esc(r.data[c[0]] ?? '')}</td>`).join('')}<td>${rp(r.result)}</td><td>${esc(r.remarks || '')}</td>${S.due ? `<td>${fdate(r.next_due)}</td>` : ''}</tr>`).join('')}
+          </tbody></table></div>` : '<p class="muted small">No lines yet.</p>'}</section>`;
+      }).join('')}`;
+    if (ro) return;
+    $('#as', T).addEventListener('submit', (e) => { e.preventDefault(); const k = e.target.sheet.value; if (!k) return; busy(e.submitter, async () => { await api(`/wo/${w.id}/sheets`, { add: k }); toast('Sheet added'); reload(); }); });
+    $$('[data-rmsheet]', T).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/wo/${w.id}/sheets`, { remove: b.dataset.rmsheet }); reload(); }));
+    $$('[data-addrow]', T).forEach((b) => b.onclick = () => rowForm(b.dataset.addrow, null));
+    $$('tr[data-row]', T).forEach((tr) => tr.onclick = () => { const r = d.tests.find((x) => String(x.id) === tr.dataset.row); rowForm(r.sheet, r); });
+    function rowForm(k, row) {
+      const S = defs[k]; let saved = false; const keep = ['location', 'volts', 'class', 'tag', 'interval', 'limit', 'tol', 'min', 'rating', 'machine', 'medium', 'energy', 'by', 'panel', 'range', 'size', 'spec'];
+      const field = (c, v) => { const [key, label, t, opts] = c; const val = esc(v ?? ''); return `<label class="f">${esc(label)}${t === 'sel' ? `<select name="${key}">${opt(opts, v, '—')}</select>` : `<input name="${key}" value="${val}" ${t === 'num' ? 'type="number" step="any" inputmode="decimal"' : ''}>`}</label>`; };
+      dlg(`${head(esc(S.title), esc(S.limits))}<form class="stack" id="rf"><div class="grid3"><label class="f">Test date<input type="date" name="__date" value="${esc(row ? row.test_date : today())}"></label>${S.cols.map((c) => field(c, row ? row.data[c[0]] : '')).join('')}</div>
+        <label class="f">Remarks <span class="hint">(needed if it fails)</span><input name="__remarks" value="${esc(row ? row.remarks || '' : '')}"></label><p class="small" id="rr"></p><p class="err" id="re"></p>
+        <div class="acts">${row ? '<button class="btn bad" type="button" id="del">Delete line</button>' : ''}<button class="btn ghost" type="button" data-close>Close</button>${row ? '' : '<button class="btn ghost" type="submit" value="next">Save & next</button>'}<button class="btn" type="submit" value="done">Save</button></div></form>`,
+      (dl) => {
+        dl.addEventListener('close', () => { if (saved) reload(); });
+        const f = $('#rf', dl);
+        f.addEventListener('submit', (e) => {
+          e.preventDefault(); const x = formData(f), next = e.submitter && e.submitter.value === 'next';
+          const data = {}; S.cols.forEach((c) => { data[c[0]] = x[c[0]] || ''; });
+          busy(e.submitter, async () => {
+            const r = await api(`/wo/${w.id}/test`, { sheet: k, id: row ? row.id : undefined, data, remarks: x.__remarks, test_date: x.__date }); saved = true;
+            const msg = r.result ? `Saved: ${r.result}${r.next_due ? ', next test ' + fdate(r.next_due) : ''}` : 'Saved';
+            if (next) { S.cols.forEach((c) => { if (!keep.includes(c[0])) { const el = f.querySelector(`[name="${c[0]}"]`); if (el) el.value = ''; } }); f.querySelector('[name="__remarks"]').value = ''; $('#rr', dl).innerHTML = (r.result === 'Fail' ? '<span class="pill s-on_hold">Last line: Fail</span> ' : r.result ? '<span class="pill s-approved">Last line: ' + esc(r.result) + '</span> ' : '') + 'Saved. Enter the next one.'; const first = f.querySelector('input:not([type=date]),select'); if (first) first.focus(); }
+            else { dl.close(); toast(msg, r.result === 'Fail'); }
+          }, $('#re', dl));
+        });
+        const del = $('#del', dl); if (del) del.onclick = () => busy(del, async () => { await api(`/wo/${w.id}/test`, { remove: row.id }); saved = true; dl.close(); toast('Line deleted'); });
+      }, 'wide');
+    }
+  }
   function tabMaterials(T, d, can, reload, total) {
     const w = d.wo;
     T.innerHTML = `<div class="card"><div class="card-h"><h2>Materials and parts used</h2><b>${money(total)}</b></div>
@@ -579,7 +628,7 @@
       await refreshLK();
       return dlg(`${head('Edit work order', esc(w.number))}<form class="stack" id="ef">
         <label class="f">Title<input name="title" value="${esc(w.title)}" required></label>
-        <div class="grid3"><label class="f">Discipline<select name="discipline">${opt(LK.disciplines, w.discipline)}</select></label><label class="f">Type<select name="type">${opt(LK.types, w.type)}</select></label><label class="f">Priority<select name="priority">${opt(LK.priorities, w.priority)}</select></label></div>
+        <div class="grid3"><label class="f">Discipline<select name="discipline">${opt(LK.disciplines, w.discipline)}</select></label><label class="f">Type<select name="type">${typeOpts(w.type)}</select></label><label class="f">Priority<select name="priority">${opt(LK.priorities, w.priority)}</select></label></div>
         <div class="grid2"><label class="f">Site<select name="site_id">${opt(LK.sites.filter((s) => s.client_id === w.client_id).map((s) => [s.id, s.name]), w.site_id, '—')}</select></label><label class="f">Equipment<select name="asset_id">${opt(LK.assets.filter((a) => LK.sites.some((s) => s.id === a.site_id && s.client_id === w.client_id)).map((a) => [a.id, a.tag + ' · ' + a.name]), w.asset_id, '—')}</select></label></div>
         <label class="f">Description<textarea name="description" rows="4">${esc(w.description || '')}</textarea></label>
         <div class="grid3"><label class="f">Due<input type="date" name="due_date" value="${esc(w.due_date || '')}"></label><label class="f">Scheduled<input type="date" name="scheduled_date" value="${esc(w.scheduled_date || '')}"></label><label class="f">Estimated hours<input name="est_hours" type="number" step="0.5" value="${esc(w.est_hours ?? '')}"></label></div>
@@ -589,7 +638,8 @@
     }
     if (k === 'submit') {
       const blank = d.checklist.filter((c) => !c.result).length, failNoNote = d.checklist.filter((c) => c.result === 'Fail' && !c.note).length;
-      const issues = [blank && `${blank} checklist item${blank > 1 ? 's' : ''} not answered`, failNoNote && `${failNoNote} failed check${failNoNote > 1 ? 's' : ''} without a note`, !d.time.length && 'No hours logged', !(w.work_done || '').trim() && '"Work done" is empty (Details tab)'].filter(Boolean);
+      const emptySheets = d.sheets.filter((k) => !d.tests.some((t) => t.sheet === k)).map((k) => `Test sheet "${d.sheet_defs[k].title}" has no results`); const failNoRemark = d.tests.filter((t) => t.result === 'Fail' && !t.remarks).length;
+      const issues = [...emptySheets, failNoRemark && `${failNoRemark} failed test line${failNoRemark > 1 ? 's' : ''} without a remark`, blank && `${blank} checklist item${blank > 1 ? 's' : ''} not answered`, failNoNote && `${failNoNote} failed check${failNoNote > 1 ? 's' : ''} without a note`, !d.time.length && 'No hours logged', !(w.work_done || '').trim() && '"Work done" is empty (Details tab)'].filter(Boolean);
       return dlg(`${head('Submit completed job', 'Your foreman will review it before the client gets the report.')}
         ${issues.length ? `<div class="banner warn">${ic('alert')}<span>Still to do:<br>${issues.map(esc).join('<br>')}</span></div>` : `<div class="banner ok">${ic('check')}<span>Checklist, hours and notes are complete. ${d.photos.length} photo${d.photos.length === 1 ? '' : 's'} attached.</span></div>`}
         <form class="stack" id="sf"><label class="f">Your name<input name="sign_name" value="${esc(ME.name)}"></label><div><p class="small" style="font-weight:700;color:var(--muted);margin-bottom:5px">Sign here</p><canvas class="sig" id="sig" aria-label="Signature pad"></canvas><button type="button" class="link" id="clr">Clear signature</button></div>
@@ -667,13 +717,33 @@
       const foremen = LK.staff.filter((s) => ['foreman', 'manager', 'admin'].includes(s.role));
       dlg(`${head(p.id ? 'Edit plan' : 'Add maintenance plan')}<form class="stack" id="pf"><label class="f">What is the planned job?<input name="title" value="${esc(p.title || '')}" required placeholder="e.g. Monthly motor inspection"></label>
         <label class="f">Asset<select name="asset_id" required>${opt(LK.assets.map((a) => [a.id, a.tag + ' · ' + a.name]), p.asset_id, 'Choose…')}</select></label>
-        <div class="grid2"><label class="f">Discipline<select name="discipline">${opt(LK.disciplines, p.discipline || 'Electrical')}</select></label><label class="f">Type<select name="type">${opt(LK.types, p.type || 'Preventive maintenance')}</select></label></div>
+        <div class="grid2"><label class="f">Discipline<select name="discipline">${opt(LK.disciplines, p.discipline || 'Electrical')}</select></label><label class="f">Type<select name="type">${typeOpts(p.type || 'Preventive maintenance')}</select></label></div>
         <div class="grid3"><label class="f">Every (days)<input name="every_days" type="number" min="1" value="${esc(p.every_days || 30)}" required></label><label class="f">Next due<input name="next_due" type="date" value="${esc(p.next_due || today())}" required></label><label class="f">Est. hours<input name="est_hours" type="number" step="0.5" value="${esc(p.est_hours ?? '')}"></label></div>
         <label class="f">Foreman<select name="foreman_id">${opt(foremen.map((s) => [s.id, s.name]), p.foreman_id, 'Any foreman')}</select></label>
         <label class="check"><input type="checkbox" name="active" ${p.active ? 'checked' : ''}> Active</label><p class="err" id="pe"></p>
         <div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`,
       (dl) => $('#pf', dl).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); x.active = !!x.active; busy(e.submitter, async () => { await api('/pm', { ...x, id: p.id }); dl.close(); toast('Saved'); route(); }, $('#pe', dl)); }), 'wide');
     }
+  }
+
+  /* ---------- test & tag register ---------- */
+  async function register(v) {
+    setTitle(ME.role === 'client' ? 'Tagged items' : 'Test & tag register');
+    const d = await api('/register'); const t = d.today;
+    const soon = (() => { const x = new Date(); x.setDate(x.getDate() + 30); return x.toISOString().slice(0, 10); })();
+    const status = (r) => r.result === 'Fail' ? ['Failed, out of service', 's-on_hold'] : !r.next_due ? ['No due date', ''] : r.next_due < t ? ['Overdue', 's-on_hold'] : r.next_due <= soon ? ['Due within 30 days', 's-in_progress'] : ['In date', 's-approved'];
+    let f = 'all', q = '';
+    v.innerHTML = `<div class="between"><p class="muted" style="max-width:70ch">Every portable appliance and lifting item tested, its last result and when it is due again. Each line comes from a test sheet on a work order.</p>${SUP() ? `<a class="btn ghost" href="/api/export/tests">${ic('download', 16)} All test results (CSV)</a>` : ''}</div>
+      <div class="kpis"><div class="kpi"><span>Items on register</span><b>${d.items.length}</b></div><div class="kpi alert"><span>Overdue</span><b>${d.items.filter((r) => r.result !== 'Fail' && r.next_due && r.next_due < t).length}</b></div><div class="kpi"><span>Due in 30 days</span><b>${d.items.filter((r) => r.next_due && r.next_due >= t && r.next_due <= soon).length}</b></div><div class="kpi alert"><span>Failed</span><b>${d.items.filter((r) => r.result === 'Fail').length}</b></div></div>
+      <div class="toolbar"><label class="search">${ic('search', 16)}<input type="search" id="q" placeholder="Search tag, item, location, client" aria-label="Search"></label><div class="chips">${[['all', 'All'], ['due', 'Overdue or due soon'], ['fail', 'Failed']].map(([k, l]) => `<button class="chip" data-f="${k}" aria-pressed="${k === f}">${l}</button>`).join('')}</div></div><div id="list"></div>`;
+    const draw = () => {
+      let l = d.items.filter((r) => f === 'all' || (f === 'fail' ? r.result === 'Fail' : r.result !== 'Fail' && r.next_due && r.next_due <= soon));
+      if (q) l = l.filter((r) => [r.data.tag_no, r.data.item, r.data.location, r.client, r.site, r.number].join(' ').toLowerCase().includes(q));
+      $('#list', v).innerHTML = l.length ? `<div class="tw"><table><thead><tr><th>Tag / ID</th><th>Item</th><th>Location</th>${ME.role !== 'client' ? '<th>Client</th>' : ''}<th>Tested</th><th>Tag</th><th>Next due</th><th>Status</th><th>Job</th></tr></thead><tbody>${l.map((r) => { const s2 = status(r); return `<tr><td class="mono">${esc(r.data.tag_no || '—')}</td><td><b>${esc(r.data.item || '')}</b><br><span class="tiny muted">${r.sheet === 'lift' ? 'Lifting equipment' + (r.data.swl ? ' · SWL ' + esc(r.data.swl) : '') : 'Class ' + esc(r.data.class || '?')}</span></td><td>${esc(r.data.location || '')}<br><span class="tiny muted">${esc(r.site || '')}</span></td>${ME.role !== 'client' ? `<td>${esc(r.client || '')}</td>` : ''}<td>${fdate(r.test_date)}<br><span class="tiny muted">${esc(r.tester || '')}</span></td><td>${esc(r.data.tag || '')}</td><td>${fdate(r.next_due) || '—'}</td><td><span class="pill ${s2[1]}">${s2[0]}</span></td><td><a class="mono" href="#/job/${r.wo_id}">${esc(r.number)}</a></td></tr>`; }).join('')}</tbody></table></div>` : '<p class="empty">Nothing on the register yet. Results appear here when a Test & tag or Lifting equipment sheet is filled in on a job.</p>';
+    };
+    draw();
+    $('#q', v).oninput = (e) => { q = e.target.value.toLowerCase(); draw(); };
+    $$('[data-f]', v).forEach((b) => b.onclick = () => { f = b.dataset.f; $$('[data-f]', v).forEach((x) => x.setAttribute('aria-pressed', x === b)); draw(); });
   }
 
   /* ---------- clients ---------- */
@@ -729,7 +799,7 @@
       const hrs = done.reduce((a, w) => a + w.hours, 0);
       const q = `from=${from}&to=${to}`;
       $('#rp', v).innerHTML = `<div class="kpis"><div class="kpi"><span>Jobs created</span><b>${inR.length}</b></div><div class="kpi"><span>Jobs completed</span><b>${done.length}</b></div><div class="kpi"><span>Hours on completed jobs</span><b>${hrs}</b></div><div class="kpi"><span>Breakdowns</span><b>${inR.filter((w) => w.type === 'Breakdown').length}</b></div></div>
-        <div class="card"><h2>Download for Excel</h2><p class="muted small" style="margin:4px 0 12px">CSV files open in Excel and Google Sheets. Use them for invoicing, payroll and monthly client reports.</p><div class="row"><a class="btn ghost" href="/api/export/workorders?${q}">${ic('download', 16)} Work orders with value</a><a class="btn ghost" href="/api/export/timesheets?${q}">${ic('download', 16)} Timesheets</a><a class="btn ghost" href="/api/export/materials?${q}">${ic('download', 16)} Materials used</a></div></div>
+        <div class="card"><h2>Download for Excel</h2><p class="muted small" style="margin:4px 0 12px">CSV files open in Excel and Google Sheets. Use them for invoicing, payroll and monthly client reports.</p><div class="row"><a class="btn ghost" href="/api/export/workorders?${q}">${ic('download', 16)} Work orders with value</a><a class="btn ghost" href="/api/export/timesheets?${q}">${ic('download', 16)} Timesheets</a><a class="btn ghost" href="/api/export/materials?${q}">${ic('download', 16)} Materials used</a><a class="btn ghost" href="/api/export/tests?${q}">${ic('download', 16)} Test results</a></div></div>
         <div class="grid2">${box('Jobs by client', grp(inR, 'client'))}${box('Jobs by type', grp(inR, 'type'))}${box('Jobs by discipline', grp(inR, 'discipline'))}${box('Completed by lead technician', grp(done, 'lead'))}</div>`;
     };
     draw();

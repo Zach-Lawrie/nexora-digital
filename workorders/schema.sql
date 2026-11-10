@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS work_orders (
   findings TEXT, work_done TEXT, recommendations TEXT, client_ref TEXT,
   tech_sign TEXT, tech_sign_name TEXT, client_sign TEXT, client_sign_name TEXT, signed_at TEXT,
   report_token TEXT, released_at TEXT, started_at TEXT, completed_at TEXT, reviewed_at TEXT, approved_at TEXT, approved_by INTEGER,
-  pm_id INTEGER,
+  pm_id INTEGER, sheets TEXT,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
   updated_at TEXT
 );
@@ -90,3 +90,9 @@ CREATE TABLE IF NOT EXISTS audit (
   id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, who TEXT, action TEXT, detail TEXT,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
 );
+CREATE TABLE IF NOT EXISTS test_rows (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, wo_id INTEGER NOT NULL, sheet TEXT NOT NULL, data TEXT NOT NULL, result TEXT, remarks TEXT,
+  test_date TEXT, next_due TEXT, sort INTEGER NOT NULL DEFAULT 0, added_by INTEGER,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
+);
+CREATE INDEX IF NOT EXISTS tr_wo ON test_rows(wo_id, sheet);
