@@ -1,0 +1,135 @@
+// Runs complete job flows through the API (tests the rules and creates realistic demo jobs).
+// Usage: node dev/flow.mjs http://localhost:8788 <password> [--quiet]
+import fs from 'node:fs';
+const BASE = process.argv[2], PW = process.argv[3], quiet = process.argv.includes('--quiet');
+const SIGN = 'data:image/png;base64,' + fs.readFileSync(new URL('./sign.png', import.meta.url)).toString('base64');
+const PHOTO = 'data:image/jpeg;base64,' + fs.readFileSync(new URL('./photo.jpg', import.meta.url)).toString('base64');
+let fails = 0;
+const ok = (c, m) => { if (!c) { fails++; console.log('FAIL', m); } else if (!quiet) console.log('ok  ', m); };
+async function login(email) {
+  const r = await fetch(BASE + '/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password: PW }) });
+  if (r.status !== 200) throw new Error('login failed ' + email + ' ' + (await r.text()));
+  const ck = r.headers.get('set-cookie').split(';')[0];
+  const call = async (method, p, body) => {
+    const res = await fetch(BASE + '/api' + p, { method, headers: { cookie: ck, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+    const ct = res.headers.get('content-type') || '';
+    return { status: res.status, data: ct.includes('json') ? await res.json() : await res.text() };
+  };
+  return { get: (p) => call('GET', p), post: (p, b) => call('POST', p, b || {}) };
+}
+const day = (n) => { const d = new Date(); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const mgr = await login('manager@meazim.com'), fe = await login('foreman.electrical@meazim.com'), fm = await login('foreman.mechanical@meazim.com');
+const kuda = await login('tech.kuda@meazim.com'), tendai = await login('tech.tendai@meazim.com'), simon = await login('tech.simon@meazim.com'), ruth = await login('tech.ruth@meazim.com');
+const cs = await login('client.shamva@meazim.com'), ck = await login('client.kariba@meazim.com');
+const L = (await mgr.get('/lookups')).data;
+const uid = (name) => L.staff.find((s) => s.name === name).id;
+
+async function work(tech, id, opts = {}) {
+  const d = (await tech.get('/wo/' + id)).data;
+  const answer = (sec) => d.checklist.filter((c) => c.section.startsWith(sec)).map((c, i) => ({ id: c.id, result: opts.fail && i === 1 && sec === 'Work' ? 'Fail' : c.item.includes('RCD') ? 'N/A' : 'Pass', reading: /MΩ/.test(c.item) ? '>500 MΩ' : /mm\/s/.test(c.item) ? '2.1 mm/s' : /°C/.test(c.item) ? '58 °C' : /mA/.test(c.item) ? '4.02 / 19.98 mA' : '', note: opts.fail && i === 1 && sec === 'Work' ? 'Worn, replacement recommended.' : '' }));
+  return { d, answer };
+}
+
+// ---------- Flow 1: client request -> full cycle -> client sign-off ----------
+let r = await cs.post('/wo', { title: 'Ball mill motor tripping on overload', description: 'Motor tripped three times this week during start-up. Please investigate urgently.', discipline: 'Electrical', type: 'Breakdown', priority: 'Urgent', asset_id: 1, client_ref: 'SG-PO-4471' });
+ok(r.status === 201 && r.data.wo.status === 'requested', 'client creates request');
+const id1 = r.data.wo.id;
+ok((await cs.post('/wo/' + id1 + '/status', { to: 'completed' })).status === 403, 'client cannot complete');
+ok((await kuda.get('/wo/' + id1)).status === 404, 'tech cannot see unassigned job');
+ok((await ck.get('/wo/' + id1)).status === 404, 'other client cannot see job');
+const n1 = (await fe.get('/notifications')).data;
+ok(n1.items.some((n) => n.wo_id === id1), 'foreman notified of request');
+r = await fe.post('/wo/' + id1 + '/assign', { lead_id: uid('Kudakwashe Rusike'), scheduled_date: day(0), note: 'Take the clamp meter and IR tester.' });
+ok(r.status === 200, 'foreman assigns lead tech');
+ok((await kuda.get('/wo/' + id1)).status === 200, 'lead tech can see job');
+ok((await kuda.post('/wo/' + id1 + '/team', { user_id: uid('Ruth Gora'), role_text: 'Instrument technician' })).status === 200, 'lead adds team member');
+ok((await kuda.post('/wo/' + id1 + '/team', { name: 'Blessing (assistant)', role_text: 'Assistant' })).status === 200, 'lead adds outside helper');
+ok((await ruth.post('/wo/' + id1 + '/team', { name: 'X' })).status === 403, 'team member cannot change team');
+r = await kuda.post('/wo/' + id1 + '/status', { to: 'in_progress' });
+ok(r.status === 400 && /safety/i.test(r.data.error), 'cannot start without safety checks');
+let w = await work(kuda, id1);
+await kuda.post('/wo/' + id1 + '/checklist', { items: w.answer('Safety') });
+ok((await kuda.post('/wo/' + id1 + '/status', { to: 'in_progress' })).status === 200, 'tech starts job after safety checks');
+r = await kuda.post('/wo/' + id1 + '/status', { to: 'completed', sign: SIGN });
+ok(r.status === 400, 'cannot complete with open checklist: ' + r.data.error);
+w = await work(kuda, id1, { fail: true });
+await kuda.post('/wo/' + id1 + '/checklist', { items: [...w.answer('Breakdown'), ...w.answer('Work'), ...w.answer('Handover')] });
+await ruth.post('/wo/' + id1 + '/checklist', { add: { item: 'Thermal scan of motor terminal box', section: 'Extra checks' } });
+w = await work(kuda, id1);
+const extra = w.d.checklist.find((c) => c.item.startsWith('Thermal scan of motor'));
+await ruth.post('/wo/' + id1 + '/checklist', { items: [{ id: extra.id, result: 'Pass', reading: '61 °C' }] });
+const team = (await kuda.get('/wo/' + id1)).data.team;
+ok((await kuda.post('/wo/' + id1 + '/time', { hours: 4.5, date: day(0), note: 'Fault finding and repair' })).status === 200, 'tech logs own time');
+ok((await kuda.post('/wo/' + id1 + '/time', { hours: 4, team_id: team.find((t) => !t.user_id).id, note: 'Assisting' })).status === 200, 'lead logs helper time');
+ok((await ruth.post('/wo/' + id1 + '/time', { hours: 2, note: 'Checked overload relay settings' })).status === 200, 'team member logs own time');
+ok((await ruth.post('/wo/' + id1 + '/time', { hours: 2, user_id: uid('Kudakwashe Rusike') })).status === 403, 'team member cannot log for others');
+ok((await kuda.post('/wo/' + id1 + '/material', { item: 'Thermal overload relay 400 A', qty: 1, unit: 'each', unit_cost: 185 })).status === 200, 'tech adds material');
+await kuda.post('/wo/' + id1 + '/material', { item: 'Lugs 240 mm²', qty: 6, unit: 'each', unit_cost: 4.5 });
+ok((await kuda.post('/wo/' + id1 + '/photo', { data: PHOTO, caption: 'Burnt overload relay contact', stage: 'Defect' })).status === 200, 'tech uploads photo');
+r = await kuda.post('/wo/' + id1 + '/status', { to: 'completed', sign: SIGN });
+ok(r.status === 400 && /work was done/i.test(r.data.error), 'needs work done text');
+await kuda.post('/wo/' + id1 + '/update', { findings: 'Overload relay (400 A) had a burnt contact on L2 causing single-phasing and nuisance trips. Motor IR good (>500 MΩ). Start current normal.', work_done: 'Isolated MCC-02 feeder, replaced thermal overload relay and re-terminated L2 with new lugs. Set overload to 380 A. Tested motor run for 2 hours under load, current balanced at 352/349/355 A.', recommendations: 'Thermal scan of MCC-02 every 3 months. Replace remaining relays of the same batch at next shutdown.' });
+ok((await ruth.post('/wo/' + id1 + '/status', { to: 'completed', sign: SIGN })).status === 403, 'only lead can submit');
+ok((await kuda.post('/wo/' + id1 + '/status', { to: 'completed', sign: SIGN, sign_name: 'Kudakwashe Rusike' })).status === 200, 'lead submits signed job');
+ok((await kuda.post('/wo/' + id1 + '/time', { hours: 1 })).status === 403, 'tech cannot edit after submit');
+ok((await fe.get('/notifications')).data.items.some((n) => /completed/.test(n.text)), 'foreman notified of completion');
+ok((await fe.post('/wo/' + id1 + '/status', { to: 'in_progress' })).status === 400, 'send back needs a reason');
+ok((await fe.post('/wo/' + id1 + '/status', { to: 'in_progress', note: 'Add the overload setting photo.' })).status === 200, 'foreman sends back for rework');
+await kuda.post('/wo/' + id1 + '/photo', { data: PHOTO, caption: 'New overload relay set to 380 A', stage: 'After' });
+ok((await kuda.post('/wo/' + id1 + '/status', { to: 'completed', sign: SIGN })).status === 200, 'tech resubmits');
+ok((await fe.post('/wo/' + id1 + '/status', { to: 'reviewed' })).status === 200, 'foreman reviews');
+ok((await fe.post('/wo/' + id1 + '/status', { to: 'approved' })).status === 403, 'foreman cannot approve');
+ok((await cs.get('/report/' + id1)).status === 403, 'client cannot see report before release');
+ok((await mgr.post('/wo/' + id1 + '/status', { to: 'approved' })).status === 200, 'manager approves');
+r = await mgr.post('/wo/' + id1 + '/release');
+ok(r.status === 200 && r.data.token.length === 40, 'manager sends report to client');
+const token = r.data.token;
+ok((await cs.get('/notifications')).data.items.some((n) => /report/.test(n.text)), 'client notified report ready');
+r = await cs.get('/report/' + id1);
+ok(r.status === 200 && r.data.checklist.length > 10 && r.data.time.length === 3 && r.data.photos.length === 2, 'client reads report');
+const pub = await fetch(BASE + '/api/public/report/' + token).then((x) => x.json());
+ok(pub.wo && pub.wo.number && !pub.activity, 'public share link works without login');
+const ph = await fetch(BASE + '/api/photo/' + pub.photos[0].id + '?t=' + token);
+ok(ph.status === 200 && ph.headers.get('content-type') === 'image/jpeg', 'public report photo loads');
+ok((await fetch(BASE + '/api/photo/' + pub.photos[0].id)).status === 401, 'photo private without token');
+ok((await cs.post('/wo/' + id1 + '/signoff', { sign: SIGN, name: 'Tendai Moyo', comment: 'Thank you, motor running well.' })).status === 200, 'client signs off');
+ok((await mgr.get('/wo/' + id1)).data.wo.status === 'closed', 'job closed');
+
+// ---------- Flow 2: on hold + cancel + PM + exports ----------
+r = await fm.post('/wo', { title: 'Replace conveyor drive belt', description: 'Belt slipping and frayed at splice.', discipline: 'Mechanical', type: 'Corrective maintenance', priority: 'High', asset_id: 7, lead_id: uid('Tendai Mafa'), scheduled_date: day(1), est_hours: 4 });
+ok(r.status === 201 && r.data.wo.status === 'assigned', 'foreman creates assigned job');
+const id2 = r.data.wo.id;
+w = await work(tendai, id2); await tendai.post('/wo/' + id2 + '/checklist', { items: w.answer('Safety') });
+await tendai.post('/wo/' + id2 + '/status', { to: 'in_progress' });
+ok((await tendai.post('/wo/' + id2 + '/status', { to: 'on_hold' })).status === 400, 'hold needs reason');
+ok((await tendai.post('/wo/' + id2 + '/status', { to: 'on_hold', note: 'Waiting for new belt from supplier (ETA Friday).' })).status === 200, 'tech puts job on hold');
+await tendai.post('/wo/' + id2 + '/time', { hours: 1.5, note: 'Inspection and measuring belt' });
+r = await ck.post('/wo', { title: 'Cold room 1 not reaching temperature', discipline: 'Mechanical', type: 'Breakdown', priority: 'High', asset_id: 9 });
+ok(r.status === 201 && r.data.wo.client_id === 2, 'second client request');
+const id3 = r.data.wo.id;
+r = await ck.post('/wo', { title: 'Install 3 new LED high bays', discipline: 'Electrical', type: 'Installation', priority: 'Low', site_id: 3 });
+ok((await ck.post('/wo/' + r.data.wo.id + '/status', { to: 'cancelled', note: 'Budget moved to next quarter.' })).status === 200, 'client cancels own request');
+ok((await mgr.post('/wo/' + id3 + '/status', { to: 'open' })).status === 200, 'manager accepts request');
+await fm.post('/wo/' + id3 + '/assign', { lead_id: uid('Tendai Mafa'), scheduled_date: day(0) });
+r = await mgr.get('/dashboard');
+ok(r.status === 200 && r.data.pm_created.length >= 1, 'planned maintenance jobs generated: ' + (r.data.pm_created || []).join(', '));
+ok((await mgr.get('/dashboard')).data.pm_created.length === 0, 'no duplicate PM jobs');
+r = await fe.post('/wo', { title: 'PLC firmware update and backup', discipline: 'Automation', type: 'Preventive maintenance', priority: 'Normal', asset_id: 3, lead_id: uid('Simon Ndoro'), scheduled_date: day(2) });
+const id4 = r.data.wo.id;
+w = await work(simon, id4); await simon.post('/wo/' + id4 + '/checklist', { items: [...w.answer('Safety'), ...w.answer('Work'), ...w.answer('Handover')] });
+await simon.post('/wo/' + id4 + '/status', { to: 'in_progress' });
+await simon.post('/wo/' + id4 + '/time', { hours: 3, note: 'Backup, firmware update, test' });
+await simon.post('/wo/' + id4 + '/update', { findings: 'Firmware V2.8, backup from 2025 only.', work_done: 'Backed up program, updated firmware to V3.1, verified I/O and HMI comms.', recommendations: 'Keep a backup after every change.' });
+ok((await simon.post('/wo/' + id4 + '/status', { to: 'completed', sign: SIGN })).status === 200, 'automation job completed (awaiting review)');
+r = await fetch(BASE + '/api/export/workorders', { headers: { cookie: '' } });
+ok(r.status === 401, 'export needs login');
+r = await mgr.get('/export/workorders');
+ok(r.status === 200 && r.data.includes('Work order') && r.data.split('\n').length > 4, 'manager exports work orders CSV');
+ok((await mgr.get('/export/timesheets')).data.includes('Kudakwashe Rusike'), 'timesheet export');
+if (!process.argv.includes('--seed')) { r = await mgr.post('/users', { name: 'New Tech', email: 'tech.new@meazim.com', role: 'tech', trade: 'Electrical' });
+ok(r.status === 201 && r.data.password, 'manager creates user with temp password'); }
+ok((await kuda.get('/users')).status === 403, 'tech cannot list users');
+ok((await cs.get('/wo')).data.items.every((x) => x.client_id === 1), 'client list scoped');
+ok((await kuda.get('/wo')).data.items.length === 1, 'tech list scoped to own jobs');
+console.log(fails ? `${fails} FAILED` : 'ALL FLOWS OK');
+process.exit(fails ? 1 : 0);

@@ -1,0 +1,5 @@
+dev/local.db*
+dev/seed.sql
+dev/base.sql
+dev/.fn.mjs
+dev/dump-*.sql

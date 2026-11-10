@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job report</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap">
+<style>
+:root{--brand:#d9822b;--ink:#15171b;--muted:#5b616c;--line:#dfe2e7;--soft:#f6f7f9}
+*{box-sizing:border-box}
+html,body{margin:0;background:#e9ebef;color:var(--ink);font:13px/1.45 "DM Sans",system-ui,sans-serif}
+.bar{position:sticky;top:0;z-index:5;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:10px;background:#1b1f26}
+.bar button,.bar a{font:700 14px "DM Sans",sans-serif;padding:9px 16px;border-radius:10px;border:1px solid #ffffff33;background:none;color:#fff;cursor:pointer;text-decoration:none}
+.bar .main{background:var(--brand);border-color:var(--brand)}
+.page{width:210mm;max-width:100%;margin:18px auto 40px;background:#fff;padding:14mm 13mm;box-shadow:0 10px 40px -10px rgba(0,0,0,.3);position:relative}
+@media (max-width:820px){.page{margin:0;padding:18px 14px;box-shadow:none}}
+h1,h2,h3{font-family:Poppins,"DM Sans",sans-serif;margin:0;line-height:1.2}
+.hd{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding-bottom:12px;border-bottom:3px solid var(--brand)}
+.co{display:flex;gap:12px;align-items:center}
+.co img{max-height:58px;max-width:150px;object-fit:contain}
+.co b{display:block;font:700 16px Poppins,sans-serif}
+.co span{display:block;color:var(--muted);font-size:11.5px}
+.ti{text-align:right}
+.ti h1{font-size:20px;letter-spacing:.04em;text-transform:uppercase}
+.ti .no{font:700 15px ui-monospace,Menlo,monospace;color:var(--brand)}
+.ti span{display:block;color:var(--muted);font-size:11.5px}
+.title{margin:14px 0 4px;font-size:17px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--soft);border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.grid div{padding:7px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.grid div:nth-child(3n){border-right:0}
+.grid dt{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.grid dd{margin:1px 0 0;font-weight:600}
+@media (max-width:600px){.grid{grid-template-columns:1fr 1fr}.grid div:nth-child(3n){border-right:1px solid var(--line)}.grid div:nth-child(2n){border-right:0}}
+section{margin:14px 0}
+section h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--brand);border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:8px}
+.text{white-space:pre-wrap}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:5px 7px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--soft);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.sec td{background:#fafbfc;font-weight:700;font-size:11.5px}
+.r{font-weight:700;font-size:11px;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.r.Pass{background:#e1f3e9;color:#137a46}.r.Fail{background:#fde6e3;color:#b42318}.r.NA{background:#eceef2;color:#5b616c}
+.sum{margin-left:auto;width:min(320px,100%)}
+.sum td{border:0;padding:3px 7px}.sum tr.t td{border-top:2px solid var(--ink);font-weight:700;font-size:14px}
+.photos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ph{border:1px solid var(--line);border-radius:6px;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
+.ph img{width:100%;height:62mm;object-fit:cover;display:block;background:#eee}
+.ph p{margin:0;padding:5px 8px;font-size:11px}
+.signs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:600px){.signs{grid-template-columns:1fr}}
+.sg{border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:96px;break-inside:avoid;page-break-inside:avoid}
+.sg dt{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.sg img{height:48px;max-width:100%;display:block;margin:4px 0}
+.sg .blank{height:48px;border-bottom:1px dashed #9aa1ab;margin:4px 0}
+.foot{margin-top:18px;padding-top:8px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.draft{position:absolute;top:90mm;left:0;right:0;text-align:center;font:700 90px Poppins,sans-serif;color:rgba(180,35,24,.08);transform:rotate(-25deg);pointer-events:none}
+.avoid{break-inside:avoid;page-break-inside:avoid}
+.msg{max-width:520px;margin:60px auto;background:#fff;padding:24px;border-radius:14px;text-align:center}
+@page{size:A4;margin:12mm}
+@media print{html,body{background:#fff}.bar{display:none}.page{margin:0;padding:0;box-shadow:none;width:auto}}
+</style>
+</head>
+<body>
+<div class="bar"><button class="main" id="pdf" type="button">Download PDF</button><button id="pr" type="button">Print</button><a id="bk" href="/">Open the app</a></div>
+<div id="out"><p class="msg">Loading report…</p></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+<script>
+(async () => {
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const fd = (s) => { if (!s) return ''; const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return `${d} ${MON[m - 1]} ${y}`; };
+  const qs = new URLSearchParams(location.search), id = qs.get('id'), tk = qs.get('t');
+  const out = document.getElementById('out');
+  let r;
+  try {
+    const res = await fetch(tk ? '/api/public/report/' + encodeURIComponent(tk) : '/api/report/' + encodeURIComponent(id), { credentials: 'same-origin' });
+    r = await res.json();
+    if (!res.ok) throw new Error(r.error || 'Report not available.');
+  } catch (e) { out.innerHTML = `<div class="msg"><h2>Report not available</h2><p>${esc(e.message)}</p><p><a href="/">Sign in to the work order app</a></p></div>`; document.querySelector('.bar').style.display = 'none'; return; }
+  const S = r.settings, w = r.wo;
+  document.documentElement.style.setProperty('--brand', /^#[0-9a-f]{6}$/i.test(S.color || '') ? S.color : '#d9822b');
+  document.title = `${w.number} · Job report · ${S.short || ''}`;
+  if (tk) document.getElementById('bk').hidden = true; else document.getElementById('bk').href = '/#/job/' + w.id;
+  const cur = (v) => (S.currency === 'USD' || !S.currency ? '$' : S.currency + ' ') + (Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const costs = S.report_costs === '1';
+  const per = {}; r.time.forEach((t) => { per[t.worker] = (per[t.worker] || 0) + t.hours; });
+  const hours = r.time.reduce((a, t) => a + t.hours, 0);
+  const mat = r.materials.reduce((a, m) => a + m.qty * m.unit_cost, 0);
+  const labour = hours * (Number(S.labour_rate) || 0), sub = labour + mat, vat = sub * (Number(S.vat) || 0) / 100;
+  const secs = [...new Set(r.checklist.map((c) => c.section))];
+  const fails = r.checklist.filter((c) => c.result === 'Fail').length;
+  const team = [w.lead, ...r.team.map((t) => t.name + (t.role_text ? ` (${t.role_text})` : ''))].filter(Boolean).join(', ');
+  const photo = (p) => `/api/photo/${p.id}${tk ? '?t=' + encodeURIComponent(tk) : ''}`;
+  out.innerHTML = `<article class="page" id="doc">${r.draft ? '<div class="draft">DRAFT</div>' : ''}
+    <header class="hd"><div class="co">${S.logo ? `<img src="${esc(S.logo)}" alt="" crossorigin="anonymous">` : ''}<div><b>${esc(S.company)}</b><span>${esc(S.address || '')}</span><span>${esc([S.phone, S.email, S.website].filter(Boolean).join(' · '))}</span></div></div>
+      <div class="ti"><h1>Job report</h1><div class="no">${esc(w.number)}</div><span>Report date ${fd(w.released_at || w.approved_at || new Date().toISOString())}</span>${w.client_ref ? `<span>Client ref. ${esc(w.client_ref)}</span>` : ''}</div></header>
+    <h2 class="title">${esc(w.title)}</h2>
+    <div class="chips"><span class="chip">${esc(w.discipline)}</span><span class="chip">${esc(w.type)}</span><span class="chip">Priority: ${esc(w.priority)}</span>${fails ? `<span class="chip" style="background:#fde6e3;color:#b42318">${fails} check${fails > 1 ? 's' : ''} failed</span>` : '<span class="chip" style="background:#e1f3e9;color:#137a46">All checks passed or N/A</span>'}</div>
+    <dl class="grid">
+      <div><dt>Client</dt><dd>${esc(w.client || '—')}</dd></div><div><dt>Site</dt><dd>${esc(w.site || '—')}</dd></div><div><dt>Equipment</dt><dd>${w.asset_tag ? esc(w.asset_tag + ' · ' + w.asset) : '—'}</dd></div>
+      <div><dt>Make / model</dt><dd>${esc([w.asset_make, w.asset_model].filter(Boolean).join(' ') || '—')}</dd></div><div><dt>Serial / rating</dt><dd>${esc([w.asset_serial, w.asset_rating].filter(Boolean).join(' · ') || '—')}</dd></div><div><dt>Requested</dt><dd>${fd(w.created_at)}</dd></div>
+      <div><dt>Work started</dt><dd>${fd(w.started_at) || '—'}</dd></div><div><dt>Work completed</dt><dd>${fd(w.completed_at) || '—'}</dd></div><div><dt>Hours on site</dt><dd>${hours} h</dd></div>
+      <div style="grid-column:1/-1"><dt>Team</dt><dd>${esc(team || '—')}</dd></div>
+    </dl>
+    ${w.description ? `<section class="avoid"><h2>Job requested</h2><p class="text">${esc(w.description)}</p></section>` : ''}
+    ${w.findings ? `<section class="avoid"><h2>What we found</h2><p class="text">${esc(w.findings)}</p></section>` : ''}
+    ${w.work_done ? `<section class="avoid"><h2>Work done</h2><p class="text">${esc(w.work_done)}</p></section>` : ''}
+    ${w.recommendations ? `<section class="avoid"><h2>Recommendations</h2><p class="text">${esc(w.recommendations)}</p></section>` : ''}
+    <section><h2>Safety and checklist</h2><table><thead><tr><th>Check</th><th>Result</th><th>Reading</th><th>Note</th></tr></thead><tbody>
+      ${secs.map((s) => `<tr class="sec"><td colspan="4">${esc(s)}</td></tr>${r.checklist.filter((c) => c.section === s).map((c) => `<tr><td>${esc(c.item)}</td><td>${c.result ? `<span class="r ${c.result.replace('/', '')}">${esc(c.result)}</span>` : '—'}</td><td>${esc(c.reading || '')}</td><td>${esc(c.note || '')}</td></tr>`).join('')}`).join('')}
+    </tbody></table></section>
+    <section class="avoid"><h2>Labour</h2><table><thead><tr><th>Name</th><th class="n">Hours</th></tr></thead><tbody>${Object.entries(per).map(([n, h]) => `<tr><td>${esc(n)}</td><td class="n">${h}</td></tr>`).join('') || '<tr><td colspan="2">No hours recorded</td></tr>'}<tr><td><b>Total</b></td><td class="n"><b>${hours}</b></td></tr></tbody></table></section>
+    ${r.materials.length ? `<section class="avoid"><h2>Materials and parts used</h2><table><thead><tr><th>Item</th><th class="n">Qty</th>${costs ? '<th class="n">Unit cost</th><th class="n">Total</th>' : ''}</tr></thead><tbody>${r.materials.map((m) => `<tr><td>${esc(m.item)}</td><td class="n">${m.qty} ${esc(m.unit || '')}</td>${costs ? `<td class="n">${cur(m.unit_cost)}</td><td class="n">${cur(m.qty * m.unit_cost)}</td>` : ''}</tr>`).join('')}</tbody></table></section>` : ''}
+    ${costs ? `<section class="avoid"><h2>Cost summary</h2><table class="sum"><tbody><tr><td>Labour (${hours} h × ${cur(S.labour_rate)})</td><td class="n">${cur(labour)}</td></tr><tr><td>Materials</td><td class="n">${cur(mat)}</td></tr><tr><td>Subtotal</td><td class="n">${cur(sub)}</td></tr><tr><td>VAT ${esc(S.vat)}%</td><td class="n">${cur(vat)}</td></tr><tr class="t"><td>Total</td><td class="n">${cur(sub + vat)}</td></tr></tbody></table></section>` : ''}
+    ${r.photos.length ? `<section><h2>Photos</h2><div class="photos">${r.photos.map((p) => `<figure class="ph" style="margin:0"><img src="${photo(p)}" alt="${esc(p.caption || '')}"><p><b>${esc(p.stage || '')}</b>${p.caption ? ': ' + esc(p.caption) : ''}</p></figure>`).join('')}</div></section>` : ''}
+    <section class="avoid"><h2>Sign-off</h2><dl class="signs">
+      <div class="sg"><dt>Technician</dt>${w.tech_sign ? `<img src="${w.tech_sign}" alt="Technician signature">` : '<div class="blank"></div>'}<dd style="margin:0">${esc(w.tech_sign_name || w.lead || '')}<br><span style="color:var(--muted)">${fd(w.completed_at)}</span></dd></div>
+      <div class="sg"><dt>Approved for ${esc(S.short || '')}</dt><div class="blank" style="border:0;display:grid;place-items:center;color:#137a46;font-weight:700">${w.approver ? '✓ Approved' : ''}</div><dd style="margin:0">${esc(w.approver || '')}<br><span style="color:var(--muted)">${fd(w.approved_at)}</span></dd></div>
+      <div class="sg"><dt>Client acceptance</dt>${w.client_sign ? `<img src="${w.client_sign}" alt="Client signature">` : '<div class="blank"></div>'}<dd style="margin:0">${esc(w.client_sign_name || 'Name:')}<br><span style="color:var(--muted)">${w.signed_at ? fd(w.signed_at) : 'Date:'}</span></dd></div>
+    </dl></section>
+    <footer class="foot"><span>${esc(S.report_footer || '')}</span><span>${esc(w.number)} · generated by Basa work orders</span></footer>
+  </article>`;
+  const file = `${w.number}-${(w.title || 'report').replace(/[^a-z0-9]+/gi, '-').slice(0, 40)}.pdf`;
+  document.getElementById('pr').onclick = () => print();
+  document.getElementById('pdf').onclick = async (e) => {
+    const b = e.currentTarget;
+    if (!window.html2pdf) { print(); return; }
+    b.disabled = true; b.textContent = 'Making PDF…';
+    try {
+      await Promise.all([...document.images].map((i) => i.complete ? 0 : new Promise((ok) => { i.onload = i.onerror = ok; })));
+      await html2pdf().set({ margin: [8, 8, 10, 8], filename: file, image: { type: 'jpeg', quality: 0.92 }, html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: ['css', 'legacy'], avoid: ['.avoid', '.ph', '.sg', 'tr'] } }).from(document.getElementById('doc')).save();
+    } catch (er) { print(); }
+    b.disabled = false; b.textContent = 'Download PDF';
+  };
+})();
+</script>
+</body>
+</html>
