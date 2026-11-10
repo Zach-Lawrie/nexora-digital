@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
   client_id INTEGER,
   pass_hash TEXT NOT NULL,
   pass_salt TEXT NOT NULL,
-  must_change INTEGER NOT NULL DEFAULT 1,
+  must_change INTEGER NOT NULL DEFAULT 1, notify_push INTEGER NOT NULL DEFAULT 1, notify_sms INTEGER NOT NULL DEFAULT 1,
   status TEXT NOT NULL DEFAULT 'active',
   failed INTEGER NOT NULL DEFAULT 0,
   locked_until TEXT,
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS activity (
 );
 CREATE INDEX IF NOT EXISTS act_wo ON activity(wo_id);
 CREATE TABLE IF NOT EXISTS notifications (
-  id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, wo_id INTEGER, text TEXT NOT NULL, read INTEGER NOT NULL DEFAULT 0,
+  id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, wo_id INTEGER, text TEXT NOT NULL, kind TEXT, read INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
 );
 CREATE INDEX IF NOT EXISTS nt_user ON notifications(user_id, read);
@@ -96,3 +96,8 @@ CREATE TABLE IF NOT EXISTS test_rows (
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
 );
 CREATE INDEX IF NOT EXISTS tr_wo ON test_rows(wo_id, sheet);
+CREATE TABLE IF NOT EXISTS push_subs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, endpoint TEXT NOT NULL UNIQUE, p256dh TEXT NOT NULL, auth TEXT NOT NULL, ua TEXT, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')));
+CREATE TABLE IF NOT EXISTS announcements (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, body TEXT, priority TEXT NOT NULL DEFAULT 'Info', audience TEXT NOT NULL, pinned INTEGER NOT NULL DEFAULT 0, expires TEXT, ack_required INTEGER NOT NULL DEFAULT 0, sms INTEGER NOT NULL DEFAULT 0, created_by INTEGER, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')));
+CREATE TABLE IF NOT EXISTS ann_reads (ann_id INTEGER NOT NULL, user_id INTEGER NOT NULL, read_at TEXT, ack_at TEXT, PRIMARY KEY (ann_id, user_id));
+CREATE TABLE IF NOT EXISTS reminders (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, body TEXT, audience TEXT NOT NULL, next_at TEXT NOT NULL, repeat TEXT NOT NULL DEFAULT 'none', sms INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, created_by INTEGER, last_sent TEXT, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')));
+CREATE TABLE IF NOT EXISTS auto_sent (k TEXT PRIMARY KEY, at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')));

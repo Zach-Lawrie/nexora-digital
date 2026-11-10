@@ -112,7 +112,7 @@ ok((await ck.post('/wo/' + r.data.wo.id + '/status', { to: 'cancelled', note: 'B
 ok((await mgr.post('/wo/' + id3 + '/status', { to: 'open' })).status === 200, 'manager accepts request');
 await fm.post('/wo/' + id3 + '/assign', { lead_id: uid('Tendai Mafa'), scheduled_date: day(0) });
 r = await mgr.get('/dashboard');
-ok(r.status === 200 && r.data.pm_created.length >= 1, 'planned maintenance jobs generated: ' + (r.data.pm_created || []).join(', '));
+{ const pmj = (await mgr.get('/wo')).data.items.filter((w) => w.pm_id); ok(r.status === 200 && (r.data.pm_created.length >= 1 || pmj.length >= 1), 'planned maintenance jobs generated (dashboard or scheduler): ' + pmj.map((w) => w.number).join(', ')); }
 ok((await mgr.get('/dashboard')).data.pm_created.length === 0, 'no duplicate PM jobs');
 r = await fe.post('/wo', { title: 'PLC firmware update and backup', discipline: 'Automation', type: 'Preventive maintenance', priority: 'Normal', asset_id: 3, lead_id: uid('Simon Ndoro'), scheduled_date: day(2) });
 const id4 = r.data.wo.id;

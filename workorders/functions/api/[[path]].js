@@ -21,7 +21,8 @@ const DEFAULT_SETTINGS = {
   company: 'MEA · Mechanical, Electrical & Automation', short: 'MEA', tagline: 'Engineering services and maintenance',
   address: 'Harare, Zimbabwe', phone: '', email: 'manager@meazim.com', website: 'meazim.com',
   logo: '', color: '#d9822b', currency: 'USD', labour_rate: '35', vat: '15', report_costs: '1',
-  report_footer: 'Thank you for choosing MEA. Please contact us about any of the recommendations in this report.'
+  report_footer: 'Thank you for choosing MEA. Please contact us about any of the recommendations in this report.',
+  sms_provider: 'none', sms_user: '', sms_token: '', sms_from: '', sms_country: '263', reminder_hour: '6', tz: '120',
 };
 
 /* ---------- checklist templates ---------- */
@@ -153,7 +154,7 @@ const all = async (db, sql, ...b) => (await db.prepare(sql).bind(...b).all()).re
 const one = (db, sql, ...b) => db.prepare(sql).bind(...b).first();
 const run = (db, sql, ...b) => db.prepare(sql).bind(...b).run();
 async function audit(env, user, action, detail) { try { await run(env.DB, 'INSERT INTO audit (user_id, who, action, detail) VALUES (?,?,?,?)', user ? user.id : null, user ? user.email : 'public', action, detail ? String(detail).slice(0, 400) : null); } catch (e) { /* never block */ } }
-const publicUser = (u) => u && ({ id: u.id, email: u.email, name: u.name, phone: u.phone, role: u.role, trade: u.trade, client_id: u.client_id, must_change: !!u.must_change });
+const publicUser = (u) => u && ({ id: u.id, email: u.email, name: u.name, phone: u.phone, role: u.role, trade: u.trade, client_id: u.client_id, must_change: !!u.must_change, notify_push: u.notify_push !== 0, notify_sms: u.notify_sms !== 0 });
 async function currentUser(env, req) {
   const t = getCookie(req, COOKIE);
   if (!t || !/^[a-f0-9]{64}$/.test(t)) return null;
@@ -170,13 +171,216 @@ async function settings(env) {
   rows.forEach((r) => { s[r.key] = r.value; });
   return s;
 }
-async function notify(env, userIds, woId, text) {
+const SECRET = ['sms_token', 'vapid_private', 'cron_key', 'last_tick'];
+async function publicSettings(env, user) {
+  const s = await settings(env);
+  const out = {};
+  for (const k of Object.keys(s)) if (!SECRET.includes(k) && k !== 'vapid_public') out[k] = s[k];
+  out.sms_on = !!s.sms_provider && s.sms_provider !== 'none';
+  out.tz_label = { 0: 'UTC', 60: 'UTC+1', 120: 'Harare, UTC+2', 180: 'Nairobi, UTC+3', 240: 'Dubai, UTC+4' }[s.tz] || 'UTC' + (s.tz >= 0 ? '+' : '') + s.tz / 60;
+  if (user && BOSS.includes(user.role)) out.sms_token_set = !!s.sms_token; else { delete out.sms_user; delete out.sms_from; }
+  return out;
+}
+const upsertSetting = (env, k, v) => env.DB.prepare('INSERT INTO settings (key, value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').bind(k, String(v));
+
+/* ---------- web push (VAPID + aes128gcm, RFC 8291/8292) ---------- */
+const b64u = {
+  enc: (buf) => { const a = new Uint8Array(buf); let s = ''; for (let i = 0; i < a.length; i++) s += String.fromCharCode(a[i]); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); },
+  dec: (str) => { let x = String(str).replace(/-/g, '+').replace(/_/g, '/'); while (x.length % 4) x += '='; return Uint8Array.from(atob(x), (c) => c.charCodeAt(0)); },
+};
+const concat = (...arrs) => { const out = new Uint8Array(arrs.reduce((n, a) => n + a.length, 0)); let o = 0; for (const a of arrs) { out.set(a, o); o += a.length; } return out; };
+async function hkdf(salt, ikm, info, len) {
+  const k = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt, info }, k, len * 8));
+}
+async function vapidKeys(env) {
+  let s = await settings(env);
+  if (!s.vapid_public || !s.vapid_private) {
+    const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    const jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+    const pub = b64u.enc(await crypto.subtle.exportKey('raw', kp.publicKey));
+    await env.DB.batch([env.DB.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?,?)').bind('vapid_public', pub), env.DB.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?,?)').bind('vapid_private', JSON.stringify(jwk))]);
+    s = await settings(env);
+  }
+  return { pub: s.vapid_public, jwk: JSON.parse(s.vapid_private), email: s.email };
+}
+async function encryptPush(sub, payload) {
+  const enc = new TextEncoder();
+  const ua = b64u.dec(sub.p256dh), auth = b64u.dec(sub.auth);
+  const eph = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+  const asPub = new Uint8Array(await crypto.subtle.exportKey('raw', eph.publicKey));
+  const uaKey = await crypto.subtle.importKey('raw', ua, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+  const secret = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: uaKey }, eph.privateKey, 256));
+  const ikm = await hkdf(auth, secret, concat(enc.encode('WebPush: info\0'), ua, asPub), 32);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const cek = await hkdf(salt, ikm, enc.encode('Content-Encoding: aes128gcm\0'), 16);
+  const nonce = await hkdf(salt, ikm, enc.encode('Content-Encoding: nonce\0'), 12);
+  const key = await crypto.subtle.importKey('raw', cek, 'AES-GCM', false, ['encrypt']);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, key, concat(enc.encode(payload), new Uint8Array([2]))));
+  const head = new Uint8Array(86); head.set(salt, 0); new DataView(head.buffer).setUint32(16, 4096); head[20] = 65; head.set(asPub, 21);
+  return concat(head, ct);
+}
+async function vapidHeader(v, endpoint) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('jwk', v.jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+  const h = b64u.enc(enc.encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })));
+  const c = b64u.enc(enc.encode(JSON.stringify({ aud: new URL(endpoint).origin, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: 'mailto:' + (v.email || 'admin@example.com') })));
+  const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, enc.encode(h + '.' + c));
+  return `vapid t=${h}.${c}.${b64u.enc(sig)}, k=${v.pub}`;
+}
+async function sendPush(env, ids, msg) {
+  if (!ids.length) return 0;
+  const subs = await all(env.DB, `SELECT s.* FROM push_subs s JOIN users u ON u.id=s.user_id WHERE u.status='active' AND COALESCE(u.notify_push,1)=1 AND s.user_id IN (${ids.map(() => '?').join(',')})`, ...ids);
+  if (!subs.length) return 0;
+  const v = await vapidKeys(env);
+  const body = JSON.stringify(msg).slice(0, 3000);
+  let sent = 0;
+  await Promise.allSettled(subs.map(async (sub) => {
+    const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 8000);
+    try {
+      const r = await fetch(sub.endpoint, { method: 'POST', signal: ctl.signal, headers: { 'content-encoding': 'aes128gcm', 'content-type': 'application/octet-stream', ttl: '86400', urgency: msg.urgent ? 'high' : 'normal', authorization: await vapidHeader(v, sub.endpoint) }, body: await encryptPush(sub, body) });
+      if (r.status === 404 || r.status === 410) await run(env.DB, 'DELETE FROM push_subs WHERE id=?', sub.id);
+      else if (r.ok) sent++;
+    } catch (e) { /* push service unreachable: the in-app alert still exists */ } finally { clearTimeout(tm); }
+  }));
+  return sent;
+}
+
+/* ---------- SMS ---------- */
+function e164(phone, cc) {
+  let d = String(phone || '').replace(/[^\d+]/g, '');
+  if (!d) return '';
+  if (d.startsWith('+')) return d;
+  if (d.startsWith('00')) return '+' + d.slice(2);
+  if (d.startsWith('0')) return '+' + (cc || '263') + d.slice(1);
+  return '+' + d;
+}
+async function sendSms(env, ids, text, force) {
+  const s = await settings(env);
+  if (!s.sms_provider || s.sms_provider === 'none' || !ids.length) return { sent: 0, reason: 'SMS is not set up.' };
+  const rows = await all(env.DB, `SELECT id, phone FROM users WHERE status='active' AND ${force ? '1=1' : 'COALESCE(notify_sms,1)=1'} AND COALESCE(phone,'')<>'' AND id IN (${ids.map(() => '?').join(',')})`, ...ids);
+  const to = [...new Set(rows.map((r) => e164(r.phone, s.sms_country)).filter((x) => x.length > 8))];
+  if (!to.length) return { sent: 0, reason: 'Nobody has a mobile number saved.' };
+  const msg = `${s.short || 'Work orders'}: ${text}`.slice(0, 450);
+  try {
+    if (s.sms_provider === 'twilio') {
+      let n = 0;
+      for (const t of to) { const r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(s.sms_user)}/Messages.json`, { method: 'POST', headers: { authorization: 'Basic ' + btoa(s.sms_user + ':' + s.sms_token), 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ To: t, From: s.sms_from, Body: msg }) }); if (r.ok) n++; else return { sent: n, reason: 'Twilio: ' + (await r.text()).slice(0, 160) }; }
+      return { sent: n };
+    }
+    if (s.sms_provider === 'africastalking') {
+      const p = new URLSearchParams({ username: s.sms_user, to: to.join(','), message: msg }); if (s.sms_from) p.set('from', s.sms_from);
+      const r = await fetch('https://api.africastalking.com/version1/messaging', { method: 'POST', headers: { apiKey: s.sms_token, accept: 'application/json', 'content-type': 'application/x-www-form-urlencoded' }, body: p });
+      return r.ok ? { sent: to.length } : { sent: 0, reason: "Africa's Talking: " + (await r.text()).slice(0, 160) };
+    }
+    if (s.sms_provider === 'webhook') {
+      const r = await fetch(s.sms_user, { method: 'POST', headers: { 'content-type': 'application/json', ...(s.sms_token ? { authorization: 'Bearer ' + s.sms_token } : {}) }, body: JSON.stringify({ to, message: msg }) });
+      return r.ok ? { sent: to.length } : { sent: 0, reason: 'Webhook answered ' + r.status };
+    }
+  } catch (e) { return { sent: 0, reason: 'Could not reach the SMS service.' }; }
+  return { sent: 0, reason: 'Unknown SMS provider.' };
+}
+
+/* ---------- notify: in-app + push (+ SMS when asked) ---------- */
+async function notify(env, userIds, woId, text, opt = {}) {
   const ids = [...new Set(userIds.filter(Boolean))];
   if (!ids.length) return;
-  await env.DB.batch(ids.map((id) => env.DB.prepare('INSERT INTO notifications (user_id, wo_id, text) VALUES (?,?,?)').bind(id, woId, text.slice(0, 300))));
+  await env.DB.batch(ids.map((id) => env.DB.prepare('INSERT INTO notifications (user_id, wo_id, text, kind) VALUES (?,?,?,?)').bind(id, woId, text.slice(0, 300), opt.kind || 'job')));
+  const s = await settings(env);
+  const job = woId ? text.match(/^(WO-[\w-]+):\s*/) : null;
+  await sendPush(env, ids, { title: opt.title || (job ? `${s.short || ''} ${job[1]}`.trim() : (s.short || 'Work orders')), body: job ? text.slice(job[0].length) : text, url: opt.url || (woId ? '/#/job/' + woId : '/#/'), tag: opt.tag || (woId ? 'wo' + woId : undefined), urgent: !!opt.urgent });
+  if (opt.sms) await sendSms(env, ids, text);
 }
 const roleIds = async (env, ...roles) => (await all(env.DB, `SELECT id FROM users WHERE status='active' AND role IN (${roles.map(() => '?').join(',')})`, ...roles)).map((r) => r.id);
 const clientIds = async (env, clientId) => clientId ? (await all(env.DB, `SELECT id FROM users WHERE status='active' AND role='client' AND client_id=?`, clientId)).map((r) => r.id) : [];
+// audience: { to: everyone|staff|tech|foreman|manager|trade|clients|client|me, trade, client_id }
+async function audienceIds(env, aud, me) {
+  const to = aud && aud.to;
+  const q = async (where, ...b) => (await all(env.DB, `SELECT id FROM users WHERE status='active' AND ${where}`, ...b)).map((r) => r.id);
+  if (to === 'everyone') return q('1=1');
+  if (to === 'staff') return q(`role IN ('admin','manager','foreman','tech')`);
+  if (to === 'tech') return q(`role='tech'`);
+  if (to === 'foreman') return q(`role='foreman'`);
+  if (to === 'manager') return q(`role IN ('admin','manager')`);
+  if (to === 'trade') return q(`role IN ('tech','foreman') AND trade=?`, String(aud.trade || ''));
+  if (to === 'clients') return q(`role='client'`);
+  if (to === 'client') return q(`role='client' AND client_id=?`, Number(aud.client_id) || -1);
+  return [me.id];
+}
+const AUD_TO = ['everyone', 'staff', 'tech', 'foreman', 'manager', 'trade', 'clients', 'client', 'me'];
+function audienceLabel(aud, names) {
+  const m = { everyone: 'Everyone', staff: 'All staff', tech: 'All technicians', foreman: 'Foremen', manager: 'Managers', clients: 'All clients', me: 'Just me' };
+  if (aud.to === 'trade') return (aud.trade || '') + ' team';
+  if (aud.to === 'client') return (names && names[aud.client_id]) || 'One client';
+  return m[aud.to] || 'Just me';
+}
+function cleanAudience(body, user) {
+  const to = oneOf(body.to, AUD_TO, 'me');
+  if (!SUPERVISE.includes(user.role) && to !== 'me') fail(403, 'You can only set reminders for yourself.');
+  return { to, trade: to === 'trade' ? oneOf(body.trade, DISCIPLINES, 'Electrical') : undefined, client_id: to === 'client' ? numOr(body.client_id) : undefined };
+}
+/* ---------- local time helpers (settings.tz = minutes offset, Harare = 120) ---------- */
+const localNow = (s) => new Date(Date.now() + (Number(s.tz) || 0) * 60000);
+const localDate = (s) => localNow(s).toISOString().slice(0, 10);
+const localToUtc = (s, d, t) => new Date(new Date(`${d}T${t || '07:00'}:00Z`).getTime() - (Number(s.tz) || 0) * 60000).toISOString().replace(/\.\d+Z$/, 'Z');
+function nextRepeat(iso, rep) {
+  const d = new Date(iso);
+  if (rep === 'daily') d.setUTCDate(d.getUTCDate() + 1);
+  else if (rep === 'weekdays') { do { d.setUTCDate(d.getUTCDate() + 1); } while ([0, 6].includes(d.getUTCDay())); }
+  else if (rep === 'weekly') d.setUTCDate(d.getUTCDate() + 7);
+  else if (rep === 'monthly') d.setUTCMonth(d.getUTCMonth() + 1);
+  else return null;
+  return d.toISOString().replace(/\.\d+Z$/, 'Z');
+}
+/* ---------- scheduler tick: reminders, automatic daily alerts, planned maintenance ---------- */
+async function tick(env, force) {
+  const s = await settings(env);
+  if (!force && s.last_tick && Date.now() - new Date(s.last_tick).getTime() < 9 * 60000) return { skipped: true };
+  await upsertSetting(env, 'last_tick', now()).run();
+  const out = { reminders: 0, daily: false, pm: [] };
+  // 1. scheduled reminders
+  const due = await all(env.DB, 'SELECT * FROM reminders WHERE active=1 AND next_at <= ? ORDER BY next_at LIMIT 50', now());
+  for (const r of due) {
+    const nx = nextRepeat(r.next_at, r.repeat);
+    let next = nx; while (next && next <= now()) next = nextRepeat(next, r.repeat);
+    const claim = await run(env.DB, 'UPDATE reminders SET last_sent=?, next_at=COALESCE(?, next_at), active=? WHERE id=? AND next_at=? AND active=1', now(), next, next ? 1 : 0, r.id, r.next_at);
+    if (!claim.meta || !claim.meta.changes) continue; // another run already sent it
+    const ids = await audienceIds(env, JSON.parse(r.audience || '{}'), { id: r.created_by });
+    await notify(env, ids, null, `Reminder: ${r.title}${r.body ? ' · ' + r.body : ''}`, { kind: 'reminder', title: '⏰ ' + r.title, url: '/#/notices/reminders', sms: !!r.sms, urgent: true, tag: 'rem' + r.id });
+    out.reminders++;
+  }
+  // 2. automatic daily reminders, once a day after the reminder hour (local time)
+  const ld = localDate(s), hour = localNow(s).getUTCHours();
+  if (hour >= (Number(s.reminder_hour) || 6) && ((await run(env.DB, 'INSERT OR IGNORE INTO auto_sent (k) VALUES (?)', 'daily:' + ld)).meta || {}).changes) {
+    out.daily = true;
+    const team = async (w) => [w.lead_id, ...(await all(env.DB, 'SELECT user_id FROM wo_team WHERE wo_id=?', w.id)).map((t) => t.user_id)];
+    const sup = async (w) => w.foreman_id ? [w.foreman_id] : await roleIds(env, 'foreman');
+    const tomorrow = addDays(ld, 1);
+    for (const w of await all(env.DB, `SELECT w.*, s.name AS site FROM work_orders w LEFT JOIN sites s ON s.id=w.site_id WHERE w.scheduled_date=? AND w.status IN ('assigned','on_hold','in_progress')`, ld))
+      await notify(env, await team(w), w.id, `${w.number}: on your schedule today: ${w.title}${w.site ? ' at ' + w.site : ''}`, { kind: 'auto' });
+    for (const w of await all(env.DB, `SELECT * FROM work_orders WHERE due_date=? AND status IN ('open','assigned','in_progress','on_hold')`, tomorrow))
+      await notify(env, [...await team(w), ...await sup(w)], w.id, `${w.number}: due tomorrow: ${w.title}`, { kind: 'auto' });
+    for (const w of await all(env.DB, `SELECT * FROM work_orders WHERE due_date < ? AND status IN ('open','assigned','in_progress','on_hold')`, ld))
+      await notify(env, [...await team(w), ...await sup(w)], w.id, `${w.number}: overdue since ${w.due_date}: ${w.title}`, { kind: 'auto', urgent: true });
+    for (const w of await all(env.DB, `SELECT * FROM work_orders WHERE status='completed' AND completed_at < ?`, new Date(Date.now() - 864e5).toISOString()))
+      await notify(env, await sup(w), w.id, `${w.number}: waiting for your review since ${w.completed_at.slice(0, 10)}`, { kind: 'auto' });
+    for (const w of await all(env.DB, `SELECT * FROM work_orders WHERE status='reviewed' AND reviewed_at < ?`, new Date(Date.now() - 864e5).toISOString()))
+      await notify(env, await roleIds(env, 'manager', 'admin'), w.id, `${w.number}: waiting for your approval`, { kind: 'auto' });
+    for (const w of await all(env.DB, `SELECT * FROM work_orders WHERE status='sent' AND released_at < ?`, new Date(Date.now() - 3 * 864e5).toISOString()))
+      await notify(env, await clientIds(env, w.client_id), w.id, `${w.number}: your job report is waiting for your sign-off`, { kind: 'auto' });
+    if (localNow(s).getUTCDay() === 1) {
+      const tags = await all(env.DB, `SELECT w.client_id, COUNT(*) n FROM test_rows t JOIN work_orders w ON w.id=t.wo_id WHERE t.sheet IN ('tt','lift') AND t.next_due IS NOT NULL AND t.next_due <= ? AND w.status<>'cancelled' GROUP BY w.client_id`, addDays(ld, 30));
+      for (const g of tags) {
+        const c = await one(env.DB, 'SELECT name FROM clients WHERE id=?', g.client_id);
+        await notify(env, await roleIds(env, 'manager', 'admin'), null, `${g.n} tagged item${g.n > 1 ? 's' : ''} at ${c ? c.name : 'a client'} due for retest within 30 days`, { kind: 'auto', url: '/#/register' });
+        await notify(env, await clientIds(env, g.client_id), null, `${g.n} of your tagged item${g.n > 1 ? 's are' : ' is'} due for retest within 30 days`, { kind: 'auto', url: '/#/register' });
+      }
+    }
+  }
+  // 3. planned maintenance jobs
+  out.pm = await generatePM(env, { id: null, name: 'System' });
+  return out;
+}
 async function log(env, wo, user, kind, text) {
   await run(env.DB, 'INSERT INTO activity (wo_id, user_id, who, kind, text) VALUES (?,?,?,?,?)', wo.id, user ? user.id : null, user ? user.name : 'System', kind, String(text).slice(0, 1000));
   await run(env.DB, 'UPDATE work_orders SET updated_at=? WHERE id=?', now(), wo.id);
@@ -203,7 +407,7 @@ async function canWork(env, wo, user) {
 }
 async function needWork(env, wo, user) { if (!(await canWork(env, wo, user))) fail(403, wo.status === 'completed' ? 'This job has been submitted. Ask your foreman to send it back if something must change.' : 'You cannot change this job now.'); }
 
-const WO_LIST_SQL = `SELECT w.id, w.number, w.title, w.status, w.priority, w.discipline, w.type, w.due_date, w.scheduled_date, w.created_at, w.updated_at, w.completed_at, w.client_id, w.lead_id, w.foreman_id,
+const WO_LIST_SQL = `SELECT w.id, w.number, w.title, w.status, w.priority, w.discipline, w.type, w.due_date, w.scheduled_date, w.created_at, w.updated_at, w.completed_at, w.client_id, w.lead_id, w.foreman_id, w.pm_id,
   c.name AS client, s.name AS site, a.tag AS asset_tag, a.name AS asset, l.name AS lead, f.name AS foreman,
   (SELECT COUNT(*) FROM wo_team t WHERE t.wo_id=w.id) AS team_count,
   (SELECT COALESCE(SUM(hours),0) FROM time_logs t WHERE t.wo_id=w.id) AS hours,
@@ -287,7 +491,7 @@ on('POST', '/auth/logout', async ({ env, req, secure }) => {
   if (t) await run(env.DB, 'DELETE FROM sessions WHERE token=?', t);
   return json({ ok: true }, 200, { 'set-cookie': cookie('x', 0, secure) });
 });
-on('GET', '/me', async ({ env, user }) => json({ user: publicUser(user), settings: await settings(env) }));
+on('GET', '/me', async ({ env, user }) => json({ user: publicUser(user), settings: await publicSettings(env, user) }));
 on('POST', '/me/password', async ({ env, user, body }) => {
   if (!user) fail(401, 'Please sign in.');
   if (!safeEqual((await hashPassword(String(body.current || ''), user.pass_salt)).hash, user.pass_hash)) fail(400, 'Your current password is wrong.');
@@ -350,7 +554,7 @@ on('GET', '/dashboard', async ({ env, user }) => {
 });
 
 /* notifications */
-on('GET', '/notifications', async ({ env, user }) => { need(user); return json({ items: await all(env.DB, 'SELECT * FROM notifications WHERE user_id=? ORDER BY id DESC LIMIT 30', user.id), unread: (await one(env.DB, 'SELECT COUNT(*) n FROM notifications WHERE user_id=? AND read=0', user.id)).n }); });
+on('GET', '/notifications', async ({ env, user }) => { need(user); try { await tick(env, false); } catch (e) { console.error('tick', e); } return json({ items: await all(env.DB, 'SELECT * FROM notifications WHERE user_id=? ORDER BY id DESC LIMIT 30', user.id), unread: (await one(env.DB, 'SELECT COUNT(*) n FROM notifications WHERE user_id=? AND read=0', user.id)).n, notices: (await one(env.DB, 'SELECT COUNT(*) n FROM ann_reads r JOIN announcements a ON a.id=r.ann_id WHERE r.user_id=? AND r.read_at IS NULL AND (a.expires IS NULL OR a.expires >= ?)', user.id, today())).n }); });
 on('POST', '/notifications/read', async ({ env, user }) => { need(user); await run(env.DB, 'UPDATE notifications SET read=1 WHERE user_id=?', user.id); return json({ ok: true }); });
 
 /* work orders */
@@ -385,8 +589,8 @@ on('POST', '/wo', async ({ env, user, body }) => {
   d.status = isClient ? 'requested' : d.lead_id ? 'assigned' : 'open';
   const wo = await createWO(env, user, d);
   await log(env, wo, user, 'created', isClient ? 'Job requested by the client.' : 'Work order created.');
-  if (isClient) await notify(env, await roleIds(env, 'manager', 'admin', 'foreman'), wo.id, `${wo.number}: new request from ${user.name}: ${d.title}`);
-  if (d.lead_id) { await log(env, wo, user, 'assigned', 'Assigned to ' + (await one(env.DB, 'SELECT name FROM users WHERE id=?', d.lead_id)).name); await notify(env, [d.lead_id], wo.id, `${wo.number}: you are the lead technician on "${d.title}"`); }
+  if (isClient) await notify(env, await roleIds(env, 'manager', 'admin', 'foreman'), wo.id, `${wo.number}: new ${d.priority === 'Urgent' ? 'URGENT ' : ''}request from ${user.name}: ${d.title}`, { urgent: d.priority === 'Urgent', sms: d.priority === 'Urgent' });
+  if (d.lead_id) { await log(env, wo, user, 'assigned', 'Assigned to ' + (await one(env.DB, 'SELECT name FROM users WHERE id=?', d.lead_id)).name); await notify(env, [d.lead_id], wo.id, `${wo.number}: you are the lead technician on "${d.title}"`, { urgent: d.priority === 'Urgent', sms: d.priority === 'Urgent' }); }
   if (d.foreman_id && d.foreman_id !== user.id) await notify(env, [d.foreman_id], wo.id, `${wo.number}: new job for your team: ${d.title}`);
   await audit(env, user, 'created work order', wo.number);
   return json({ wo }, 201);
@@ -460,7 +664,7 @@ on('POST', '/wo/:id/assign', async ({ env, user, params, body }) => {
   const lead = await one(env.DB, 'SELECT name FROM users WHERE id=?', d.lead_id);
   await run(env.DB, 'DELETE FROM wo_team WHERE wo_id=? AND user_id=?', wo.id, d.lead_id);
   await log(env, wo, user, 'assigned', `Lead technician: ${lead.name}${sched ? ', scheduled for ' + sched : ''}.${str(body.note, 500) ? ' Note: ' + str(body.note, 500) : ''}`);
-  if (d.lead_id !== wo.lead_id) await notify(env, [d.lead_id], wo.id, `${wo.number}: you are the lead technician on "${wo.title}"${sched ? ' (' + sched + ')' : ''}`);
+  if (d.lead_id !== wo.lead_id) await notify(env, [d.lead_id], wo.id, `${wo.number}: you are the lead technician on "${wo.title}"${sched ? ' (' + sched + ')' : ''}`, { urgent: wo.priority === 'Urgent', sms: wo.priority === 'Urgent' });
   if (wo.status === 'requested') await notify(env, await clientIds(env, wo.client_id), wo.id, `${wo.number}: your request was accepted and a technician has been assigned`);
   return json({ ok: true });
 });
@@ -721,13 +925,134 @@ on('GET', '/register', async ({ env, user }) => {
   return json({ items, today: today() });
 });
 
+/* notifications: push subscriptions, preferences, tests */
+on('GET', '/push/key', async ({ env, user }) => { need(user); return json({ key: (await vapidKeys(env)).pub }); });
+on('POST', '/push/subscribe', async ({ env, user, body }) => {
+  need(user);
+  const ep = str(body.endpoint, 1000), k = body.keys || {};
+  if (!/^https:\/\//.test(ep) && !/^http:\/\/localhost/.test(ep)) fail(400, 'Invalid push subscription.');
+  if (!/^[A-Za-z0-9_-]{80,100}$/.test(k.p256dh || '') || !/^[A-Za-z0-9_-]{16,30}$/.test(k.auth || '')) fail(400, 'Invalid push keys.');
+  await run(env.DB, 'DELETE FROM push_subs WHERE endpoint=?', ep);
+  await run(env.DB, 'INSERT INTO push_subs (user_id, endpoint, p256dh, auth, ua) VALUES (?,?,?,?,?)', user.id, ep, k.p256dh, k.auth, str(body.ua, 200));
+  await run(env.DB, 'UPDATE users SET notify_push=1 WHERE id=?', user.id);
+  return json({ ok: true });
+});
+on('POST', '/push/unsubscribe', async ({ env, user, body }) => { need(user); await run(env.DB, 'DELETE FROM push_subs WHERE endpoint=? AND user_id=?', str(body.endpoint, 1000), user.id); return json({ ok: true }); });
+on('POST', '/push/test', async ({ env, user }) => {
+  need(user);
+  const n = await sendPush(env, [user.id], { title: 'Notifications are working', body: `Hi ${user.name.split(' ')[0]}, you will get job alerts here.`, url: '/#/', urgent: true });
+  return json({ sent: n, devices: (await one(env.DB, 'SELECT COUNT(*) n FROM push_subs WHERE user_id=?', user.id)).n });
+});
+on('POST', '/sms/test', async ({ env, user, body }) => {
+  need(user, ...BOSS);
+  if (!user.phone) fail(400, 'Add your mobile number under My account first.');
+  const r = await sendSms(env, [user.id], 'Test message. SMS alerts are working.', true);
+  if (!r.sent) fail(400, r.reason || 'The SMS was not sent.');
+  return json(r);
+});
+on('POST', '/me/prefs', async ({ env, user, body }) => {
+  need(user);
+  await run(env.DB, 'UPDATE users SET notify_push=?, notify_sms=? WHERE id=?', body.notify_push === false ? 0 : 1, body.notify_sms === false ? 0 : 1, user.id);
+  return json({ ok: true });
+});
+on('GET', '/notifications/all', async ({ env, user }) => { need(user); return json({ items: await all(env.DB, 'SELECT * FROM notifications WHERE user_id=? ORDER BY id DESC LIMIT 150', user.id) }); });
+
+/* notice board */
+on('GET', '/notices', async ({ env, user }) => {
+  need(user);
+  const rows = await all(env.DB, `SELECT a.*, u.name AS author, u.role AS author_role, r.user_id AS rcpt, r.read_at, r.ack_at,
+    (SELECT COUNT(*) FROM ann_reads x WHERE x.ann_id=a.id) AS recipients, (SELECT COUNT(*) FROM ann_reads x WHERE x.ann_id=a.id AND x.read_at IS NOT NULL) AS reads,
+    (SELECT COUNT(*) FROM ann_reads x WHERE x.ann_id=a.id AND x.ack_at IS NOT NULL) AS acks
+    FROM announcements a LEFT JOIN users u ON u.id=a.created_by LEFT JOIN ann_reads r ON r.ann_id=a.id AND r.user_id=?
+    WHERE (r.user_id IS NOT NULL OR a.created_by=? OR ?) AND (a.expires IS NULL OR a.expires >= ?) ORDER BY a.pinned DESC, a.id DESC LIMIT 100`, user.id, user.id, BOSS.includes(user.role) ? 1 : 0, today());
+  const names = Object.fromEntries((await all(env.DB, 'SELECT id, name FROM clients')).map((c) => [c.id, c.name]));
+  return json({ items: rows.map((a) => ({ ...a, audience_label: audienceLabel(JSON.parse(a.audience || '{}'), names), mine: a.created_by === user.id, can_manage: a.created_by === user.id || BOSS.includes(user.role), recipient: !!a.rcpt })) });
+});
+on('POST', '/notices', async ({ env, user, body }) => {
+  need(user, ...SUPERVISE);
+  const title = str(body.title, 120), text = str(body.body, 3000), aud = cleanAudience(body, user);
+  if (!title) fail(400, 'Give the notice a title.');
+  if (aud.to === 'me') fail(400, 'Choose who should get this notice.');
+  const priority = oneOf(body.priority, ['Info', 'Important', 'Urgent'], 'Info');
+  const ids = (await audienceIds(env, aud, user)).filter((x) => x !== user.id);
+  if (!ids.length) fail(400, 'Nobody matches that audience yet.');
+  const r = await run(env.DB, 'INSERT INTO announcements (title, body, priority, audience, pinned, expires, ack_required, sms, created_by) VALUES (?,?,?,?,?,?,?,?,?)', title, text, priority, JSON.stringify(aud), body.pinned ? 1 : 0, dateOr(body.expires), body.ack ? 1 : 0, body.sms ? 1 : 0, user.id);
+  const id = r.meta.last_row_id;
+  await env.DB.batch(ids.map((u) => env.DB.prepare('INSERT OR IGNORE INTO ann_reads (ann_id, user_id) VALUES (?,?)').bind(id, u)));
+  await notify(env, ids, null, `${priority === 'Urgent' ? 'URGENT: ' : ''}${title}${text ? ' · ' + text.slice(0, 140) : ''}`, { kind: 'notice', title: (priority === 'Urgent' ? '🚨 ' : '📢 ') + title, url: '/#/notices', urgent: priority !== 'Info', sms: !!body.sms, tag: 'ann' + id });
+  await audit(env, user, 'posted notice', title);
+  return json({ id, recipients: ids.length }, 201);
+});
+on('POST', '/notices/:id', async ({ env, user, params, body }) => {
+  need(user);
+  const a = await one(env.DB, 'SELECT * FROM announcements WHERE id=?', Number(params.id) || 0);
+  if (!a) fail(404, 'Notice not found.');
+  const manage = a.created_by === user.id || BOSS.includes(user.role);
+  if (body.read || body.ack) {
+    await run(env.DB, `UPDATE ann_reads SET read_at=COALESCE(read_at, ?), ack_at=CASE WHEN ? THEN COALESCE(ack_at, ?) ELSE ack_at END WHERE ann_id=? AND user_id=?`, now(), body.ack ? 1 : 0, now(), a.id, user.id);
+    return json({ ok: true });
+  }
+  if (!manage) fail(403, 'Only the author or a manager can change this notice.');
+  if (body.delete) { await env.DB.batch([env.DB.prepare('DELETE FROM ann_reads WHERE ann_id=?').bind(a.id), env.DB.prepare('DELETE FROM announcements WHERE id=?').bind(a.id)]); return json({ ok: true }); }
+  if ('pinned' in body) await run(env.DB, 'UPDATE announcements SET pinned=? WHERE id=?', body.pinned ? 1 : 0, a.id);
+  if (body.remind) {
+    const ids = (await all(env.DB, `SELECT user_id FROM ann_reads WHERE ann_id=? AND ${a.ack_required ? 'ack_at' : 'read_at'} IS NULL`, a.id)).map((r) => r.user_id);
+    await notify(env, ids, null, `Reminder: please ${a.ack_required ? 'read and acknowledge' : 'read'} "${a.title}"`, { kind: 'notice', url: '/#/notices', tag: 'ann' + a.id, sms: !!body.sms });
+    return json({ reminded: ids.length });
+  }
+  return json({ ok: true });
+});
+on('GET', '/notices/:id/receipts', async ({ env, user, params }) => {
+  need(user, ...SUPERVISE);
+  const a = await one(env.DB, 'SELECT * FROM announcements WHERE id=?', Number(params.id) || 0);
+  if (!a) fail(404, 'Notice not found.');
+  return json({ items: await all(env.DB, 'SELECT u.name, u.role, u.trade, r.read_at, r.ack_at FROM ann_reads r JOIN users u ON u.id=r.user_id WHERE r.ann_id=? ORDER BY r.read_at IS NULL DESC, u.name', a.id) });
+});
+/* reminders */
+on('GET', '/reminders', async ({ env, user }) => {
+  need(user);
+  const names = Object.fromEntries((await all(env.DB, 'SELECT id, name FROM clients')).map((c) => [c.id, c.name]));
+  const rows = await all(env.DB, `SELECT r.*, u.name AS author FROM reminders r LEFT JOIN users u ON u.id=r.created_by WHERE r.created_by=? OR ? ORDER BY r.active DESC, r.next_at`, user.id, BOSS.includes(user.role) ? 1 : 0);
+  return json({ items: rows.map((r) => ({ ...r, audience_label: audienceLabel(JSON.parse(r.audience || '{}'), names) })), tz: (await settings(env)).tz });
+});
+on('POST', '/reminders', async ({ env, user, body }) => {
+  need(user);
+  const s = await settings(env);
+  if (body.id) {
+    const r = await one(env.DB, 'SELECT * FROM reminders WHERE id=?', Number(body.id));
+    if (!r || (r.created_by !== user.id && !BOSS.includes(user.role))) fail(404, 'Reminder not found.');
+    if (body.delete) { await run(env.DB, 'DELETE FROM reminders WHERE id=?', r.id); return json({ ok: true }); }
+    if ('active' in body && Object.keys(body).length <= 2) { await run(env.DB, 'UPDATE reminders SET active=? WHERE id=?', body.active ? 1 : 0, r.id); return json({ ok: true }); }
+  }
+  const title = str(body.title, 120);
+  if (!title) fail(400, 'What is the reminder about?');
+  const d = dateOr(body.date), t = /^\d{2}:\d{2}$/.test(body.time || '') ? body.time : null;
+  if (!d || !t) fail(400, 'Choose the date and time.');
+  const at = localToUtc(s, d, t);
+  const repeat = oneOf(body.repeat, ['none', 'daily', 'weekdays', 'weekly', 'monthly'], 'none');
+  if (repeat === 'none' && at < now()) fail(400, 'That time has already passed.');
+  let next = at; while (repeat !== 'none' && next < now()) next = nextRepeat(next, repeat);
+  const aud = cleanAudience(body, user);
+  const f = [title, str(body.body, 1000), JSON.stringify(aud), next, repeat, body.sms && SUPERVISE.includes(user.role) ? 1 : 0, 1];
+  if (body.id) await run(env.DB, 'UPDATE reminders SET title=?, body=?, audience=?, next_at=?, repeat=?, sms=?, active=? WHERE id=?', ...f, Number(body.id));
+  else await run(env.DB, 'INSERT INTO reminders (title, body, audience, next_at, repeat, sms, active, created_by) VALUES (?,?,?,?,?,?,?,?)', ...f, user.id);
+  return json({ ok: true, next_at: next });
+});
+/* scheduler: called every 15 minutes by the cron worker, and as a fallback while the app is open */
+on('POST', '/cron', async ({ env, req }) => {
+  const s = await settings(env);
+  const k = req.headers.get('x-cron-key') || '';
+  if (!s.cron_key || k.length < 20 || !safeEqual(k, s.cron_key)) fail(403, 'Forbidden.');
+  return json(await tick(env, true));
+});
+
 /* reports */
 on('GET', '/report/:id', async ({ env, user, params }) => {
   need(user);
   const wo = await loadWO(env, params.id, user);
   if (user.role === 'client' && !['sent', 'closed'].includes(wo.status)) fail(403, 'The report will be available once the manager sends it.');
   const out = await fullWO(env, wo, user, true);
-  out.settings = await settings(env);
+  out.settings = await publicSettings(env, null);
   out.draft = !['approved', 'sent', 'closed'].includes(wo.status);
   out.wo.tech_sign = wo.tech_sign;
   return json(out);
@@ -737,7 +1062,7 @@ on('GET', '/public/report/:token', async ({ env, params }) => {
   const wo = await one(env.DB, `SELECT * FROM work_orders WHERE report_token=? AND status IN ('sent','closed')`, params.token);
   if (!wo) fail(404, 'Report not found or no longer shared.');
   const out = await fullWO(env, wo, null, true);
-  out.settings = await settings(env);
+  out.settings = await publicSettings(env, null);
   out.wo.tech_sign = wo.tech_sign;
   out.token = params.token;
   return json(out);
@@ -847,6 +1172,11 @@ on('POST', '/settings', async ({ env, user, body }) => {
   const stmts = [];
   for (const k of Object.keys(DEFAULT_SETTINGS)) if (k in body) {
     let v = str(body[k], k === 'logo' ? 400000 : 600);
+    if (k === 'sms_token' && !v) continue;
+    if (k === 'sms_provider') v = oneOf(v, ['none', 'twilio', 'africastalking', 'webhook'], 'none');
+    if (k === 'sms_user' && body.sms_provider === 'webhook' && v && !/^https:\/\//.test(v)) fail(400, 'The webhook must be an https link.');
+    if (k === 'reminder_hour') v = String(Math.min(23, Math.max(0, Math.round(Number(v) || 6))));
+    if (k === 'tz') v = String(Math.round(Number(v) || 0));
     if (k === 'logo' && v && !/^data:image\/(png|jpeg|webp);base64,/.test(v) && !/^https:\/\//.test(v) && !/^\/[\w/.-]+$/.test(v)) fail(400, 'The logo must be an uploaded image or a link.');
     if (k === 'color' && !/^#[0-9a-fA-F]{6}$/.test(v)) v = DEFAULT_SETTINGS.color;
     stmts.push(env.DB.prepare('INSERT INTO settings (key, value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').bind(k, v));

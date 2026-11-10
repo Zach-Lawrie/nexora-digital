@@ -13,6 +13,7 @@
     alert: 'M12 3 2 21h20zM12 10v4M12 18h.01', shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z', play: 'M6 4l14 8-14 8z', pause: 'M7 4h4v16H7zM13 4h4v16h-4z',
     send: 'M22 2 11 13M22 2l-7 20-4-9-9-4z', share: 'M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6M8.6 13.5l6.8 4M15.4 6.5l-6.8 4',
     download: 'M12 3v12M7 10l5 5 5-5M5 21h14', printer: 'M6 9V2h12v7M6 18H4v-7h16v7h-2M6 14h12v8H6z', back: 'M15 18l-6-6 6-6', msg: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+    mega: 'M3 10v4h3l7 5V5L6 10zM16.5 8.5a5 5 0 0 1 0 7M19.5 5.5a9 9 0 0 1 0 13', pinf: 'M12 17v5M9 3h6l-1 6 4 4v2H6v-2l4-4z',
     refresh: 'M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5', trash: 'M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15', phone: 'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z',
   };
   const ic = (n, s = 18) => `<svg class="i" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${P[n] || P.list}"/></svg>`;
@@ -135,26 +136,26 @@
   /* ---------- shell ---------- */
   function navItems() {
     const r = ME.role;
-    if (r === 'client') return [['#/', 'home', 'My jobs'], ['#/new', 'plus', 'Request work'], ['#/assets', 'tag', 'Equipment'], ['#/register', 'shield', 'Tagged items'], ['#/account', 'user', 'Account']];
-    if (r === 'tech') return [['#/', 'home', 'My jobs'], ['#/jobs', 'list', 'Job history'], ['#/register', 'shield', 'Test & tag'], ['#/account', 'user', 'Account']];
-    const n = [['#/', 'home', 'Dashboard'], ['#/jobs', 'list', 'Work orders'], ['#/board', 'board', 'Board'], ['#/new', 'plus', 'New work order'], ['#/assets', 'tag', 'Assets'], ['#/pm', 'cal', 'Maintenance plans'], ['#/register', 'shield', 'Test & tag register'], ['#/clients', 'building', 'Clients & sites'], ['#/reports', 'chart', 'Reports']];
+    if (r === 'client') return [['#/', 'home', 'My jobs'], ['#/new', 'plus', 'Request work'], ['#/notices', 'mega', 'Notices'], ['#/register', 'shield', 'Tagged items'], ['#/assets', 'tag', 'Equipment'], ['#/account', 'user', 'Account']];
+    if (r === 'tech') return [['#/', 'home', 'My jobs'], ['#/jobs', 'list', 'Job history'], ['#/notices', 'mega', 'Notices'], ['#/register', 'shield', 'Test & tag'], ['#/account', 'user', 'Account']];
+    const n = [['#/', 'home', 'Dashboard'], ['#/jobs', 'list', 'Work orders'], ['#/board', 'board', 'Board'], ['#/new', 'plus', 'New work order'], ['#/notices', 'mega', 'Notice board'], ['#/assets', 'tag', 'Assets'], ['#/pm', 'cal', 'Maintenance plans'], ['#/register', 'shield', 'Test & tag register'], ['#/clients', 'building', 'Clients & sites'], ['#/reports', 'chart', 'Reports']];
     if (BOSS()) n.push(['#/users', 'users', 'People & logins'], ['#/settings', 'gear', 'Settings']);
     n.push(['#/account', 'user', 'My account']);
     return n;
   }
   function shell() {
     const items = navItems();
-    const tab = ME.role === 'client' ? [items[0], items[1], items[2], items[3], items[4]] : ME.role === 'tech' ? items : [items[0], items[1], items[3], items[4], ['#/more', 'gear', 'More']];
+    const tab = ME.role === 'client' ? [items[0], items[1], items[2], items[3], items[5]] : ME.role === 'tech' ? items : [items[0], items[1], items[3], items[4], ['#/more', 'gear', 'More']];
     document.body.innerHTML = `<div class="app">
       <aside class="side"><div class="brand">${logoHTML()}<div><b>${esc(SET.short || 'Basa')}</b><span>Work orders</span></div></div>
-        <nav class="nav" aria-label="Main">${items.map(([h, i, l]) => `<a href="${h}">${ic(i)}<span>${l}</span></a>`).join('')}</nav>
+        <nav class="nav" aria-label="Main">${items.map(([h, i, l]) => `<a href="${h}">${ic(i)}<span>${l}</span>${h === '#/notices' ? '<em class="nb" hidden></em>' : ''}</a>`).join('')}</nav>
         <div class="me"><div class="who"><span class="av">${esc(initials(ME.name))}</span><div><b>${esc(ME.name)}</b><small>${ROLE[ME.role]}${ME.trade && ME.trade !== 'Multi' ? ' · ' + esc(ME.trade) : ''}</small></div></div>
         <button id="so">${ic('out', 16)} Sign out</button><p class="credit">Basa by Nexora Digital</p></div></aside>
       <div class="main"><header class="topbar"><div><div class="crumb">${esc(SET.short || 'Basa')} work orders</div><h1 id="ttl"></h1></div>
         <div class="row" style="position:relative"><button class="iconbtn" id="bell" aria-label="Notifications">${ic('bell')}<span class="dotn" id="bn" hidden></span></button>
         <button class="iconbtn mobile-only" id="so2" aria-label="Sign out">${ic('out')}</button><div class="menu" id="nm" hidden></div></div></header>
         <main class="view" id="v" tabindex="-1"></main></div>
-      <nav class="tabbar" aria-label="Main">${tab.map(([h, i, l]) => `<a href="${h}">${ic(i, 20)}<span>${l}</span></a>`).join('')}</nav></div>`;
+      <nav class="tabbar" aria-label="Main">${tab.map(([h, i, l]) => `<a href="${h}">${ic(i, 20)}<span>${l}</span>${h === '#/notices' || h === '#/more' ? '<em class="nb" hidden></em>' : ''}</a>`).join('')}</nav></div>`;
     $('#so').onclick = logout; $('#so2').onclick = logout;
     $('#bell').onclick = toggleNotes;
     document.addEventListener('click', (e) => { const m = $('#nm'); if (m && !m.hidden && !e.target.closest('#nm,#bell')) m.hidden = true; });
@@ -165,14 +166,32 @@
     const h = (location.hash || '#/').split('?')[0];
     $$('.nav a, .tabbar a').forEach((a) => { const x = a.getAttribute('href'); const cur = x === '#/' ? h === '#/' || h === '#' : h === x || h.startsWith(x + '/'); a.setAttribute('aria-current', cur ? 'page' : 'false'); });
   }
+  const noteLink = (n) => n.wo_id ? '#/job/' + n.wo_id : n.kind === 'reminder' ? '#/notices/reminders' : n.kind === 'notice' ? '#/notices' : /tagged item/.test(n.text) ? '#/register' : '#/notices/alerts';
+  let lastNote = null;
   async function pollNotes() {
-    try { NOTE = await api('/notifications'); const b = $('#bn'); if (b) { b.hidden = !NOTE.unread; b.textContent = NOTE.unread > 9 ? '9+' : NOTE.unread; } } catch (e) { /* offline */ }
-    clearTimeout(pollNotes.t); pollNotes.t = setTimeout(pollNotes, 60000);
+    try {
+      NOTE = await api('/notifications');
+      const b = $('#bn'); if (b) { b.hidden = !NOTE.unread; b.textContent = NOTE.unread > 9 ? '9+' : NOTE.unread; }
+      $$('.nb').forEach((e) => { e.hidden = !NOTE.notices; e.textContent = NOTE.notices > 9 ? '9+' : NOTE.notices; });
+      const top = NOTE.items.length ? NOTE.items[0].id : 0;
+      if (lastNote !== null) NOTE.items.filter((n) => n.id > lastNote && !n.read).slice(0, 3).reverse().forEach((n) => liveAlert({ body: n.text, url: noteLink(n), urgent: /URGENT|overdue/i.test(n.text) }));
+      lastNote = Math.max(lastNote || 0, top);
+    } catch (e) { /* offline */ }
+    clearTimeout(pollNotes.t); pollNotes.t = setTimeout(pollNotes, document.hidden ? 120000 : 30000);
+  }
+  function liveAlert(d) {
+    let box = $('#live'); if (!box) { box = document.createElement('div'); box.id = 'live'; box.setAttribute('aria-live', 'polite'); document.body.appendChild(box); }
+    const a = document.createElement('a'); a.className = 'live' + (d.urgent ? ' urgent' : ''); a.href = d.url || '#/';
+    a.innerHTML = `${ic(d.urgent ? 'alert' : 'bell', 18)}<span>${d.title ? `<b>${esc(d.title)}</b>` : ''}${esc(d.body || '')}</span><button type="button" aria-label="Dismiss">${ic('x', 14)}</button>`;
+    a.querySelector('button').onclick = (e) => { e.preventDefault(); a.remove(); };
+    a.addEventListener('click', () => setTimeout(() => a.remove(), 50));
+    box.prepend(a); while (box.children.length > 3) box.lastChild.remove();
+    setTimeout(() => a.remove(), d.urgent ? 20000 : 9000);
   }
   async function toggleNotes() {
     const m = $('#nm'); if (!m.hidden) { m.hidden = true; return; }
     await pollNotes();
-    m.innerHTML = NOTE.items.length ? NOTE.items.map((n) => `<a href="#/job/${n.wo_id}" class="${n.read ? '' : 'unread'}">${esc(n.text)}<small>${ago(n.created_at)}</small></a>`).join('') : '<p class="empty">No notifications yet.</p>';
+    m.innerHTML = (NOTE.items.length ? NOTE.items.map((n) => `<a href="${noteLink(n)}" class="${n.read ? '' : 'unread'}">${esc(n.text)}<small>${ago(n.created_at)}</small></a>`).join('') : '<p class="empty">No notifications yet.</p>') + `<a href="#/notices/alerts" class="all">All alerts and notices</a>`;
     m.hidden = false;
     if (NOTE.unread) { api('/notifications/read', {}).then(() => { NOTE.unread = 0; $('#bn').hidden = true; }).catch(() => {}); }
     $$('a', m).forEach((a) => a.addEventListener('click', () => { m.hidden = true; }));
@@ -201,9 +220,11 @@
       else if (parts[0] === 'reports') await reports(v);
       else if (parts[0] === 'settings') await settingsView(v);
       else if (parts[0] === 'account') await account(v);
+      else if (parts[0] === 'notices') await notices(v, parts[1] || 'board');
       else if (parts[0] === 'more') more(v);
       else v.innerHTML = '<p class="empty">Page not found.</p>';
     } catch (e) { v.innerHTML = `<div class="banner bad">${ic('alert')}<span>${esc(e.message)}</span></div>`; }
+    if (!parts.length) pushNudge(v);
   }
   const refreshLK = async () => { LK = await api('/lookups'); };
 
@@ -820,17 +841,166 @@
       <h2 style="margin-top:8px">Costing</h2><div class="grid3"><label class="f">Currency<input name="currency" value="${esc(s.currency)}" maxlength="6"></label><label class="f">Labour rate per hour<input name="labour_rate" type="number" step="any" value="${esc(s.labour_rate)}"></label><label class="f">VAT %<input name="vat" type="number" step="any" value="${esc(s.vat)}"></label></div>
       <label class="check"><input type="checkbox" name="report_costs" ${s.report_costs === '1' ? 'checked' : ''}> Show labour, materials and totals on client reports</label>
       <label class="f">Report footer<textarea name="report_footer" rows="2">${esc(s.report_footer)}</textarea></label>
+      <h2 style="margin-top:8px">Alerts, reminders and SMS</h2><p class="muted small">Phone alerts are free and need no setup: each person turns them on under My account. SMS text messages need an account with an SMS provider and are only sent for urgent jobs, urgent notices and reminders you mark for SMS.</p>
+      <div class="grid3"><label class="f">Daily job reminders at<select name="reminder_hour">${opt(Array.from({ length: 24 }, (_, h) => [h, String(h).padStart(2, '0') + ':00']), s.reminder_hour || 6)}</select></label><label class="f">Time zone<select name="tz">${opt([[0, 'UTC / GMT'], [60, 'UTC+1 (Lagos, Kinshasa)'], [120, 'UTC+2 (Harare, Lusaka, Johannesburg)'], [180, 'UTC+3 (Nairobi, Dar es Salaam)'], [240, 'UTC+4 (Dubai)']], s.tz || 120)}</select></label><label class="f">Country code<input name="sms_country" value="${esc(s.sms_country || '263')}" maxlength="4" inputmode="numeric"><span class="hint">Used for numbers saved like 077…</span></label></div>
+      <div class="grid2"><label class="f">SMS provider<select name="sms_provider" id="smp">${opt([['none', 'No SMS'], ['africastalking', "Africa's Talking"], ['twilio', 'Twilio'], ['webhook', 'Other (webhook)']], s.sms_provider || 'none')}</select></label><label class="f" id="smf">Sender name or number<input name="sms_from" value="${esc(s.sms_from || '')}" maxlength="20"></label></div>
+      <div class="grid2" id="smx"><label class="f"><span id="smul">Username</span><input name="sms_user" value="${esc(s.sms_user || '')}" autocomplete="off"></label><label class="f"><span id="smtl">API key</span><input name="sms_token" type="password" autocomplete="new-password" placeholder="${s.sms_token_set ? 'Saved. Type to replace.' : ''}"></label></div>
+      <div class="row" id="smt"><button class="btn ghost" type="button" id="smtest">${ic('phone', 16)} Send a test SMS to my phone</button><span class="hint">Save first. Goes to the number under My account.</span></div>
       <p class="err" id="se"></p><div class="row"><button class="btn">Save settings</button></div></form>`;
     let logo = null;
+    const smp = $('#smp', v), smx = () => { const p = smp.value; $('#smx', v).hidden = $('#smf', v).hidden = $('#smt', v).hidden = p === 'none'; $('#smf', v).hidden = p === 'none' || p === 'webhook'; $('#smul', v).textContent = p === 'twilio' ? 'Account SID' : p === 'webhook' ? 'Webhook link (https)' : 'Username'; $('#smtl', v).textContent = p === 'twilio' ? 'Auth token' : p === 'webhook' ? 'Bearer token (optional)' : 'API key'; };
+    smp.onchange = smx; smx();
+    $('#smtest', v).onclick = (e) => busy(e.currentTarget, async () => { const r = await api('/sms/test', {}); toast(`Test SMS sent (${r.sent})`); });
     $('#lg', v).onchange = async (e) => { const f = e.target.files[0]; if (!f) return; try { logo = await resizeImage(f, 500, 'image/png'); toast('Logo ready. Press Save.'); } catch (er) { toast(er.message, true); } };
     $('#sf', v).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); x.report_costs = x.report_costs ? '1' : '0'; if (logo) x.logo = logo; busy(e.submitter, async () => { await api('/settings', x); SET = (await api('/me')).settings; brand(); toast('Settings saved'); shell(); route(); }, $('#se', v)); });
   }
   async function account(v) {
     setTitle('My account');
     v.innerHTML = `<div class="grid2" style="max-width:900px"><form class="card stack" id="pf"><h2>Profile</h2><label class="f">Name<input name="name" value="${esc(ME.name)}"></label><label class="f">Phone<input name="phone" value="${esc(ME.phone || '')}"></label><p class="muted small">${esc(ME.email)} · ${ROLE[ME.role]}</p><button class="btn ghost">Save</button></form>
+      <section class="card stack" id="al"><h2>Alerts on this phone</h2><p class="muted small">Get job alerts, notices and reminders as phone notifications, even when the app is closed.</p><div id="pst" class="muted small">Checking…</div><div class="row" id="pbt"></div>
+        <label class="check"><input type="checkbox" id="nsms" ${ME.notify_sms ? 'checked' : ''}> Send me SMS text messages for urgent jobs, urgent notices and reminders</label><p class="hint">SMS goes to the phone number in your profile.</p></section>
       <form class="card stack" id="cf"><h2>Change password</h2><label class="f">Current password<input name="current" type="password" autocomplete="current-password" required></label><label class="f">New password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label><p class="err" id="ce"></p><button class="btn ghost">Change password</button></form></div>`;
     $('#pf', v).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); busy(e.submitter, async () => { await api('/me/profile', x); ME.name = x.name; ME.phone = x.phone; toast('Saved'); }); });
     $('#cf', v).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/me/password', formData(e.target)); e.target.reset(); toast('Password changed'); }, $('#ce', v)); });
+    $('#nsms', v).onchange = (e) => busy(null, async () => { await api('/me/prefs', { notify_push: ME.notify_push, notify_sms: e.target.checked }); ME.notify_sms = e.target.checked; toast(e.target.checked ? 'SMS alerts on' : 'SMS alerts off'); });
+    pushPanel(v);
+  }
+  /* ---------- push notifications ---------- */
+  const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const pushOK = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  const u8 = (b) => { const s = atob((b + '==='.slice((b.length + 3) % 4)).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(s, (c) => c.charCodeAt(0)); };
+  async function swReady() { if (!('serviceWorker' in navigator)) return null; try { await navigator.serviceWorker.register('/sw.js'); return await navigator.serviceWorker.ready; } catch (e) { return null; } }
+  async function currentSub() { if (!pushOK()) return null; const r = await swReady(); return r ? r.pushManager.getSubscription() : null; }
+  async function enablePush() {
+    if (!pushOK()) throw new Error(isIOS() && !standalone() ? 'On iPhone: tap Share, then "Add to Home Screen". Open the app from your home screen and turn alerts on there.' : 'This browser cannot show notifications. Try Chrome, Edge, Firefox or Safari.');
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') throw new Error('Notifications are blocked for this site. Allow them in your browser or phone settings, then try again.');
+    const reg = await swReady(); if (!reg) throw new Error('Could not start notifications in this browser.');
+    const { key } = await api('/push/key');
+    let sub = await reg.pushManager.getSubscription();
+    try { if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u8(key) }); }
+    catch (e) { if (sub) await sub.unsubscribe(); sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u8(key) }); }
+    const j = sub.toJSON();
+    await api('/push/subscribe', { endpoint: j.endpoint, keys: j.keys, ua: navigator.userAgent.slice(0, 200) });
+    ME.notify_push = true;
+  }
+  async function disablePush() { const sub = await currentSub(); if (sub) { await api('/push/unsubscribe', { endpoint: sub.endpoint }); await sub.unsubscribe(); } }
+  async function pushPanel(v) {
+    const st = $('#pst', v), bt = $('#pbt', v); if (!st) return;
+    const sub = await currentSub().catch(() => null);
+    if (!pushOK()) { st.innerHTML = isIOS() && !standalone() ? `${ic('phone', 14)} On iPhone, phone alerts work once the app is on your home screen: tap <b>Share</b> then <b>Add to Home Screen</b>, open it from there and come back to this page.` : 'This browser does not support phone alerts. You will still see alerts inside the app.'; bt.innerHTML = ''; return; }
+    if (Notification.permission === 'denied') { st.textContent = 'Notifications are blocked for this site. Allow them in your browser or phone settings.'; bt.innerHTML = ''; return; }
+    st.innerHTML = sub ? `<span class="pill s-closed">On</span> Alerts are on for this device.` : 'Alerts are off on this device.';
+    bt.innerHTML = sub ? `<button class="btn ghost" type="button" id="ptest">${ic('bell', 16)} Send a test alert</button><button class="link" type="button" id="poff">Turn off on this device</button>` : `<button class="btn" type="button" id="pon">${ic('bell', 16)} Turn on alerts</button>`;
+    const on = $('#pon', v), test = $('#ptest', v), off = $('#poff', v);
+    if (on) on.onclick = () => busy(on, async () => { await enablePush(); toast('Alerts are on'); pushPanel(v); });
+    if (off) off.onclick = () => busy(off, async () => { await disablePush(); toast('Alerts turned off on this device'); pushPanel(v); });
+    if (test) test.onclick = () => busy(test, async () => { const r = await api('/push/test', {}); toast(r.sent ? 'Test sent. It should arrive in a few seconds.' : 'The test could not be delivered. Turn alerts off and on again.', !r.sent); });
+  }
+  async function pushNudge(v) {
+    try {
+      if (!pushOK() && !(isIOS() && !standalone())) return;
+      if (localStorage.getItem('basa_nopush') === '1') return;
+      if (pushOK() && (Notification.permission === 'denied' || await currentSub())) return;
+    } catch (e) { return; }
+    if (!v.isConnected || $('#nudge', v)) return;
+    const b = document.createElement('div'); b.className = 'banner info'; b.id = 'nudge'; b.style.marginBottom = '14px';
+    b.innerHTML = `${ic('bell')}<span style="flex:1">${pushOK() ? 'Get job alerts, notices and reminders on this phone, even when the app is closed.' : 'On iPhone: tap Share, then "Add to Home Screen" to get job alerts on your phone.'}</span>${pushOK() ? '<button class="btn" type="button" id="nyes" style="padding:6px 12px">Turn on</button>' : ''}<button class="link" type="button" id="nno">Not now</button>`;
+    v.prepend(b);
+    const y = $('#nyes', b); if (y) y.onclick = () => busy(y, async () => { await enablePush(); b.remove(); toast('Alerts are on'); });
+    $('#nno', b).onclick = () => { try { localStorage.setItem('basa_nopush', '1'); } catch (e) { /* private mode */ } b.remove(); };
+  }
+
+  /* ---------- notice board, reminders and alert history ---------- */
+  const PRI = { Info: 's-sent', Important: 's-on_hold', Urgent: 'p-Urgent' };
+  const REP = { none: 'Once', daily: 'Every day', weekdays: 'Every weekday', weekly: 'Every week', monthly: 'Every month' };
+  const fwhen = (iso) => { const d = new Date(new Date(iso).getTime() + (Number(SET.tz ?? 120) || 0) * 60000); return isNaN(d) ? '' : d.toLocaleString('en-GB', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }; // company time
+  function audFields(a, own) {
+    const sup = SUP();
+    const tos = [['me', 'Just me'], ...(sup ? [['staff', 'All staff'], ['tech', 'All technicians'], ['foreman', 'Foremen'], ['manager', 'Managers'], ['trade', 'One trade team'], ['everyone', 'Everyone (staff and clients)'], ['clients', 'All clients'], ['client', 'One client']] : [])].filter(([k]) => own || k !== 'me');
+    return `<div class="grid2"><label class="f">Send to<select name="to" id="ato">${opt(tos, a.to || (own ? 'me' : 'staff'))}</select></label>
+      <label class="f" id="atr" hidden>Trade<select name="trade">${opt(LK.disciplines, a.trade || 'Electrical')}</select></label>
+      <label class="f" id="acl" hidden>Client<select name="client_id">${opt((LK.clients || []).map((c) => [c.id, c.name]), a.client_id || '')}</select></label></div>`;
+  }
+  const wireAud = (d) => { const s = $('#ato', d); const f = () => { $('#atr', d).hidden = s.value !== 'trade'; $('#acl', d).hidden = s.value !== 'client'; }; s.onchange = f; f(); };
+  async function notices(v, tab) {
+    setTitle(ME.role === 'client' ? 'Notices' : 'Notice board');
+    const tabs = [['board', 'Notices'], ['reminders', 'Reminders'], ['alerts', 'My alerts']];
+    v.innerHTML = `<div class="between"><nav class="tabs" style="flex:1">${tabs.map(([k, l]) => `<a href="#/notices${k === 'board' ? '' : '/' + k}" aria-current="${k === tab ? 'page' : 'false'}">${l}</a>`).join('')}</nav>
+      <div class="row">${tab === 'board' && SUP() ? `<button class="btn" id="nn">${ic('mega', 16)} New notice</button>` : ''}${tab === 'reminders' ? `<button class="btn" id="nr">${ic('clock', 16)} New reminder</button>` : ''}</div></div><div id="nl" class="stack" style="margin-top:14px"><p class="loading">Loading…</p></div>`;
+    const box = $('#nl', v);
+    if (tab === 'alerts') {
+      const { items } = await api('/notifications/all');
+      box.innerHTML = items.length ? `<div class="card" style="padding:0">${items.map((n) => `<a class="arow" href="${noteLink(n)}">${ic(n.kind === 'notice' ? 'mega' : n.kind === 'reminder' ? 'clock' : n.kind === 'auto' ? 'cal' : 'wrench', 16)}<span>${esc(n.text)}<small>${ago(n.created_at)}</small></span></a>`).join('')}</div>` : '<p class="empty">No alerts yet.</p>';
+      return;
+    }
+    if (tab === 'reminders') { $('#nr', v).onclick = () => reminderDlg({}, () => notices(v, tab)); return drawReminders(box, () => notices(v, tab)); }
+    if ($('#nn', v)) $('#nn', v).onclick = () => noticeDlg(() => notices(v, tab));
+    const { items } = await api('/notices');
+    box.innerHTML = items.length ? items.map((a) => `<article class="card notice${a.priority === 'Urgent' ? ' urgent' : ''}${a.recipient && !a.read_at ? ' new' : ''}" data-id="${a.id}">
+        <div class="between" style="align-items:flex-start"><div><div class="row" style="gap:6px;margin-bottom:6px">${a.pinned ? `<span class="pill s-assigned">${ic('pinf', 12)} Pinned</span>` : ''}<span class="pill ${PRI[a.priority]}">${esc(a.priority)}</span>${a.recipient && !a.read_at ? '<span class="pill s-open">New</span>' : ''}</div><h2>${esc(a.title)}</h2></div></div>
+        ${a.body ? `<p class="nbody">${esc(a.body)}</p>` : ''}
+        <p class="muted small">${esc(a.author || 'System')} · ${ago(a.created_at)} · To ${esc(a.audience_label)}${a.expires ? ' · Until ' + fdate(a.expires) : ''}</p>
+        <div class="row">${a.recipient && a.ack_required ? (a.ack_at ? `<span class="pill s-closed">${ic('check', 12)} You acknowledged ${ago(a.ack_at)}</span>` : `<button class="btn" data-ack>${ic('check', 16)} I have read this</button>`) : ''}
+        ${a.can_manage && SUP() ? `<button class="chip" data-rc>${a.reads}/${a.recipients} read${a.ack_required ? ` · ${a.acks} acknowledged` : ''}</button><button class="chip" data-pin>${a.pinned ? 'Unpin' : 'Pin to top'}</button>${(a.ack_required ? a.acks : a.reads) < a.recipients ? '<button class="chip" data-rm>Remind the rest</button>' : ''}<button class="chip" data-del>${ic('trash', 14)} Delete</button>` : ''}</div></article>`).join('') : `<p class="empty">No notices yet.${SUP() ? ' Post one to reach your whole team at once.' : ''}</p>`;
+    const unread = items.filter((a) => a.recipient && !a.read_at);
+    if (unread.length) Promise.all(unread.map((a) => api('/notices/' + a.id, { read: 1 }))).then(pollNotes).catch(() => {});
+    $$('article.notice', box).forEach((c) => {
+      const id = c.dataset.id, a = items.find((x) => String(x.id) === id), go = (b, body, msg) => busy(b, async () => { const r = await api('/notices/' + id, body); if (msg) toast(typeof msg === 'function' ? msg(r) : msg); notices(v, tab); });
+      const q = (s) => $(s, c);
+      if (q('[data-ack]')) q('[data-ack]').onclick = (e) => go(e.currentTarget, { ack: 1 }, 'Thank you. Acknowledged.');
+      if (q('[data-pin]')) q('[data-pin]').onclick = (e) => go(e.currentTarget, { pinned: !a.pinned });
+      if (q('[data-rm]')) q('[data-rm]').onclick = (e) => go(e.currentTarget, { remind: 1 }, (r) => `Reminder sent to ${r.reminded} ${r.reminded === 1 ? 'person' : 'people'}`);
+      if (q('[data-del]')) q('[data-del]').onclick = (e) => { if (confirmDel(e.currentTarget)) go(e.currentTarget, { delete: 1 }, 'Notice deleted'); };
+      if (q('[data-rc]')) q('[data-rc]').onclick = () => receipts(a);
+    });
+  }
+  const confirmDel = (b) => { if (b.dataset.sure) return true; b.dataset.sure = '1'; b.innerHTML = 'Tap again to delete'; setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.innerHTML = `${ic('trash', 14)} Delete`; } }, 4000); return false; };
+  async function receipts(a) {
+    const { items } = await api('/notices/' + a.id + '/receipts');
+    dlg(`${head('Who has read it', esc(a.title))}<div class="stack" style="gap:0">${items.map((r) => `<div class="arow"><span class="av">${esc(initials(r.name))}</span><span><b>${esc(r.name)}</b><small>${ROLE[r.role] || ''}${r.trade ? ' · ' + esc(r.trade) : ''}</small></span>${r.ack_at ? `<span class="pill s-closed">Acknowledged ${ago(r.ack_at)}</span>` : r.read_at ? `<span class="pill s-sent">Read ${ago(r.read_at)}</span>` : '<span class="pill s-requested">Not read</span>'}</div>`).join('')}</div>`);
+  }
+  function noticeDlg(done) {
+    dlg(`${head('New notice', 'Everyone you choose gets it in the app and as a phone alert.')}<form class="stack" id="nf">
+      <label class="f">Title<input name="title" maxlength="120" required placeholder="e.g. Site induction on Monday 7:00"></label>
+      <label class="f">Message<textarea name="body" rows="5" maxlength="3000" placeholder="Details, times, what people must do"></textarea></label>
+      ${audFields({}, false)}
+      <div class="grid2"><label class="f">Priority<select name="priority">${opt(['Info', 'Important', 'Urgent'], 'Info')}</select></label><label class="f">Show until (optional)<input type="date" name="expires" min="${today()}"></label></div>
+      <label class="check"><input type="checkbox" name="ack"> Ask everyone to tap "I have read this" (for safety notices and new procedures)</label>
+      <label class="check"><input type="checkbox" name="pinned"> Pin to the top of the board</label>
+      ${SET.sms_on ? '<label class="check"><input type="checkbox" name="sms"> Also send as an SMS text message</label>' : ''}
+      <p class="err" id="ne"></p><div class="row"><button class="btn">${ic('send', 16)} Post notice</button><button class="btn ghost" type="button" data-close>Cancel</button></div></form>`, (d) => {
+      wireAud(d);
+      $('#nf', d).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); ['ack', 'pinned', 'sms'].forEach((k) => { x[k] = !!x[k]; }); busy(e.submitter, async () => { const r = await api('/notices', x); d.close(); toast(`Notice sent to ${r.recipients} ${r.recipients === 1 ? 'person' : 'people'}`); done(); }, $('#ne', d)); });
+    });
+  }
+  function localParts(iso, tz) { const d = new Date(new Date(iso).getTime() + (Number(tz) || 0) * 60000).toISOString(); return [d.slice(0, 10), d.slice(11, 16)]; }
+  async function drawReminders(box, redraw) {
+    const { items, tz } = await api('/reminders');
+    box.innerHTML = `<p class="muted small">Reminders arrive as a phone alert and in the app at the time you set${SUP() ? ', for you or for a whole group' : ''}. Job reminders (scheduled today, due tomorrow, overdue, waiting for review or approval, reports not signed, tags due) are sent automatically every morning.</p>` +
+      (items.length ? items.map((r) => `<article class="card rem${r.active ? '' : ' off'}" data-id="${r.id}"><div class="between" style="align-items:flex-start"><div><h2>${esc(r.title)}</h2>${r.body ? `<p class="nbody">${esc(r.body)}</p>` : ''}
+        <p class="muted small">${ic('clock', 13)} ${r.active ? 'Next: ' + fwhen(r.next_at) : 'Finished' + (r.last_sent ? ', last sent ' + fwhen(r.last_sent) : '')} · ${REP[r.repeat]} · To ${esc(r.audience_label)}${r.sms ? ' · SMS too' : ''}${r.created_by !== ME.id ? ' · by ' + esc(r.author || '') : ''}</p></div></div>
+        <div class="row"><button class="chip" data-ed>Edit</button>${r.repeat !== 'none' || r.active ? `<button class="chip" data-tg>${r.active ? 'Pause' : 'Resume'}</button>` : ''}<button class="chip" data-del>${ic('trash', 14)} Delete</button></div></article>`).join('') : '<p class="empty">No reminders yet.</p>');
+    $$('article.rem', box).forEach((c) => {
+      const r = items.find((x) => String(x.id) === c.dataset.id);
+      $('[data-ed]', c).onclick = () => { const [date, time] = localParts(r.next_at, tz); reminderDlg({ ...r, ...JSON.parse(r.audience || '{}'), date, time }, redraw); };
+      if ($('[data-tg]', c)) $('[data-tg]', c).onclick = (e) => busy(e.currentTarget, async () => { await api('/reminders', { id: r.id, active: !r.active }); redraw(); });
+      $('[data-del]', c).onclick = (e) => { if (confirmDel(e.currentTarget)) busy(e.currentTarget, async () => { await api('/reminders', { id: r.id, delete: 1 }); toast('Reminder deleted'); redraw(); }); };
+    });
+  }
+  function reminderDlg(r, done) {
+    const t = new Date(Date.now() + 3600e3); const dd = r.date || today(), tt = r.time || `${String(t.getHours()).padStart(2, '0')}:00`;
+    dlg(`${head(r.id ? 'Edit reminder' : 'New reminder', 'Times are in company time (' + esc(SET.tz_label || 'Harare') + ').')}<form class="stack" id="rf">
+      <label class="f">Remind about<input name="title" maxlength="120" required value="${esc(r.title || '')}" placeholder="e.g. Submit weekly timesheets"></label>
+      <label class="f">Details (optional)<textarea name="body" rows="3" maxlength="1000">${esc(r.body || '')}</textarea></label>
+      <div class="grid3"><label class="f">Date<input type="date" name="date" required value="${dd}"></label><label class="f">Time<input type="time" name="time" required value="${tt}"></label><label class="f">Repeat<select name="repeat">${opt(Object.entries(REP), r.repeat || 'none')}</select></label></div>
+      ${audFields(r, true)}
+      ${SUP() && SET.sms_on ? `<label class="check"><input type="checkbox" name="sms" ${r.sms ? 'checked' : ''}> Also send as an SMS text message</label>` : ''}
+      <p class="err" id="re"></p><div class="row"><button class="btn">${ic('check', 16)} Save reminder</button><button class="btn ghost" type="button" data-close>Cancel</button></div></form>`, (d) => {
+      wireAud(d);
+      $('#rf', d).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); x.sms = !!x.sms; if (r.id) x.id = r.id; busy(e.submitter, async () => { const res = await api('/reminders', x); d.close(); toast('Reminder set for ' + fwhen(res.next_at)); done(); }, $('#re', d)); });
+    });
   }
 
   /* ---------- start ---------- */
@@ -841,8 +1011,14 @@
     if (ME.must_change) return mustChange();
     await refreshLK();
     shell();
+    swReady();
     route();
   }
   window.addEventListener('hashchange', route);
+  if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', (e) => {
+    const m = e.data || {};
+    if (m.type === 'go' && m.url) { const u = new URL(m.url); if (u.hash) location.hash = u.hash; }
+    if (m.type === 'push' && ME) { liveAlert(m.d || {}); pollNotes(); }
+  });
   start().catch((e) => { document.body.innerHTML = `<p style="padding:30px;font-family:system-ui">Could not load: ${esc(e.message)}</p>`; });
 })();
