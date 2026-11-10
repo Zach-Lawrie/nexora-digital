@@ -243,6 +243,7 @@ footer nav a:hover{color:#fff}
 .plan .cost{font:800 3.2rem/1 "Bricolage Grotesque",sans-serif;letter-spacing:-.03em}
 .plan .cost sup{font-size:.45em;vertical-align:.9em;margin-right:2px}
 .plan .cost small{font:500 1rem "Figtree",sans-serif;color:var(--ink-soft);letter-spacing:0;margin-left:4px}
+.plan .cost small:first-child{display:block;margin:0 0 6px}
 .plan .ticks{grid-template-columns:1fr;margin:0}
 .plan .btn{margin-top:auto;justify-content:center}
 .note{margin-top:28px;color:var(--ink-soft);font-size:.98rem;max-width:46em}
