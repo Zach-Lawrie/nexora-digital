@@ -26,6 +26,11 @@ export const DB = {
   async batch(list) { sqlite.exec('BEGIN'); try { const out = list.map((s) => s.runSync()); sqlite.exec('COMMIT'); return out; } catch (e) { sqlite.exec('ROLLBACK'); throw e; } },
 };
 
+// stand-in for Cloudflare Workers AI during local tests (MOCK_AI=1)
+const MOCK_AI = { async run(model, input) {
+  if (JSON.stringify(input.messages || '').includes('image_url')) return { response: ({ healthy: false, problem: 'Late blight', type: 'disease', confidence: 'high', signs: 'Dark water-soaked patches on leaves', cause: 'Phytophthora infestans in cool wet weather', act_now: ['Remove badly infected leaves', 'Spray a protective fungicide', 'Avoid overhead watering'], organic: 'Copper-based spray', chemical: 'Mancozeb or copper oxychloride', prevent: 'Rotate crops, space plants', spread_risk: 'high', see_expert: false }) };
+  return { response: 'Top-dress your maize now with about 150 kg/ha of AN while the soil is moist. Follow the label and ask your AGRITEX officer.' };
+} };
 const tmp = path.join(ROOT, 'dev', '.fn.mjs');
 fs.copyFileSync(path.join(ROOT, 'functions', 'api', '[[path]].js'), tmp);
 const { onRequest } = await import(pathToFileURL(tmp).href + '?v=' + Date.now());
@@ -37,7 +42,7 @@ http.createServer(async (req, res) => {
     const chunks = []; for await (const c of req) chunks.push(c);
     const headers = new Headers(); for (const [k, v] of Object.entries(req.headers)) headers.set(k, Array.isArray(v) ? v.join(', ') : v);
     const request = new Request(url, { method: req.method, headers, body: ['GET', 'HEAD'].includes(req.method) ? undefined : Buffer.concat(chunks) });
-    const r = await onRequest({ request, env: { DB } });
+    const r = await onRequest({ request, env: { DB, ...(process.env.WEATHER_URL ? { WEATHER_URL: process.env.WEATHER_URL } : {}), ...(process.env.MOCK_AI ? { AI: MOCK_AI } : {}) } });
     const h = {}; r.headers.forEach((v, k) => { h[k] = v; });
     res.writeHead(r.status, h); res.end(Buffer.from(await r.arrayBuffer())); return;
   }

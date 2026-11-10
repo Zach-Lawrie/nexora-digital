@@ -10,6 +10,7 @@
     search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16M21 21l-4.3-4.3', alert: 'M12 3 2 21h20zM12 10v4M12 18h.01', send: 'M22 2 11 13M22 2l-7 20-4-9-9-4z', more: 'M4 6h16M4 12h16M4 18h16', wallet: 'M3 7h18v13H3zM3 7l3-4h12l3 4M16 14h.01',
     phone: 'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z',
     shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z', out: 'M9 21H5V3h4M16 17l5-5-5-5M21 12H9', snow: 'M12 2v20M4.9 4.9l14.2 14.2M2 12h20M4.9 19.1 19.1 4.9', download: 'M12 3v12M7 10l5 5 5-5M5 21h14', gear: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6',
+    sprout: 'M7 20h10M10 20c5.5-2.5.8-6.4 3-10M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8zM14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z',
     leaf: 'M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10zM2 21c0-3 1.9-5.4 5.1-6',
   };
   const ic = (n, s = 18) => `<svg class="i" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${P[n] || P.box}"/></svg>`;
@@ -19,12 +20,12 @@
   const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const fdate = (s) => { if (!s) return ''; const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return `${d} ${MON[m - 1]} ${y}`; };
-  const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+  const today = () => new Date(Date.now() + 2 * 3600e3).toISOString().slice(0, 10); // same calendar day as the server (Central Africa Time)
   const ago = (s) => { const m = Math.round((Date.now() - new Date(s).getTime()) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : fdate(s); };
   const initials = (n) => String(n || '?').split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
   const qn = (n) => { const x = Number(n); return Number.isInteger(x) ? String(x) : x.toFixed(2).replace(/0+$/, '').replace(/\.$/, ''); };
   let ME = null, LK = null, BAL = 0, FOLLOWS = [], NOTE = { items: [], unread: 0 };
-  const money = (v) => (LK && LK.currency !== 'USD' ? LK.currency + ' ' : '$') + (Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const money = (v) => ((Number(v) || 0) < 0 ? '−' : '') + (LK && LK.currency !== 'USD' ? LK.currency + ' ' : '$') + Math.abs(Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const EMO = { Tomatoes: '🍅', Onions: '🧅', Cabbage: '🥬', Potatoes: '🥔', 'Sweet potatoes': '🍠', Butternut: '🎃', Pumpkins: '🎃', Carrots: '🥕', 'Covo / rape': '🥬', Spinach: '🥬', Lettuce: '🥬', 'Green peppers': '🫑', Chillies: '🌶️', 'Green beans': '🫛', Peas: '🫛', Cucumbers: '🥒', Garlic: '🧄', 'Green maize': '🌽', Maize: '🌽', Oranges: '🍊', Lemons: '🍋', Bananas: '🍌', Avocados: '🥑', Mangoes: '🥭', Apples: '🍎', Peaches: '🍑', Watermelons: '🍉', Pineapples: '🍍', Strawberries: '🍓', Blueberries: '🫐', Papaya: '🥭', Macadamia: '🌰', Groundnuts: '🥜', 'Sugar beans': '🫘', 'Soya beans': '🫘', Cowpeas: '🫘', 'Round nuts': '🥜', Wheat: '🌾', Sorghum: '🌾', Millet: '🌾', Rice: '🍚', Broilers: '🐔', 'Road-runner chickens': '🐓', Turkeys: '🦃', Goats: '🐐', Cattle: '🐄', Pigs: '🐖', Sheep: '🐑', Rabbits: '🐇', 'Fresh milk': '🥛', 'Sour milk (lacto)': '🥛', Eggs: '🥚', Cheese: '🧀', Kapenta: '🐟', 'Bream / tilapia': '🐟', Catfish: '🐟', Honey: '🍯', Mushrooms: '🍄', Herbs: '🌿', 'Sugar cane': '🎋', Tea: '🍵', Coffee: '☕', Cotton: '☁️', Tobacco: '🍂' };
   const emo = (c) => EMO[c] || '🌱';
   const ROLE = { farmer: 'Farmer', buyer: 'Buyer', transporter: 'Transporter', admin: 'Admin' };
@@ -90,7 +91,8 @@
   function navFor() {
     if (!ME) return { top: [['#/market', 'Market'], ['#/requests', 'Buyers want'], ['#/prices', 'Prices'], ['#/loads', 'Transport'], ['#/directory', 'Directory'], ['#/pricing', 'Plans']], tab: [['#/', 'home', 'Home'], ['#/market', 'shop', 'Market'], ['#/requests', 'hand', 'Wanted'], ['#/prices', 'chart', 'Prices'], ['#/join', 'user', 'Join']] };
     const r = ME.role;
-    if (r === 'farmer') return { top: [['#/', 'Home'], ['#/sell', 'My produce'], ['#/orders', 'Orders'], ['#/requests', 'Buyers want'], ['#/loads', 'Transport'], ['#/market', 'Market'], ['#/prices', 'Prices']], tab: [['#/', 'home', 'Home'], ['#/sell', 'leaf', 'Sell'], ['#/orders', 'box', 'Orders'], ['#/requests', 'hand', 'Wanted'], ['#/more', 'more', 'More']] };
+    if (r === 'farmer') return { top: [['#/', 'Home'], ['#/farm', 'My farm'], ['#/sell', 'My produce'], ['#/orders', 'Orders'], ['#/requests', 'Buyers want'], ['#/market?category=Farm%20inputs', 'Inputs store'], ['#/loads', 'Transport'], ['#/prices', 'Prices']], tab: [['#/', 'home', 'Home'], ['#/farm', 'sprout', 'My farm'], ['#/sell', 'leaf', 'Sell'], ['#/orders', 'box', 'Orders'], ['#/more', 'more', 'More']] };
+    if (r === 'supplier') return { top: [['#/', 'Home'], ['#/sell', 'My products'], ['#/orders', 'Orders'], ['#/market?category=Farm%20inputs', 'Inputs store'], ['#/market', 'Market'], ['#/directory?role=farmer', 'Farmers']], tab: [['#/', 'home', 'Home'], ['#/sell', 'box', 'Products'], ['#/orders', 'wallet', 'Orders'], ['#/market?category=Farm%20inputs', 'shop', 'Store'], ['#/more', 'more', 'More']] };
     if (r === 'buyer') return { top: [['#/', 'Home'], ['#/market', 'Market'], ['#/orders', 'My orders'], ['#/requests', 'Requests'], ['#/loads', 'Transport'], ['#/prices', 'Prices'], ['#/directory', 'Directory']], tab: [['#/', 'home', 'Home'], ['#/market', 'shop', 'Market'], ['#/orders', 'box', 'Orders'], ['#/requests', 'hand', 'Requests'], ['#/more', 'more', 'More']] };
     if (r === 'transporter') return { top: [['#/', 'Home'], ['#/loads', 'Loads'], ['#/orders', 'My trips'], ['#/market', 'Market'], ['#/directory', 'Directory']], tab: [['#/', 'home', 'Home'], ['#/loads', 'truck', 'Loads'], ['#/orders', 'box', 'Trips'], ['#/billing', 'wallet', 'Billing'], ['#/more', 'more', 'More']] };
     return { top: [['#/admin', 'Admin'], ['#/admin/users', 'People'], ['#/admin/payments', 'Payments'], ['#/orders', 'Orders'], ['#/market', 'Market'], ['#/admin/settings', 'Settings']], tab: [['#/admin', 'chart', 'Admin'], ['#/admin/users', 'users', 'People'], ['#/admin/payments', 'wallet', 'Payments'], ['#/market', 'shop', 'Market'], ['#/more', 'more', 'More']] };
@@ -136,7 +138,7 @@
     v.innerHTML = '<p class="loading">Loading…</p>';
     window.scrollTo(0, 0);
     const k = parts[0] || '';
-    const needLogin = ['sell', 'orders', 'order', 'billing', 'account', 'admin', 'more', 'load'].includes(k) || (k === 'loads' && Q.get('mine'));
+    const needLogin = ['sell', 'orders', 'order', 'billing', 'account', 'admin', 'more', 'load', 'farm'].includes(k) || (k === 'loads' && Q.get('mine'));
     if (needLogin && !ME) { location.hash = '#/login?next=' + encodeURIComponent(raw); return; }
     try {
       if (!k) await (ME ? (ME.role === 'admin' ? admin(v) : home(v)) : landing(v));
@@ -158,6 +160,7 @@
       else if (k === 'billing') await billing(v);
       else if (k === 'account') await account(v);
       else if (k === 'more') more(v);
+      else if (k === 'farm') await farm(v, parts[1] || '', parts[2], Q);
       else if (k === 'admin') { if (ME.role !== 'admin') throw new Error('Admins only.'); await (parts[1] === 'users' ? adminUsers(v) : parts[1] === 'payments' ? adminPayments(v) : parts[1] === 'settings' ? adminSettings(v) : admin(v)); }
       else v.innerHTML = page('<p class="empty">Page not found. <a href="#/">Go home</a></p>');
     } catch (e) { v.innerHTML = page(`<div class="banner bad">${ic('alert')}<span>${esc(e.message)}</span></div>`); }
@@ -215,7 +218,16 @@
         <div class="feat"><span class="fi">📈</span><h3>Fair market prices</h3><p class="muted">See average prices per kg by crop and province from real listings and sales, so nobody sells too cheap or buys too dear.</p></div>
         <div class="feat"><span class="fi">⭐</span><h3>Trust built in</h3><p class="muted">Ratings after every sale and delivery, verified farmers and businesses, and in-app chat on every order.</p></div>
       </div></div></section>
-    <section class="sec alt"><div class="wrap"><div class="ph"><div><h2>On the market now</h2><p>${ls.items.length} listings${rescue.length ? `, ${rescue.length} rescue deal${rescue.length > 1 ? 's' : ''}` : ''}</p></div><a class="btn ghost" href="#/market">Open the market</a></div>
+    <section class="sec alt"><div class="wrap"><div class="ph"><div><h2>Run your whole farm from your phone</h2><p>Free for every farmer, with no limits on the Farm Manager plan.</p></div><a class="btn" href="#/join?role=farmer">Start free</a></div>
+      <div class="feats">
+        <div class="feat"><span class="fi">📅</span><h3>Crop and livestock calendars</h3><p class="muted">Add a crop or a broiler batch and get every task: planting, fertiliser, spraying, vaccination and harvest, with growth stages and harvest dates.</p></div>
+        <div class="feat"><span class="fi">🩺</span><h3>AI plant doctor</h3><p class="muted">Photograph a sick leaf. The AI names the likely disease, pest or deficiency and tells you what to do today, with low-cost options.</p></div>
+        <div class="feat"><span class="fi">🌦️</span><h3>Weather and outbreak alerts</h3><p class="muted">Frost, heat, heavy rain and dry-spell warnings for your farm, disease risk for your crops, and alerts when farms near you report an outbreak.</p></div>
+        <div class="feat"><span class="fi">👩🏾‍🌾</span><h3>Workers and payroll</h3><p class="muted">Daily attendance, piece work, advances and payslips worked out for you.</p></div>
+        <div class="feat"><span class="fi">📦</span><h3>Store and inputs</h3><p class="muted">Track seed, fertiliser, chemicals and feed. Get warned before you run out or harvest inside a chemical's withholding period, and buy from suppliers here.</p></div>
+        <div class="feat"><span class="fi">📒</span><h3>Farm accounts</h3><p class="muted">Money in and out, profit per crop, and a file for your accountant. Sales, wages and purchases are recorded automatically.</p></div>
+      </div></div></section>
+    <section class="sec"><div class="wrap"><div class="ph"><div><h2>On the market now</h2><p>${ls.items.length} listings${rescue.length ? `, ${rescue.length} rescue deal${rescue.length > 1 ? 's' : ''}` : ''}</p></div><a class="btn ghost" href="#/market">Open the market</a></div>
       ${grid(fresh, 'No produce listed yet. <a href="#/join?role=farmer">Be the first farmer on FreeFarm.</a>')}
       ${rq.items.length ? `<h2 style="margin:32px 0 12px">Buyers are looking for</h2><div class="list">${rq.items.slice(0, 4).map(reqCard).join('')}</div>` : ''}
     </div></section>
@@ -414,7 +426,7 @@
     setTitle('Join');
     const role = Q.get('role') || 'farmer', plan = Q.get('plan') || 'free';
     v.innerHTML = page(`<div class="auth stack"><div class="ph" style="margin:0"><div><h1>Join FreeFarm</h1><p>Free to join. Use the mobile number people can reach you on.</p></div></div>
-      <form class="card stack" id="jf" novalidate><div class="rolepick" role="radiogroup" aria-label="I want to">${[['farmer', '🧑🏾‍🌾', 'Sell produce', 'Farmer or grower'], ['buyer', '🛒', 'Buy produce', 'Home, shop, hotel, factory, exporter'], ['transporter', '🚚', 'Move produce', 'Truck or bakkie owner']].map(([k, e, t, s]) => `<label><input type="radio" name="role" value="${k}" ${k === role ? 'checked' : ''}><span class="e">${e}</span><b>${t}</b><span class="muted small">${s}</span></label>`).join('')}</div>
+      <form class="card stack" id="jf" novalidate><div class="rolepick" role="radiogroup" aria-label="I want to">${[['farmer', '🧑🏾‍🌾', 'Sell produce', 'Farmer or grower'], ['buyer', '🛒', 'Buy produce', 'Home, shop, hotel, factory, exporter'], ['transporter', '🚚', 'Move produce', 'Truck or bakkie owner'], ['supplier', '🧪', 'Sell farm inputs', 'Seed, fertiliser, chemicals, feed, equipment']].map(([k, e, t, s]) => `<label><input type="radio" name="role" value="${k}" ${k === role ? 'checked' : ''}><span class="e">${e}</span><b>${t}</b><span class="muted small">${s}</span></label>`).join('')}</div>
         <div class="grid2"><label class="f">Your name<input name="name" autocomplete="name" required></label><label class="f">Mobile number<input name="phone" type="tel" autocomplete="tel" placeholder="077 123 4567" required></label></div>
         <label class="f"><span id="bl">Farm or business name (optional)</span><input name="business" autocomplete="organization"></label>
         <label class="f" id="bt">Type of buyer<select name="buyer_type">${opt(LK.buyer_types, 'Household')}</select></label>
@@ -430,8 +442,8 @@
     const upd = () => {
       const r = f.elements.role.value;
       $('#bt', f).hidden = r !== 'buyer'; $('#tv', f).hidden = r !== 'transporter'; $('#cr', f).hidden = r === 'transporter';
-      $('#crl', f).textContent = r === 'buyer' ? 'What do you usually buy?' : 'What do you grow?';
-      $('#bl', f).textContent = r === 'farmer' ? 'Farm name (optional)' : r === 'buyer' ? 'Business name (optional for households)' : 'Company name (optional)';
+      $('#crl', f).textContent = r === 'buyer' ? 'What do you usually buy?' : r === 'supplier' ? 'What do you sell?' : 'What do you grow?';
+      $('#bl', f).textContent = r === 'farmer' ? 'Farm name (optional)' : r === 'buyer' ? 'Business name (optional for households)' : r === 'supplier' ? 'Shop or company name' : 'Company name (optional)';
       const pls = LK.plans[r];
       const cur = f.dataset.plan && pls.some((p) => p.id === f.dataset.plan) ? f.dataset.plan : (pls.some((p) => p.id === plan) ? plan : 'free');
       $('#pl', f).innerHTML = `<fieldset class="radios" style="border:0;padding:0;margin:0"><legend style="font-weight:600;font-size:14px;margin-bottom:6px">Plan</legend>${pls.map((p) => `<label class="radio"><input type="radio" name="plan" value="${p.id}" ${p.id === cur ? 'checked' : ''}><span><b>${esc(p.name)} · ${p.price ? money(p.price) + '/month' : 'Free'}</b><small>${esc(p.perks.slice(0, 2).join(' · '))}${p.price ? ` · first ${LK.trial_days} days free` : ''}</small></span></label>`).join('')}</fieldset>`;
@@ -468,6 +480,13 @@
     const hi = `${new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}, ${esc(ME.name.split(' ')[0])}`;
     const owe = BAL > 0 ? `<div class="banner ${BAL > LK.fee_limit ? 'bad' : 'warn'}" style="margin-bottom:14px">${ic('wallet')}<span style="flex:1">You owe ${money(BAL)} in FreeFarm fees.${BAL > LK.fee_limit ? ' Your account is paused for new sales until it is paid.' : ''}</span><a class="btn sm" href="#/billing">Pay now</a></div>` : '';
     const trial = ME.plan !== 'free' && ME.plan_until && ME.plan_until <= new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10) ? `<div class="banner info" style="margin-bottom:14px">${ic('clock')}<span style="flex:1">Your plan ends on ${fdate(ME.plan_until)}.</span><a class="btn sm" href="#/billing">Renew</a></div>` : '';
+    if (ME.role === 'supplier') {
+      const [o, ls] = await Promise.all([api('/orders'), api('/listings?mine=1')]);
+      const todo = o.items.filter((x) => ['placed', 'accepted', 'ready'].includes(x.status) && x.farmer_id === ME.id);
+      v.innerHTML = page(owe + trial + ph(hi, 'Sell seed, fertiliser, chemicals, feed and equipment to farmers.', `<a class="btn" href="#/sell/new">${ic('plus', 16)} List a product</a>`) + `<div class="kpis"><a class="kpi ${todo.some((x) => x.status === 'placed') ? 'hot' : ''}" href="#/orders"><span>New orders</span><b>${todo.filter((x) => x.status === 'placed').length}</b></a><a class="kpi" href="#/sell"><span>Live products</span><b>${ls.items.filter((l) => l.status === 'active').length}</b></a><a class="kpi" href="#/orders"><span>Completed sales</span><b>${o.items.filter((x) => x.status === 'completed' && x.farmer_id === ME.id).length}</b></a><a class="kpi" href="#/billing"><span>Plan</span><b style="font-size:20px">${ME.plan === 'free' ? 'Starter' : 'Supplier Pro'}</b></a></div>
+        <div class="card stack" style="margin-top:18px"><div class="between"><h2>Orders to handle</h2><a href="#/orders">All orders</a></div>${todo.length ? `<div class="list">${todo.map(orderItem).join('')}</div>` : '<p class="muted">No orders waiting. Farmers are pointed to your products when their crops need inputs.</p>'}</div>`);
+      return;
+    }
     if (ME.role === 'farmer') {
       const [o, ls, rq] = await Promise.all([api('/orders'), api('/listings?mine=1'), api('/requests?country=' + encodeURIComponent(ME.country))]);
       const todo = o.items.filter((x) => ['placed', 'accepted', 'ready'].includes(x.status));
@@ -512,7 +531,7 @@
 
   /* ---------- farmer: my produce ---------- */
   async function sell(v) {
-    if (!['farmer', 'admin'].includes(ME.role)) throw new Error('Only farmers list produce.');
+    if (!['farmer', 'supplier', 'admin'].includes(ME.role)) throw new Error('Only farmers and suppliers list products.');
     setTitle('My produce');
     const { items } = await api('/listings?mine=1');
     const by = (s) => items.filter((l) => s.includes(l.status));
@@ -525,13 +544,16 @@
     $$('[data-st]', v).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/listings/${b.dataset.id}/status`, { to: b.dataset.st }); route(); }));
   }
   async function sellForm(v, id) {
-    const l = id === 'new' ? { kind: 'now', unit: 'kg', delivery: 'pickup', country: ME.country, region: ME.region, town: ME.town, min_order: 1, rescue_pct: 0 } : (await api('/listings/' + id)).item;
+    const HQ = new URLSearchParams((location.hash.split('?')[1]) || '');
+    let l = id === 'new' ? { kind: 'now', unit: 'kg', delivery: 'pickup', country: ME.country, region: ME.region, town: ME.town, min_order: 1, rescue_pct: 0 } : (await api('/listings/' + id)).item;
+    const fromPl = id === 'new' && HQ.get('planting') ? (await api('/farm/plantings/' + HQ.get('planting')).catch(() => null)) : null;
+    if (fromPl) { const p = fromPl.item; const ready = p.st.days_left > 3; l = { ...l, crop: p.crop, variety: p.variety, kind: ready && ME.plan !== 'free' ? 'preharvest' : 'now', available_from: ready ? p.expected_harvest : null, qty: Math.max(1, (p.expected_yield || 0) - (p.harvested_qty || 0)) || '', unit: p.yield_unit && LK.units[p.yield_unit] ? p.yield_unit : 'kg', unit_kg: LK.units[p.yield_unit] || 1, planting_id: p.id }; }
     setTitle(id === 'new' ? 'List produce' : 'Edit ' + l.crop);
-    const pro = ME.plan !== 'free' || ME.role === 'admin';
+    const pro = (ME.plan !== 'free' || ME.role === 'admin') && ME.role !== 'supplier';
     v.innerHTML = page(`<p style="margin-bottom:12px"><a href="#/sell">← My produce</a></p>` + ph(id === 'new' ? 'List produce' : 'Edit listing', 'Good photos and honest grades sell faster.') + `
       <form class="card stack" id="sf" style="max-width:860px">
         <div class="radios" style="grid-template-columns:repeat(2,minmax(0,1fr))"><label class="radio"><input type="radio" name="kind" value="now" ${l.kind === 'now' ? 'checked' : ''}><span><b>Ready now</b><small>Harvested or ready to harvest</small></span></label><label class="radio"><input type="radio" name="kind" value="preharvest" ${l.kind === 'preharvest' ? 'checked' : ''} ${pro ? '' : 'disabled'}><span><b>Pre-harvest ${pro ? '' : '· Pro'}</b><small>Sell before you harvest</small></span></label></div>
-        <div class="grid3"><label class="f">Produce<select name="crop" required>${cropOpts(l.crop, 'Choose…')}</select></label><label class="f">Variety (optional)<input name="variety" value="${esc(l.variety || '')}" placeholder="e.g. Hass, Star 9037"></label><label class="f">Grade<select name="grade">${opt(['A', 'B', 'C', 'Mixed'], l.grade, 'Not graded')}</select></label></div>
+        <div class="grid3"><label class="f">Produce<select name="crop" required>${(ME.role === 'supplier' ? `<option value="">Choose…</option><optgroup label="Farm inputs">${LK.crops['Farm inputs'].map((c) => `<option${c === l.crop ? ' selected' : ''}>${esc(c)}</option>`).join('')}</optgroup>` : cropOpts(l.crop, 'Choose…'))}</select></label><label class="f">${ME.role === 'supplier' ? 'Product name / brand' : 'Variety (optional)'}<input name="variety" value="${esc(l.variety || '')}" placeholder="e.g. Hass, Star 9037"></label><label class="f">Grade<select name="grade">${opt(['A', 'B', 'C', 'Mixed'], l.grade, 'Not graded')}</select></label></div>
         <div class="grid3"><label class="f">Quantity available<input name="qty" type="number" step="any" min="0" required value="${esc(l.qty ?? '')}"></label><label class="f">Sold per<select name="unit" id="un">${opt(Object.keys(LK.units), l.unit)}</select></label><label class="f">Weight of 1 unit (kg)<input name="unit_kg" type="number" step="any" min="0" value="${esc(l.unit_kg || LK.units[l.unit] || 1)}"><span class="hint">Used for price per kg</span></label></div>
         <div class="grid3"><label class="f">Price per unit (${esc(LK.currency)})<input name="price" type="number" step="any" min="0" required value="${esc(l.price ?? '')}"><span class="hint" id="ps"></span></label><label class="f">Minimum order (units)<input name="min_order" type="number" step="any" min="0" value="${esc(l.min_order)}"></label><label class="f">Delivery<select name="delivery">${opt([['pickup', 'Buyer collects'], ['farmer', 'I deliver'], ['both', 'Either']], l.delivery)}</select></label></div>
         <div class="grid3"><label class="f" id="hf">Expected harvest date<input name="available_from" type="date" value="${esc(l.available_from || '')}" min="${today()}"></label><label class="f" id="bbf">Sell by (best before)<input name="best_before" type="date" value="${esc(l.best_before || '')}" min="${today()}"><span class="hint">When it starts to spoil</span></label><label class="f" id="rsf">Rescue discount<select name="rescue_pct">${opt([[0, 'None'], [10, '10% off'], [20, '20% off'], [30, '30% off'], [40, '40% off'], [50, '50% off']], l.rescue_pct)}</select><span class="hint">Applies automatically in the last 3 days</span></label></div>
@@ -553,9 +575,16 @@
     $('#pi', f).onchange = async (e) => { const file = e.target.files[0]; if (!file) return; try { ph64 = await resizeImage(file, 1000); $('#pp', f).innerHTML = `<img src="${ph64}" alt="" style="max-height:140px;border-radius:12px">`; } catch (er) { toast(er.message, true); } };
     if ($('#rm', f)) $('#rm', f).onclick = (e) => busy(e.currentTarget, async () => { await api(`/listings/${id}/status`, { to: 'removed' }); toast('Listing removed'); location.hash = '#/sell'; });
     f.addEventListener('submit', (e) => {
-      e.preventDefault(); const x = formData(f); x.organic = !!x.organic; x.export_ready = !!x.export_ready; if (id !== 'new') x.id = Number(id); if (ph64) x.photo = ph64;
+      e.preventDefault(); const x = formData(f); x.organic = !!x.organic; x.export_ready = !!x.export_ready; if (id !== 'new') x.id = Number(id); if (ph64) x.photo = ph64; if (l.planting_id) x.planting_id = l.planting_id;
       if (x.kind === 'preharvest') x.best_before = '';
-      busy(e.submitter, async () => { const r = await api('/listings', x); toast(id === 'new' ? (r.matched ? `Published. ${r.matched} interested buyer${r.matched > 1 ? 's were' : ' was'} alerted.` : 'Published on the market') : 'Saved'); location.hash = '#/listing/' + r.id; }, $('#se', v));
+      busy(e.submitter, async () => {
+        let r;
+        try { r = await api('/listings', x); } catch (er) {
+          if (er.status !== 409) throw er;
+          if (!confirm(er.message + '\n\nOnly list it as ready now if the produce will not be harvested before that date. Continue?')) return;
+          r = await api('/listings', { ...x, confirm_withholding: true });
+        }
+        toast(id === 'new' ? (r.matched ? `Published. ${r.matched} interested buyer${r.matched > 1 ? 's were' : ' was'} alerted.` : 'Published on the market') : 'Saved'); location.hash = '#/listing/' + r.id; }, $('#se', v));
     });
   }
 
@@ -815,6 +844,337 @@
       <label class="f">Bank details<textarea name="pay_bank" rows="3">${esc(s.pay_bank)}</textarea></label><label class="f">Support WhatsApp number<input name="support_whatsapp" value="${esc(s.support_whatsapp)}" placeholder="+263…"><span class="hint">Shown on the site for help and password resets</span></label>
       <p class="err" id="se"></p><button class="btn">Save settings</button></form>`);
     $('#sf', v).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/admin/settings', formData(e.target)); LK = await api('/lookups'); toast('Settings saved'); }, $('#se', v)); });
+  }
+
+  /* =================== MY FARM =================== */
+  const FT = [['', 'sprout', 'Overview'], ['crops', 'leaf', 'Crops & animals'], ['tasks', 'check', 'Tasks'], ['workers', 'users', 'Workers & pay'], ['store', 'box', 'Store'], ['money', 'wallet', 'Money'], ['weather', 'clock', 'Weather'], ['doctor', 'search', 'Plant doctor'], ['advisor', 'hand', 'Advisor'], ['sensors', 'gear', 'Automations']];
+  const ftabs = (cur) => `<nav class="chips ftabs" aria-label="Farm sections" style="margin-bottom:18px">${FT.map(([k, i, l]) => `<a class="chip" href="#/farm${k ? '/' + k : ''}" aria-pressed="${k === cur}">${ic(i, 15)} ${l}</a>`).join('')}</nav>`;
+  const lvl = (l) => l === 'high' ? 'bad' : 'warn';
+  const WMO = (c) => c == null ? '' : c === 0 ? '☀️' : c <= 3 ? '⛅' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '🌨️' : c <= 82 ? '🌦️' : '⛈️';
+  const upsell = (what) => `<div class="banner info" style="margin-bottom:14px">${ic('leaf')}<span style="flex:1">${what} <b>Farm Manager</b> unlocks everything with no limits.</span><a class="btn sm" href="#/billing">See plans</a></div>`;
+  let FARM = null;
+  async function farm(v, tab, id, Q) {
+    if (!['farmer', 'admin'].includes(ME.role)) throw new Error('My farm is for farmers.');
+    setTitle('My farm');
+    const st = await api('/farm');
+    FARM = st.farm; FARM_FULL = st.full;
+    if (!FARM || tab === 'setup') return farmSetup(v, st);
+    const fn = { '': farmOverview, crops: farmCrops, crop: farmCrop, tasks: farmTasks, workers: farmWorkers, worker: farmWorker, pay: farmPay, store: farmStore, money: farmMoney, weather: farmWeather, doctor: farmDoctor, advisor: farmAdvisor, sensors: farmSensors }[tab];
+    if (!fn) throw new Error('Page not found.');
+    await fn(v, id, Q);
+  }
+  let FARM_FULL = false;
+  function farmSetup(v, st) {
+    const f = st.farm || { name: ME.business || '', country: ME.country, region: ME.region, town: ME.town };
+    v.innerHTML = page(ph(st.farm ? 'Farm details' : 'Set up your farm', 'Your location gives you local weather, frost and disease alerts and outbreak warnings from farms near you.') + `<form class="card stack" id="fs" style="max-width:720px">
+      <div class="grid2"><label class="f">Farm name<input name="name" value="${esc(f.name)}" required></label><label class="f">Size (hectares)<input name="size_ha" type="number" step="any" min="0" value="${esc(f.size_ha || '')}"></label></div>
+      <div class="grid3"><label class="f">Country<select name="country">${opt(LK.countries, f.country)}</select></label><label class="f">Province / region${regionField(f.country, f.region)}</label><label class="f">Nearest town<input name="town" value="${esc(f.town || '')}"></label></div>
+      <div class="grid2"><label class="f">Latitude<input name="lat" id="lat" value="${esc(f.lat ?? '')}" inputmode="decimal"></label><label class="f">Longitude<input name="lng" id="lng" value="${esc(f.lng ?? '')}" inputmode="decimal"></label></div>
+      <div class="row"><button class="btn ghost sm" type="button" id="gps">${ic('pin', 15)} Use my location (stand on the farm)</button><span class="hint" id="gh">Or leave blank and we use the centre of your province.</span></div>
+      <p class="err" id="fe"></p><div class="row"><button class="btn">${ic('check', 16)} ${st.farm ? 'Save' : 'Create my farm'}</button>${st.farm ? '<a class="btn ghost" href="#/farm">Back</a>' : ''}</div></form>`);
+    $('#gps', v).onclick = () => { if (!navigator.geolocation) return toast('This phone cannot share location.', true); $('#gh', v).textContent = 'Finding you…'; navigator.geolocation.getCurrentPosition((p) => { $('#lat', v).value = p.coords.latitude.toFixed(5); $('#lng', v).value = p.coords.longitude.toFixed(5); $('#gh', v).textContent = 'Location set (±' + Math.round(p.coords.accuracy) + ' m).'; }, () => { $('#gh', v).textContent = 'Could not get your location. Allow location, or leave blank.'; }, { enableHighAccuracy: true, timeout: 15000 }); };
+    $('#fs', v).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/farm', formData(e.target)); toast('Farm saved'); location.hash = '#/farm'; route(); }, $('#fe', v)); });
+  }
+  async function farmOverview(v) {
+    const d = await api('/farm/overview');
+    const f = d.farm, w = d.weather;
+    const todayTasks = d.tasks.filter((t) => t.due <= today());
+    v.innerHTML = page(ph(esc(f.name), `${esc([f.town, f.region, f.country].filter(Boolean).join(', '))}${f.size_ha ? ' · ' + qn(f.size_ha) + ' ha' : ''} · <a href="#/farm/setup">Edit</a>`, `<a class="btn" href="#/farm/crops?new=1">${ic('plus', 16)} Add crop or batch</a><a class="btn ghost" href="#/farm/doctor">${ic('search', 16)} Scan a plant</a>`) + ftabs('') + `
+      ${d.alerts.filter((a) => a.level === 'high').map((a) => `<div class="banner bad" style="margin-bottom:10px">${ic('alert')}<span><b>${esc(a.title)}.</b> ${esc(a.text)}</span></div>`).join('')}
+      ${d.outbreaks.map((o) => `<div class="banner warn" style="margin-bottom:10px">🦠<span><b>Outbreak near you:</b> ${esc(o.problem)} on ${esc(o.crop.toLowerCase())} at ${o.farms} farms in ${esc(f.region)} (last 2 weeks). <a href="#/farm/doctor">Scan your plants</a></span></div>`).join('')}
+      <div class="kpis"><a class="kpi ${todayTasks.length ? 'hot' : ''}" href="#/farm/tasks"><span>Tasks today</span><b>${todayTasks.length}</b><small>${d.tasks.filter((t) => t.due < today()).length} overdue</small></a>
+        <a class="kpi" href="#/farm/crops"><span>Growing now</span><b>${d.plantings.length}</b><small>crops and batches</small></a>
+        <a class="kpi" href="#/farm/workers"><span>Workers here today</span><b>${d.workers.here}/${d.workers.n}</b><small>Tap to mark attendance</small></a>
+        <a class="kpi" href="#/farm/money"><span>This month</span><b style="color:${d.money.income - d.money.expense >= 0 ? 'var(--green)' : 'var(--red)'}">${money(d.money.income - d.money.expense)}</b><small>${money(d.money.income)} in · ${money(d.money.expense)} out</small></a></div>
+      <div class="detail" style="margin-top:18px"><div class="stack">
+        <div class="card stack"><h2>💡 Suggestions for you</h2>${d.suggestions.length ? `<div class="list">${d.suggestions.map((s) => `<a class="item" href="${esc(s.link)}"><span class="em">${s.icon}</span><span>${esc(s.text)}</span><span></span></a>`).join('')}</div>` : '<p class="muted">All good for now.</p>'}</div>
+        <div class="card stack"><div class="between"><h2>Crops & animals</h2><a href="#/farm/crops">All</a></div>${d.plantings.length ? `<div class="list">${d.plantings.map(plantItem).join('')}</div>` : '<p class="muted">Nothing added yet. Add a crop or a livestock batch to get a full calendar of tasks, input reminders and harvest planning.</p>'}</div>
+        <div class="card stack"><div class="between"><h2>This week's tasks</h2><a href="#/farm/tasks">All tasks</a></div>${d.tasks.length ? `<div class="list">${d.tasks.slice(0, 8).map(taskItem).join('')}</div>` : '<p class="muted">No tasks this week.</p>'}</div></div>
+      <div class="stack">
+        <a class="card stack" href="#/farm/weather" style="text-decoration:none;color:inherit"><div class="between"><h2>Weather</h2><span class="muted small">${w ? 'updated ' + ago(w.at) : ''}</span></div>${w ? `${w.current ? `<div class="row"><span style="font-size:40px">${WMO(w.current.weather_code)}</span><div><b style="font:800 30px var(--display)">${Math.round(w.current.temperature_2m)}°C</b><br><span class="muted small">Humidity ${w.current.relative_humidity_2m}% · wind ${Math.round(w.current.wind_speed_10m)} km/h</span></div></div>` : ''}<div class="wx">${w.next.slice(0, 5).map((x) => `<div><small>${x.date === today() ? 'Today' : new Date(x.date + 'T00:00').toLocaleDateString('en-GB', { weekday: 'short' })}</small><span>${WMO(x.code)}</span><b>${Math.round(x.tmax)}°</b><small>${Math.round(x.tmin)}° · ${Math.round(x.rain)}mm</small></div>`).join('')}</div>${d.alerts.filter((a) => a.level !== 'high').slice(0, 2).map((a) => `<p class="small" style="color:var(--amber-ink)">⚠ ${esc(a.title)}</p>`).join('')}` : '<p class="muted">Weather is not available yet. Check your farm location.</p>'}</a>
+        ${d.low.length ? `<div class="card stack"><h2>📦 Running low</h2>${d.low.map((i) => `<p class="between"><span>${esc(i.name)}</span><b style="color:var(--red)">${qn(i.qty)} ${esc(i.unit)}</b></p>`).join('')}<a class="btn ghost sm" href="#/market?category=Farm%20inputs">Buy in the inputs store</a></div>` : ''}
+        <div class="card stack"><div class="between"><h2>Plant doctor</h2><a href="#/farm/doctor">Scan</a></div>${d.scans.length ? d.scans.map((s) => `<p class="between small"><span>${emo(s.crop)} ${esc(s.crop)}: <b>${esc(s.problem)}</b></span>${s.healthy ? pill('Healthy', 'green') : pill(s.confidence + ' confidence', 'amber')}</p>`).join('') : '<p class="muted small">Take a photo of a sick leaf and the AI tells you what it is and what to do.</p>'}</div>
+        ${d.full ? '' : `<div class="card stack"><h2>Farm Manager plan</h2><p class="muted small">Your plan includes 2 fields, 3 active crops, 3 workers, 3 AI scans and 3 advisor questions a month. Farm Manager removes the limits and adds sensors.</p><a class="btn sm" href="#/billing">Upgrade</a></div>`}</div></div>`);
+  }
+  function plantItem(p) {
+    const s = p.st;
+    return `<a class="item" href="#/farm/crop/${p.id}"><span class="em">${emo(p.crop)}</span><span><b>${esc(p.crop)}${p.variety ? ' · ' + esc(p.variety) : ''}</b><small>${p.kind === 'livestock' ? (p.count || '?') + ' animals' : (p.area_ha ? qn(p.area_ha) + ' ha' : '')}${p.field ? ' · ' + esc(p.field) : ''} · day ${Math.max(0, s.age)} · ${esc(s.stage)}</small><span class="bar"><i style="width:${s.pct}%"></i></span></span><span class="r">${p.status !== 'growing' ? pill(p.status, p.status === 'harvested' ? 'green' : 'red') : s.days_left <= 0 ? pill('Ready', 'green') : `<span class="muted small">${s.days_left} days to go</span>`}${p.due ? pill(p.due + ' task' + (p.due > 1 ? 's' : ''), 'amber') : ''}</span></a>`;
+  }
+  function taskItem(t) {
+    const late = t.due < today();
+    return `<div class="item task" data-t="${t.id}"><button class="tick-btn" data-done="${t.id}" aria-label="Mark done">${ic('check', 16)}</button><span><b>${esc(t.title)}</b><small>${t.crop ? emo(t.crop) + ' ' + esc(t.crop) + ' · ' : ''}${t.worker ? esc(t.worker) + ' · ' : ''}${t.repeat_days ? 'every ' + t.repeat_days + ' days · ' : ''}<span style="${late ? 'color:var(--red);font-weight:700' : ''}">${t.due === today() ? 'Today' : late ? 'Overdue since ' + fdate(t.due) : fdate(t.due)}</span></small>${t.details ? `<small class="det">${esc(t.details)}</small>` : ''}</span><span class="r">${t.input ? `<a class="btn ghost sm" href="#/market?category=Farm%20inputs&q=${encodeURIComponent(t.input)}">Buy ${esc(t.input.toLowerCase())}</a>` : ''}</span></div>`;
+  }
+  function wireTasks(root, redraw) {
+    $$('[data-done]', root).forEach((b) => b.onclick = (e) => { e.preventDefault(); busy(b, async () => { await api('/farm/tasks', { id: Number(b.dataset.done), done: 1 }); toast('Done'); redraw(); }); });
+  }
+  async function farmCrops(v, id, Q) {
+    const st = Q.get('status') || 'growing';
+    const [{ items }, fl] = await Promise.all([api('/farm/plantings?status=' + st), api('/farm/fields')]);
+    v.innerHTML = page(ph('Crops & animals', 'Each crop or batch gets a calendar of tasks, growth stages, inputs used, costs and profit.', `<button class="btn" id="np">${ic('plus', 16)} Add crop or batch</button>`) + ftabs('crops') + `
+      <div class="detail"><div class="stack"><nav class="tabs" style="margin:0">${[['growing', 'Growing'], ['harvested', 'Harvested'], ['all', 'All']].map(([k, l]) => `<a href="#/farm/crops?status=${k}" aria-current="${k === st}">${l}</a>`).join('')}</nav>
+        <div class="list">${items.map(plantItem).join('') || '<p class="empty">Nothing here yet.</p>'}</div>
+        ${st !== 'growing' && items.length ? `<div class="card stack"><h2>Profit by crop</h2><div class="tw"><table class="t"><thead><tr><th>Crop</th><th>Planted</th><th>Harvested</th><th>Profit so far</th></tr></thead><tbody>${items.map((p) => `<tr><td>${emo(p.crop)} ${esc(p.crop)}</td><td>${fdate(p.planted)}</td><td>${qn(p.harvested_qty)} ${esc(p.yield_unit || '')}</td><td style="color:${p.margin >= 0 ? 'var(--green)' : 'var(--red)'};font-weight:700">${money(p.margin)}</td></tr>`).join('')}</tbody></table></div></div>` : ''}</div>
+      <div class="card stack"><div class="between"><h2>Fields</h2><button class="btn ghost sm" id="nf">${ic('plus', 15)} Add field</button></div>${fl.items.length ? fl.items.map((x) => `<div class="between" style="border-top:1px solid var(--line2);padding-top:8px"><span><b>${esc(x.name)}</b><br><span class="muted small">${x.size_ha ? qn(x.size_ha) + ' ha · ' : ''}${esc(x.irrigation || '')}${x.soil ? ' · ' + esc(x.soil) : ''}${x.growing ? ' · ' + esc(x.growing) : ' · empty'}</span></span><button class="link" data-fe="${x.id}">Edit</button></div>`).join('') : '<p class="muted small">Add your fields, blocks, gardens or fowl runs.</p>'}</div></div>`);
+    const fieldDlg = (x) => dlg(`${head(x.id ? 'Edit field' : 'Add a field')}<form class="stack" id="ff"><label class="f">Name<input name="name" required value="${esc(x.name || '')}" placeholder="e.g. Block A, Garden by the dam"></label><div class="grid2"><label class="f">Size (ha)<input name="size_ha" type="number" step="any" min="0" value="${esc(x.size_ha || '')}"></label><label class="f">Water<select name="irrigation">${opt(['Rain-fed', 'Drip', 'Sprinkler', 'Centre pivot', 'Furrow / flood', 'Bucket / hand'], x.irrigation)}</select></label></div><label class="f">Soil<input name="soil" value="${esc(x.soil || '')}" placeholder="e.g. sandy loam, red clay"></label><p class="err" id="fe"></p><div class="row"><button class="btn">Save</button>${x.id ? '<button class="btn ghost" type="button" id="rm">Remove</button>' : ''}</div></form>`, (d) => {
+      $('#ff', d).addEventListener('submit', (e) => { e.preventDefault(); const y = formData(e.target); if (x.id) y.id = x.id; busy(e.submitter, async () => { await api('/farm/fields', y); d.close(); route(); }, $('#fe', d)); });
+      if ($('#rm', d)) $('#rm', d).onclick = (e) => busy(e.currentTarget, async () => { await api('/farm/fields', { id: x.id, remove: 1, name: x.name }); d.close(); route(); });
+    });
+    $('#nf', v).onclick = () => fieldDlg({});
+    $$('[data-fe]', v).forEach((b) => b.onclick = () => fieldDlg(fl.items.find((x) => String(x.id) === b.dataset.fe)));
+    $('#np', v).onclick = () => plantDlg(fl.items);
+    if (Q.get('new')) plantDlg(fl.items);
+  }
+  function plantDlg(fields, p = {}) {
+    const all = Object.entries(LK.crops).filter(([g]) => g !== 'Farm inputs');
+    dlg(`${head(p.id ? 'Edit' : 'Add a crop or livestock batch', 'We build your calendar of tasks, input reminders and harvest date from this.')}<form class="stack" id="pf">
+      <label class="f">What<select name="crop" required><option value="">Choose…</option>${all.map(([g, l]) => `<optgroup label="${esc(g)}">${l.map((c) => `<option${c === p.crop ? ' selected' : ''}>${esc(c)}</option>`).join('')}</optgroup>`).join('')}</select></label>
+      <div class="grid2"><label class="f">Variety / breed<input name="variety" value="${esc(p.variety || '')}"></label><label class="f">Field<select name="field_id">${opt(fields.map((x) => [x.id, x.name]), p.field_id, 'No field')}</select></label></div>
+      <div class="grid3"><label class="f">Planted / started<input type="date" name="planted" required value="${esc(p.planted || today())}"></label><label class="f" id="ar">Area (ha)<input name="area_ha" type="number" step="any" min="0" value="${esc(p.area_ha || '')}"></label><label class="f" id="ct">Number of animals<input name="count" type="number" min="0" value="${esc(p.count || '')}"></label></div>
+      <div class="grid2"><label class="f">Expected harvest / sale<input type="date" name="expected_harvest" value="${esc(p.expected_harvest || '')}"><span class="hint">Leave blank to use the usual season length</span></label><label class="f">Expected yield<input name="expected_yield" type="number" step="any" min="0" value="${esc(p.expected_yield || '')}"><span class="hint">Leave blank for a typical estimate</span></label></div>
+      ${p.id ? '' : '<label class="check"><input type="checkbox" name="auto_tasks" checked> Create the season\'s tasks for me (planting, fertiliser, spraying, vaccination, harvest)</label>'}
+      <p class="err" id="pe"></p><div class="row"><button class="btn">${ic('check', 16)} Save</button><button class="btn ghost" type="button" data-close>Cancel</button></div></form>`, (d) => {
+      const f = $('#pf', d);
+      const kind = () => { const live = ['Livestock & poultry', 'Fish'].includes(Object.entries(LK.crops).find(([, l]) => l.includes(f.elements.crop.value))?.[0]) || f.elements.crop.value === 'Eggs'; $('#ar', f).hidden = live; $('#ct', f).hidden = !live; };
+      f.elements.crop.onchange = kind; kind();
+      f.addEventListener('submit', (e) => { e.preventDefault(); const x = formData(f); x.auto_tasks = !!x.auto_tasks || !!p.id; if (p.id) x.id = p.id; busy(e.submitter, async () => { const r = await api('/farm/plantings', x); d.close(); toast(r.tasks ? `Added with ${r.tasks} tasks on your calendar` : 'Saved'); location.hash = '#/farm/crop/' + (p.id || r.id); route(); }, $('#pe', d)); });
+    });
+  }
+  async function farmCrop(v, id) {
+    const [d, fl, inv] = await Promise.all([api('/farm/plantings/' + id), api('/farm/fields'), api('/farm/inventory')]);
+    const p = d.item, s = p.st;
+    const cost = d.money.filter((m) => m.kind === 'expense').reduce((a, m) => a + m.amount, 0) + d.inputs.reduce((a, m) => a + (-m.qty) * (m.unit_cost || 0), 0);
+    const inc = d.money.filter((m) => m.kind === 'income').reduce((a, m) => a + m.amount, 0);
+    v.innerHTML = page(`<p style="margin-bottom:12px"><a href="#/farm/crops">← Crops & animals</a></p>` + ph(`${emo(p.crop)} ${esc(p.crop)}${p.variety ? ' · ' + esc(p.variety) : ''}`, `${p.kind === 'livestock' ? (p.count || '?') + ' animals' : (p.area_ha ? qn(p.area_ha) + ' ha' : '')}${p.field ? ' · ' + esc(p.field.name) : ''} · started ${fdate(p.planted)}`, `<button class="btn" id="lg">${ic('plus', 16)} Record</button><a class="btn ghost" href="#/farm/doctor?planting=${p.id}">${ic('search', 16)} Scan</a><a class="btn ghost" href="#/sell/new?planting=${p.id}">${ic('shop', 16)} Sell</a>`) + `
+      ${d.safe && d.safe.date > today() ? `<div class="banner bad" style="margin-bottom:12px">${ic('alert')}<span>Withholding period: ${esc(d.safe.item)} applied on ${fdate(d.safe.applied)}. Do not harvest or sell before <b>${fdate(d.safe.date)}</b>.</span></div>` : ''}
+      <div class="card stack"><div class="between"><b>${esc(s.stage)} · day ${Math.max(0, s.age)}</b><span class="muted small">${s.days_left > 0 ? `${s.days_left} days to ${p.kind === 'livestock' ? 'sale' : 'harvest'} (${fdate(p.expected_harvest)})` : 'Ready'}</span></div><div class="bar" style="height:10px"><i style="width:${s.pct}%"></i></div>
+        <div class="facts"><div><span>Expected yield</span><b>${p.expected_yield ? qn(p.expected_yield) + ' ' + esc(p.yield_unit || '') : '—'}</b></div><div><span>Harvested so far</span><b>${qn(p.harvested_qty)} ${esc(p.yield_unit || '')}</b></div><div><span>Costs so far</span><b>${money(cost)}</b></div><div><span>Sales</span><b>${money(inc)}</b></div><div><span>Profit so far</span><b style="color:${inc - cost >= 0 ? 'var(--green)' : 'var(--red)'}">${money(inc - cost)}</b></div><div><span>Status</span><b>${esc(p.status)}</b></div></div>
+        <div class="row">${p.status === 'growing' ? `<button class="btn ghost sm" id="hv">Record harvest${p.kind === 'livestock' ? ' / sale' : ''}</button><button class="btn ghost sm" id="ed">Edit</button><button class="btn ghost sm" id="fl">Mark as failed</button>` : `<button class="btn ghost sm" id="re">Back to growing</button>`}</div></div>
+      <div class="grid2" style="margin-top:16px"><div class="card stack"><div class="between"><h2>Tasks</h2><button class="btn ghost sm" id="nt">${ic('plus', 15)} Task</button></div><div class="list" id="tl">${d.tasks.filter((t) => t.status === 'open').map(taskItem).join('') || '<p class="muted small">No open tasks.</p>'}</div>${d.tasks.filter((t) => t.status !== 'open').length ? `<details><summary class="muted small">${d.tasks.filter((t) => t.status !== 'open').length} done</summary>${d.tasks.filter((t) => t.status !== 'open').map((t) => `<p class="small">✓ ${esc(t.title)} <span class="muted">${fdate((t.done_at || '').slice(0, 10))}</span></p>`).join('')}</details>` : ''}</div>
+      <div class="card stack"><h2>Diary</h2>${d.logs.length ? d.logs.map((g) => `<div style="border-top:1px solid var(--line2);padding-top:8px"><span class="muted small">${fdate(g.date)} · ${esc(g.kind)}${g.health ? ' · ' + esc(g.health) : ''}${g.height_cm ? ' · ' + qn(g.height_cm) + ' cm' : ''}${g.qty ? ' · ' + qn(g.qty) : ''}</span>${g.notes ? `<p class="small">${esc(g.notes)}</p>` : ''}${g.has_photo ? `<img src="/api/farm/photo/log/${g.id}" alt="" loading="lazy" style="max-height:160px;border-radius:10px;margin-top:6px">` : ''}</div>`).join('') : '<p class="muted small">Record growth, problems, sprays and harvests with photos to track how this crop is doing.</p>'}</div></div>
+      <div class="card stack" style="margin-top:16px"><div class="between"><h2>Inputs used</h2><button class="btn ghost sm" id="use">${ic('plus', 15)} Use from store</button></div>${d.inputs.length ? `<div class="tw"><table class="t"><tbody>${d.inputs.map((m) => `<tr><td>${fdate(m.date)}</td><td>${esc(m.name)}</td><td>${qn(-m.qty)} ${esc(m.unit)}</td><td>${m.unit_cost ? money(-m.qty * m.unit_cost) : ''}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted small">Seed, fertiliser, chemicals and feed you use from your store show here with their cost.</p>'}</div>`);
+    const redraw = () => route();
+    wireTasks(v, redraw);
+    $('#lg', v).onclick = () => logDlg(p, 'growth');
+    if ($('#hv', v)) $('#hv', v).onclick = () => logDlg(p, 'harvest');
+    if ($('#ed', v)) $('#ed', v).onclick = () => plantDlg(fl.items, { ...p, field_id: p.field_id });
+    if ($('#fl', v)) $('#fl', v).onclick = (e) => busy(e.currentTarget, async () => { await api('/farm/plantings', { id: p.id, status: 'failed' }); route(); });
+    if ($('#re', v)) $('#re', v).onclick = (e) => busy(e.currentTarget, async () => { await api('/farm/plantings', { id: p.id, status: 'growing' }); route(); });
+    $('#nt', v).onclick = () => taskDlg({ planting_id: p.id });
+    $('#use', v).onclick = () => stockDlg(inv.items, { kind: 'use', planting_id: p.id });
+  }
+  function logDlg(p, kind) {
+    dlg(`${head(kind === 'harvest' ? (p.kind === 'livestock' ? 'Record sale / slaughter' : 'Record harvest') : 'Add to diary', esc(p.crop))}<form class="stack" id="lf">
+      <div class="grid2"><label class="f">What<select name="kind">${opt(kind === 'harvest' ? [['harvest', p.kind === 'livestock' ? 'Sold / slaughtered' : 'Harvest']] : [['growth', 'Growth check'], ['note', 'Note'], ['problem', 'Problem seen'], ...(p.kind === 'livestock' ? [['mortality', 'Deaths'], ['weight', 'Weight check']] : [])], kind)}</select></label><label class="f">Date<input type="date" name="date" value="${today()}" max="${today()}"></label></div>
+      <div class="grid3"><label class="f">Health<select name="health">${opt(['Good', 'Fair', 'Poor'], 'Good', '—')}</select></label><label class="f">Height / weight<input name="height_cm" type="number" step="any" placeholder="cm or kg"></label><label class="f">${kind === 'harvest' ? 'Quantity (' + esc(p.yield_unit || 'units') + ')' : 'Quantity'}<input name="qty" type="number" step="any" min="0" ${kind === 'harvest' ? 'required' : ''}></label></div>
+      <label class="f">Notes<textarea name="notes" rows="2" maxlength="800"></textarea></label>
+      <label class="f">Photo<input type="file" id="ph" accept="image/*" capture="environment"></label>
+      ${kind === 'harvest' ? '<label class="check"><input type="checkbox" name="to_store" checked> Add to my store (so I can track what is still unsold)</label><label class="check"><input type="checkbox" name="final"> This was the last harvest</label>' : ''}
+      <p class="err" id="le"></p><div class="row"><button class="btn">Save</button><button class="btn ghost" type="button" data-close>Cancel</button></div></form>`, (d) => {
+      let photo; $('#ph', d).onchange = async (e) => { try { photo = await resizeImage(e.target.files[0], 900); toast('Photo added'); } catch (er) { toast(er.message, true); } };
+      $('#lf', d).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); x.to_store = !!x.to_store; x.final = !!x.final; if (photo) x.photo = photo; busy(e.submitter, async () => { await api(`/farm/plantings/${p.id}/log`, x); d.close(); toast('Saved'); route(); }, $('#le', d)); });
+    });
+  }
+  async function taskDlg(t = {}) {
+    const [w, p] = await Promise.all([api('/farm/workers'), api('/farm/plantings')]);
+    dlg(`${head(t.id ? 'Edit task' : 'New task')}<form class="stack" id="tf"><label class="f">Task<input name="title" required maxlength="120" value="${esc(t.title || '')}" placeholder="e.g. Spray tomatoes, fix the fence"></label>
+      <label class="f">Details<textarea name="details" rows="2">${esc(t.details || '')}</textarea></label>
+      <div class="grid3"><label class="f">Due<input type="date" name="due" value="${esc(t.due || today())}"></label><label class="f">Who<select name="worker_id">${opt(w.items.filter((x) => x.status === 'active').map((x) => [x.id, x.name]), t.worker_id, 'Me / anyone')}</select></label><label class="f">Repeat every (days)<input name="repeat_days" type="number" min="0" value="${esc(t.repeat_days || '')}" placeholder="No repeat"></label></div>
+      <label class="f">Crop / batch<select name="planting_id">${opt(p.items.map((x) => [x.id, x.crop + (x.variety ? ' · ' + x.variety : '')]), t.planting_id, 'Whole farm')}</select></label>
+      <p class="err" id="te"></p><div class="row"><button class="btn">Save task</button><button class="btn ghost" type="button" data-close>Cancel</button></div></form>`, (d) => {
+      $('#tf', d).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); if (t.id) x.id = t.id; busy(e.submitter, async () => { await api('/farm/tasks', x); d.close(); toast('Task saved'); route(); }, $('#te', d)); });
+    });
+  }
+  async function farmTasks(v, id, Q) {
+    const st = Q.get('status') || 'open';
+    const { items } = await api('/farm/tasks?status=' + st);
+    const groups = st === 'open' ? [['Overdue', items.filter((t) => t.due < today())], ['Today', items.filter((t) => t.due === today())], ['Next 7 days', items.filter((t) => t.due > today() && t.due <= addD(7))], ['Later', items.filter((t) => t.due > addD(7))]] : [['Done', items]];
+    v.innerHTML = page(ph('Tasks', 'Your crop calendars fill this automatically. Tick tasks off as you go; repeating tasks come back by themselves.', `<button class="btn" id="nt">${ic('plus', 16)} New task</button>`) + ftabs('tasks') + `<nav class="tabs">${[['open', 'To do'], ['done', 'Done']].map(([k, l]) => `<a href="#/farm/tasks?status=${k}" aria-current="${k === st}">${l}</a>`).join('')}</nav>` +
+      groups.filter(([, l]) => l.length).map(([g, l]) => `<h3 style="margin:16px 0 8px">${g} (${l.length})</h3><div class="list">${st === 'open' ? l.map(taskItem).join('') : l.map((t) => `<div class="item"><span class="em">✓</span><span><b>${esc(t.title)}</b><small>${t.crop ? esc(t.crop) + ' · ' : ''}${t.status} ${fdate((t.done_at || '').slice(0, 10))}</small></span><button class="link" data-re="${t.id}">Undo</button></div>`).join('')}</div>`).join('') + (items.length ? '' : '<p class="empty">Nothing here.</p>'));
+    wireTasks(v, route);
+    $$('[data-re]', v).forEach((b) => b.onclick = () => busy(b, async () => { await api('/farm/tasks', { id: Number(b.dataset.re), reopen: 1 }); route(); }));
+    $('#nt', v).onclick = () => taskDlg();
+  }
+  const addD = (n) => { const d = new Date(today() + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  async function farmWorkers(v, id, Q) {
+    const date = Q.get('date') || today();
+    const [{ items }, pr] = await Promise.all([api('/farm/workers?date=' + date), api('/farm/payroll')]);
+    const act = items.filter((w) => w.status === 'active');
+    v.innerHTML = page(ph('Workers & pay', 'Mark attendance each day. Payroll adds up days, piece work and advances for you.', `<button class="btn" id="nw">${ic('plus', 16)} Add worker</button><button class="btn ghost" id="pr">${ic('wallet', 16)} Run payroll</button>`) + ftabs('workers') + `
+      <div class="card stack"><div class="between"><h2>Attendance</h2><input type="date" id="ad" value="${date}" max="${today()}" style="max-width:180px" aria-label="Date"></div>
+        ${act.length ? `<form id="af" class="list">${act.map((w) => `<div class="item" style="grid-template-columns:minmax(0,1fr) auto"><span><b><a href="#/farm/worker/${w.id}">${esc(w.name)}</a></b><small>${esc(w.role || '')} · ${w.pay_type === 'daily' ? money(w.rate) + '/day' : w.pay_type === 'piece' ? money(w.rate) + '/unit' : money(w.rate) + '/month'} · ${qn(w.days_month)} days this month${w.owed ? ' · advances ' + money(w.owed) : ''}</small></span>
+          <span class="row" style="gap:6px"><select name="s${w.id}" aria-label="Attendance for ${esc(w.name)}" style="width:auto">${opt([['present', 'Present'], ['half', 'Half day'], ['absent', 'Absent'], ['leave', 'Paid leave'], ['sick', 'Sick']], w.today || 'present')}</select>${w.pay_type === 'piece' ? `<input name="q${w.id}" type="number" step="any" min="0" placeholder="Units" value="${esc(w.piece_qty ?? '')}" style="width:90px">` : ''}</span></div>`).join('')}
+          <div class="row"><button class="btn">${ic('check', 16)} Save attendance for ${date === today() ? 'today' : fdate(date)}</button>${items.some((w) => w.today) ? pill('Saved', 'green') : ''}</div></form>` : '<p class="muted">Add your workers to track attendance and pay.</p>'}</div>
+      <div class="grid2" style="margin-top:16px"><div class="card stack"><h2>Pay runs</h2>${pr.items.length ? pr.items.map((r) => `<a class="item" href="#/farm/pay/${r.id}"><span class="em">💵</span><span><b>${fdate(r.period_from)} – ${fdate(r.period_to)}</b><small>${r.people} workers</small></span><span class="r">${pill(r.status === 'paid' ? 'Paid' : 'Draft', r.status === 'paid' ? 'green' : 'amber')}<b>${money(r.total)}</b></span></a>`).join('') : '<p class="muted small">No pay runs yet.</p>'}</div>
+      <div class="card stack"><h2>Former workers</h2>${items.filter((w) => w.status !== 'active').map((w) => `<p><a href="#/farm/worker/${w.id}">${esc(w.name)}</a></p>`).join('') || '<p class="muted small">None.</p>'}<a class="btn ghost sm" href="/api/farm/export/attendance">${ic('download', 15)} Attendance CSV</a></div></div>`);
+    $('#ad', v).onchange = (e) => { location.hash = '#/farm/workers?date=' + e.target.value; };
+    if ($('#af', v)) $('#af', v).addEventListener('submit', (e) => { e.preventDefault(); const fd = formData(e.target); busy(e.submitter, async () => { const r = await api('/farm/attendance', { date, items: act.map((w) => ({ worker_id: w.id, status: fd['s' + w.id], piece_qty: fd['q' + w.id] })) }); toast(`Attendance saved for ${r.saved}`); route(); }); });
+    $('#nw', v).onclick = () => workerDlg();
+    $('#pr', v).onclick = () => dlg(`${head('Run payroll', 'We add up attendance, piece work and unpaid advances. You can add bonuses and deductions before paying.')}<form class="stack" id="rf"><div class="grid2"><label class="f">From<input type="date" name="from" required value="${today().slice(0, 8)}01"></label><label class="f">To<input type="date" name="to" required value="${today()}"></label></div><p class="err" id="re"></p><button class="btn">Work out pay</button></form>`, (d) => {
+      $('#rf', d).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { const r = await api('/farm/payroll', formData(e.target)); d.close(); location.hash = '#/farm/pay/' + r.id; }, $('#re', d)); });
+    });
+  }
+  function workerDlg(w = {}) {
+    dlg(`${head(w.id ? 'Edit worker' : 'Add a worker')}<form class="stack" id="wf"><div class="grid2"><label class="f">Name<input name="name" required value="${esc(w.name || '')}"></label><label class="f">Phone<input name="phone" type="tel" value="${esc(w.phone || '')}"></label></div>
+      <div class="grid3"><label class="f">Job<input name="role" value="${esc(w.role || '')}" placeholder="e.g. General hand, supervisor"></label><label class="f">Paid<select name="pay_type">${opt([['daily', 'Per day'], ['monthly', 'Per month'], ['piece', 'Per unit (piece work)']], w.pay_type)}</select></label><label class="f">Rate (${esc(LK.currency)})<input name="rate" type="number" step="any" min="0" value="${esc(w.rate ?? '')}" required></label></div>
+      <div class="grid2"><label class="f">Started<input type="date" name="start" value="${esc(w.start || today())}"></label><label class="f">Notes<input name="notes" value="${esc(w.notes || '')}"></label></div>
+      <p class="err" id="we"></p><div class="row"><button class="btn">Save</button>${w.id ? `<button class="btn ghost" type="button" id="lv">${w.status === 'active' ? 'Mark as left' : 'Mark as working again'}</button>` : ''}</div></form>`, (d) => {
+      $('#wf', d).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); if (w.id) x.id = w.id; busy(e.submitter, async () => { await api('/farm/workers', x); d.close(); toast('Saved'); route(); }, $('#we', d)); });
+      if ($('#lv', d)) $('#lv', d).onclick = (e) => busy(e.currentTarget, async () => { await api('/farm/workers', { id: w.id, name: w.name, status: w.status === 'active' ? 'left' : 'active' }); d.close(); route(); });
+    });
+  }
+  async function farmWorker(v, id) {
+    const d = await api('/farm/workers/' + id), w = d.item;
+    v.innerHTML = page(`<p style="margin-bottom:12px"><a href="#/farm/workers">← Workers</a></p>` + ph(esc(w.name), `${esc(w.role || '')} · ${w.pay_type === 'daily' ? money(w.rate) + ' per day' : w.pay_type === 'piece' ? money(w.rate) + ' per unit' : money(w.rate) + ' per month'} · since ${fdate(w.start)}`, `<button class="btn ghost" id="ed">Edit</button><button class="btn ghost" id="av">Give advance</button>${w.phone ? `<a class="btn ghost" href="${wa(w.phone)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}`) + `
+      <div class="grid2"><div class="card stack"><h2>Attendance</h2>${d.attendance.length ? `<div class="tw"><table class="t"><tbody>${d.attendance.map((a) => `<tr><td>${fdate(a.date)}</td><td>${pill(a.status, a.status === 'present' ? 'green' : a.status === 'absent' ? 'red' : 'amber')}</td><td>${a.piece_qty ? qn(a.piece_qty) + ' units' : ''}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted small">No attendance yet.</p>'}</div>
+      <div class="stack"><div class="card stack"><h2>Advances</h2>${d.advances.map((a) => `<p class="between small"><span>${fdate(a.date)} ${esc(a.note || '')}</span><b>${money(a.amount)} ${a.run_id ? pill('Repaid', 'green') : ''}</b></p>`).join('') || '<p class="muted small">None.</p>'}</div>
+      <div class="card stack"><h2>Payslips</h2>${d.pay.map((p) => `<a class="between small" href="#/farm/pay/${p.run_id}"><span>${fdate(p.period_from)} – ${fdate(p.period_to)}</span><b>${money(p.net)}</b></a>`).join('') || '<p class="muted small">None yet.</p>'}</div>
+      <div class="card stack"><h2>Open tasks</h2>${d.tasks.map((t) => `<p class="small">${esc(t.title)} · ${fdate(t.due)}</p>`).join('') || '<p class="muted small">None.</p>'}</div></div></div>`);
+    $('#ed', v).onclick = () => workerDlg(w);
+    $('#av', v).onclick = () => dlg(`${head('Advance to ' + esc(w.name), 'It comes off their next pay automatically.')}<form class="stack" id="vf"><div class="grid2"><label class="f">Amount<input name="amount" type="number" step="any" min="0" required></label><label class="f">Date<input type="date" name="date" value="${today()}"></label></div><label class="f">Note<input name="note"></label><p class="err" id="ve"></p><button class="btn">Save advance</button></form>`, (dd) => {
+      $('#vf', dd).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); x.worker_id = w.id; busy(e.submitter, async () => { await api('/farm/advances', x); dd.close(); toast('Advance recorded'); route(); }, $('#ve', dd)); });
+    });
+  }
+  async function farmPay(v, id) {
+    const d = await api('/farm/payroll/' + id), r = d.item, paid = r.status === 'paid';
+    v.innerHTML = page(`<p style="margin-bottom:12px" class="noprint"><a href="#/farm/workers">← Workers & pay</a></p>` + ph(`Pay run ${fdate(r.period_from)} – ${fdate(r.period_to)}`, `${esc(d.farm.name)} · ${paid ? 'Paid ' + fdate((r.paid_at || '').slice(0, 10)) : 'Draft: check, adjust, then pay'}`, `<button class="btn ghost noprint" id="pt">${ic('download', 16)} Print payslips</button>`) + `
+      <form id="pf" class="tw"><table class="t"><thead><tr><th>Worker</th><th>Days / units</th><th>Gross</th><th>Bonus</th><th>Advances</th><th>Deductions</th><th>Net pay</th></tr></thead><tbody>${d.items.map((i) => `<tr><td><b>${esc(i.name)}</b><br><span class="muted tiny">${esc(i.role || '')}</span></td><td>${i.pay_type === 'piece' ? qn(i.units) + ' units' : i.pay_type === 'monthly' ? 'Monthly' : qn(i.days) + ' days'}</td><td>${money(i.gross)}</td>
+        <td>${paid ? money(i.bonus) : `<input name="b${i.id}" type="number" step="any" min="0" value="${i.bonus}" style="width:90px">`}</td><td>${money(i.advances)}</td><td>${paid ? money(i.deductions) : `<input name="d${i.id}" type="number" step="any" min="0" value="${i.deductions}" style="width:90px">`}</td><td><b>${money(i.net)}</b></td></tr>`).join('')}
+        <tr><td colspan="6"><b>Total to pay out now</b></td><td><b>${money(d.items.reduce((a, i) => a + i.net, 0))}</b></td></tr></tbody></table></form>
+      ${paid ? '' : `<div class="row noprint" style="margin-top:14px"><button class="btn ghost" id="sv">Save changes</button><button class="btn" id="pd">${ic('check', 16)} Mark as paid</button><button class="btn ghost" id="dl">Delete draft</button></div><p class="hint noprint">Marking as paid records the wages in your farm accounts and clears the advances.</p>`}
+      <div class="slips">${d.items.map((i) => `<div class="slip"><b>${esc(d.farm.name)} · Payslip</b><p>${esc(i.name)}${i.role ? ', ' + esc(i.role) : ''}<br>Period ${fdate(r.period_from)} – ${fdate(r.period_to)}</p><p>${i.pay_type === 'piece' ? qn(i.units) + ' units × ' + money(i.rate) : i.pay_type === 'monthly' ? 'Monthly ' + money(i.rate) : qn(i.days) + ' days × ' + money(i.rate)} = ${money(i.gross)}<br>Bonus ${money(i.bonus)} · Advances −${money(i.advances)} · Deductions −${money(i.deductions)}</p><p><b>Net pay ${money(i.net)}</b></p><p class="tiny">Received by: ____________________</p></div>`).join('')}</div>`);
+    const items = () => { const fd = formData($('#pf', v)); return d.items.map((i) => ({ id: i.id, bonus: fd['b' + i.id], deductions: fd['d' + i.id] })); };
+    $('#pt', v).onclick = () => window.print();
+    if (!paid) {
+      $('#sv', v).onclick = (e) => busy(e.currentTarget, async () => { await api('/farm/payroll', { id: r.id, items: items() }); toast('Saved'); route(); });
+      $('#pd', v).onclick = (e) => busy(e.currentTarget, async () => { await api('/farm/payroll', { id: r.id, items: items() }); const x = await api('/farm/payroll', { id: r.id, pay: 1 }); toast(`Paid: ${money(x.total)} recorded under Labour`); route(); });
+      $('#dl', v).onclick = (e) => busy(e.currentTarget, async () => { await api('/farm/payroll', { id: r.id, delete: 1 }); location.hash = '#/farm/workers'; });
+    }
+  }
+  function stockDlg(items, pre = {}) {
+    api('/farm/plantings').then((p) => dlg(`${head({ purchase: 'Stock in', use: 'Use on a crop', sale: 'Sold (outside FreeFarm)', loss: 'Loss / spoilt' }[pre.kind] || 'Stock movement')}<form class="stack" id="sf">
+      <div class="grid2"><label class="f">Item<select name="item_id" required>${opt(items.map((i) => [i.id, `${i.name} (${qn(i.qty)} ${i.unit})`]), pre.item_id, 'Choose…')}</select></label><label class="f">What happened<select name="kind">${opt([['purchase', 'Bought / received'], ['use', 'Used on a crop or animals'], ['sale', 'Sold'], ['loss', 'Lost / spoilt'], ['adjust', 'Count correction (+/−)']], pre.kind)}</select></label></div>
+      <div class="grid3"><label class="f">Quantity<input name="qty" type="number" step="any" required></label><label class="f" id="cst">Total cost<input name="cost" type="number" step="any" min="0"></label><label class="f" id="amt">Sold for<input name="amount" type="number" step="any" min="0"></label><label class="f">Date<input type="date" name="date" value="${today()}"></label></div>
+      <label class="f" id="pl">Crop / batch<select name="planting_id">${opt(p.items.map((x) => [x.id, x.crop + (x.variety ? ' · ' + x.variety : '')]), pre.planting_id, 'None')}</select></label>
+      <label class="f">Note<input name="note"></label><p class="err" id="se"></p><button class="btn">Save</button></form>`, (d) => {
+      const f = $('#sf', d), k = () => { const x = f.elements.kind.value; $('#cst', f).hidden = x !== 'purchase'; $('#amt', f).hidden = x !== 'sale'; $('#pl', f).hidden = !['use', 'sale'].includes(x); };
+      f.elements.kind.onchange = k; k();
+      f.addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/farm/stock', formData(f)); d.close(); toast('Store updated'); route(); }, $('#se', d)); });
+    }));
+  }
+  async function farmStore(v) {
+    const d = await api('/farm/inventory');
+    const val = d.items.reduce((a, i) => a + i.value, 0);
+    v.innerHTML = page(ph('Store', `Seed, fertiliser, chemicals, feed, fuel and harvested produce. Stock value about ${money(val)}.`, `<button class="btn" id="ni">${ic('plus', 16)} New item</button><button class="btn ghost" id="mv">Stock in / out</button>`) + ftabs('store') + `
+      ${d.items.filter((i) => i.low).length ? `<div class="banner warn" style="margin-bottom:12px">${ic('box')}<span style="flex:1">${d.items.filter((i) => i.low).map((i) => esc(i.name)).join(', ')} running low.</span><a class="btn sm" href="#/market?category=Farm%20inputs">Inputs store</a></div>` : ''}
+      ${d.items.length ? `<div class="tw"><table class="t"><thead><tr><th>Item</th><th>In stock</th><th>Reorder at</th><th>Unit cost</th><th>Value</th><th></th></tr></thead><tbody>${d.items.map((i) => `<tr><td><b>${esc(i.name)}</b><br><span class="muted tiny">${esc(i.category)}${i.withholding_days ? ' · withholding ' + i.withholding_days + ' days' : ''}</span></td><td style="${i.low ? 'color:var(--red);font-weight:700' : ''}">${qn(i.qty)} ${esc(i.unit)}</td><td>${i.reorder != null ? qn(i.reorder) : '—'}</td><td>${i.unit_cost ? money(i.unit_cost) : '—'}</td><td>${money(i.value)}</td><td><div class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn ghost sm" data-in="${i.id}">+ In</button><button class="btn ghost sm" data-out="${i.id}">− Use</button><button class="link" data-ed="${i.id}">Edit</button></div></td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">Your store is empty. Add what you have so FreeFarm can warn you before you run out.</p>'}
+      <div class="card stack" style="margin-top:16px"><div class="between"><h2>Recent movements</h2><a class="btn ghost sm" href="/api/farm/export/stock">${ic('download', 15)} CSV</a></div>${d.moves.length ? `<div class="tw"><table class="t"><tbody>${d.moves.map((m) => `<tr><td>${fdate(m.date)}</td><td>${esc(m.name)}</td><td>${esc(m.kind)}</td><td style="color:${m.qty < 0 ? 'var(--red)' : 'var(--green)'}">${m.qty > 0 ? '+' : ''}${qn(m.qty)} ${esc(m.unit)}</td><td class="small">${m.crop ? esc(m.crop) : ''} ${esc(m.note || '')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted small">No movements yet.</p>'}</div>`);
+    const itemDlg = (i = {}) => dlg(`${head(i.id ? 'Edit item' : 'New store item')}<form class="stack" id="if"><div class="grid2"><label class="f">Name<input name="name" required value="${esc(i.name || '')}" placeholder="e.g. Compound D, Mancozeb, Broiler starter"></label><label class="f">Type<select name="category">${opt(d.categories, i.category || 'Fertiliser')}</select></label></div>
+      <div class="grid3"><label class="f">Unit<input name="unit" value="${esc(i.unit || 'kg')}" placeholder="kg, 50kg bag, litre"></label><label class="f">Warn me at<input name="reorder" type="number" step="any" min="0" value="${esc(i.reorder ?? '')}"></label><label class="f">Withholding days<input name="withholding_days" type="number" min="0" value="${esc(i.withholding_days ?? '')}"><span class="hint">For chemicals: days before harvest</span></label></div>
+      ${i.id ? '' : '<div class="grid2"><label class="f">Quantity now<input name="qty" type="number" step="any" min="0"></label><label class="f">What it cost (total)<input name="cost" type="number" step="any" min="0"></label></div><label class="check"><input type="checkbox" name="book"> Record that cost as an expense now</label>'}
+      <p class="err" id="ie"></p><div class="row"><button class="btn">Save</button>${i.id ? '<button class="btn ghost" type="button" id="rm">Remove</button>' : ''}</div></form>`, (dd) => {
+      $('#if', dd).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); x.book = !!x.book; if (i.id) x.id = i.id; busy(e.submitter, async () => { await api('/farm/inventory', x); dd.close(); toast('Saved'); route(); }, $('#ie', dd)); });
+      if ($('#rm', dd)) $('#rm', dd).onclick = (e) => busy(e.currentTarget, async () => { await api('/farm/inventory', { id: i.id, name: i.name, remove: 1 }); dd.close(); route(); });
+    });
+    $('#ni', v).onclick = () => itemDlg();
+    $('#mv', v).onclick = () => d.items.length ? stockDlg(d.items, { kind: 'purchase' }) : toast('Add an item first', true);
+    $$('[data-in]', v).forEach((b) => b.onclick = () => stockDlg(d.items, { kind: 'purchase', item_id: Number(b.dataset.in) }));
+    $$('[data-out]', v).forEach((b) => b.onclick = () => stockDlg(d.items, { kind: 'use', item_id: Number(b.dataset.out) }));
+    $$('[data-ed]', v).forEach((b) => b.onclick = () => itemDlg(d.items.find((i) => String(i.id) === b.dataset.ed)));
+  }
+  async function farmMoney(v, id, Q) {
+    const from = Q.get('from') || today().slice(0, 5) + '01-01', to = Q.get('to') || today();
+    const d = await api(`/farm/accounts?from=${from}&to=${to}`);
+    const inc = d.months.reduce((a, m) => a + m.income, 0), exp = d.months.reduce((a, m) => a + m.expense, 0), mx = Math.max(1, ...d.months.map((m) => Math.max(m.income, m.expense)));
+    v.innerHTML = page(ph('Money', 'Your farm books. FreeFarm sales, wages and stock purchases are recorded automatically.', `<button class="btn" id="ne">${ic('plus', 16)} Add income or expense</button><a class="btn ghost" href="/api/farm/export/accounts">${ic('download', 16)} CSV for your accountant</a>`) + ftabs('money') + `
+      <div class="card row" style="margin-bottom:14px"><label class="f">From<input type="date" id="fr" value="${from}"></label><label class="f">To<input type="date" id="to" value="${to}"></label></div>
+      <div class="kpis"><div class="kpi"><span>Money in</span><b style="color:var(--green)">${money(inc)}</b></div><div class="kpi"><span>Money out</span><b style="color:var(--red)">${money(exp)}</b></div><div class="kpi ${inc - exp < 0 ? 'hot' : ''}"><span>Profit</span><b>${money(inc - exp)}</b></div><div class="kpi"><span>Stock on hand</span><b>${money(d.stock_value)}</b><small>${d.wages_due ? 'Wages due ' + money(d.wages_due) : 'No wages waiting'}</small></div></div>
+      <div class="grid2" style="margin-top:16px"><div class="card stack"><h2>By month</h2>${d.months.length ? `<div class="bars">${d.months.map((m) => `<div><span class="muted small">${MON[Number(m.m.slice(5)) - 1]}</span><i class="in" style="width:${(m.income / mx) * 100}%" title="In ${money(m.income)}"></i><i class="out" style="width:${(m.expense / mx) * 100}%" title="Out ${money(m.expense)}"></i><small>${money(m.income - m.expense)}</small></div>`).join('')}</div><p class="tiny muted"><span style="color:var(--leaf)">■</span> in <span style="color:var(--red)">■</span> out</p>` : '<p class="muted small">No entries yet.</p>'}</div>
+      <div class="card stack"><h2>Where the money goes</h2>${d.cats.length ? d.cats.map((c) => `<p class="between small"><span>${c.kind === 'income' ? '⬆' : '⬇'} ${esc(c.category)}</span><b style="color:${c.kind === 'income' ? 'var(--green)' : 'var(--red)'}">${money(c.total)}</b></p>`).join('') : '<p class="muted small">Nothing yet.</p>'}</div></div>
+      <div class="card stack" style="margin-top:16px"><h2>Entries</h2>${d.items.length ? `<div class="tw"><table class="t"><thead><tr><th>Date</th><th>What</th><th>Crop</th><th>Amount</th><th></th></tr></thead><tbody>${d.items.map((a) => `<tr><td>${fdate(a.date)}</td><td><b>${esc(a.category)}</b><br><span class="muted tiny">${esc(a.note || '')} ${esc(a.ref || '')}${a.auto_ref ? ' · automatic' : ''}</span></td><td>${a.crop ? esc(a.crop) : ''}</td><td style="color:${a.kind === 'income' ? 'var(--green)' : 'var(--red)'};font-weight:700">${a.kind === 'income' ? '+' : '−'}${money(a.amount)}</td><td>${a.auto_ref ? '' : `<button class="link" data-del="${a.id}">Delete</button>`}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted small">No entries in these dates.</p>'}</div>`);
+    const go = () => { location.hash = `#/farm/money?from=${$('#fr', v).value}&to=${$('#to', v).value}`; };
+    $('#fr', v).onchange = go; $('#to', v).onchange = go;
+    $$('[data-del]', v).forEach((b) => b.onclick = () => busy(b, async () => { await api('/farm/accounts', { id: Number(b.dataset.del), delete: 1 }); route(); }));
+    $('#ne', v).onclick = async () => { const p = await api('/farm/plantings?status=all'); dlg(`${head('Add income or expense')}<form class="stack" id="af"><div class="radios" style="grid-template-columns:1fr 1fr"><label class="radio"><input type="radio" name="kind" value="expense" checked><span><b>Money out</b></span></label><label class="radio"><input type="radio" name="kind" value="income"><span><b>Money in</b></span></label></div>
+      <div class="grid3"><label class="f">Category<select name="category" id="ac"></select></label><label class="f">Amount<input name="amount" type="number" step="any" min="0" required></label><label class="f">Date<input type="date" name="date" value="${today()}"></label></div>
+      <label class="f">For which crop / batch (optional)<select name="planting_id">${opt(p.items.map((x) => [x.id, x.crop + ' · ' + fdate(x.planted)]), '', 'Whole farm')}</select></label><label class="f">Note<input name="note" placeholder="e.g. Diesel for pump, tractor hire"></label><p class="err" id="ae"></p><button class="btn">Save</button></form>`, (dd) => {
+      const f = $('#af', dd), fill = () => { $('#ac', f).innerHTML = opt(d.categories[f.elements.kind.value], ''); };
+      f.addEventListener('change', (e) => { if (e.target.name === 'kind') fill(); }); fill();
+      f.addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/farm/accounts', formData(f)); dd.close(); toast('Saved'); route(); }, $('#ae', dd)); });
+    }); };
+  }
+  async function farmWeather(v, id, Q) {
+    const d = await api('/farm/weather' + (Q.get('refresh') ? '?refresh=1' : ''));
+    v.innerHTML = page(ph('Weather & climate', d.at ? `For your farm location · updated ${ago(d.at)} · <a href="#/farm/weather?refresh=1">refresh</a>` : '', '') + ftabs('weather') + (!d.located ? `<div class="banner warn">${ic('pin')}<span>Set your farm location to get weather. <a href="#/farm/setup">Farm details</a></span></div>` : !d.ok ? `<div class="banner warn">${ic('alert')}<span>Weather is not available right now. Try again later.</span></div>` : `
+      ${d.alerts.map((a) => `<div class="banner ${lvl(a.level)}" style="margin-bottom:10px">${ic('alert')}<span><b>${esc(a.title)}.</b> ${esc(a.text)}</span></div>`).join('') || `<div class="banner ok" style="margin-bottom:10px">${ic('check')}<span>No weather warnings or disease risks for your crops right now.</span></div>`}
+      <div class="card stack"><h2>Next 7 days</h2><div class="wx wide">${d.next.map((x) => `<div><small>${x.date === today() ? 'Today' : new Date(x.date + 'T00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })}</small><span>${WMO(x.code)}</span><b>${Math.round(x.tmax)}°</b><small>${Math.round(x.tmin)}°</small><small>💧 ${Math.round(x.rain)} mm${x.pop != null ? ' · ' + x.pop + '%' : ''}</small><small>💨 ${Math.round(x.wind)}</small></div>`).join('')}</div></div>
+      <div class="grid2" style="margin-top:16px"><div class="card stack"><h2>Advice</h2>${d.advice.map((a) => `<p>• ${esc(a)}</p>`).join('')}</div>
+      <div class="card stack"><h2>Last 14 days</h2><p class="small">Rain: <b>${Math.round(d.past.reduce((a, x) => a + x.rain, 0))} mm</b> · Hottest ${Math.round(Math.max(...d.past.map((x) => x.tmax)))}°C · Coldest ${Math.round(Math.min(...d.past.map((x) => x.tmin)))}°C</p><div class="rainbars">${d.past.map((x) => `<i style="height:${Math.min(100, x.rain * 3)}%" title="${x.date}: ${Math.round(x.rain)} mm"></i>`).join('')}</div><p class="tiny muted">Daily rain, oldest on the left. Weather data: Open-Meteo.</p></div></div>
+      <p class="hint" style="margin-top:12px">Disease and pest risks are worked out from temperature, humidity and rain for the crops you are growing. They are early warnings: scout your crops to confirm.</p>`));
+  }
+  async function farmDoctor(v, id, Q) {
+    const [{ items }, p] = await Promise.all([api('/farm/scans'), api('/farm/plantings').catch(() => ({ items: [] }))]);
+    const pre = Q.get('planting') ? p.items.find((x) => String(x.id) === Q.get('planting')) : null;
+    v.innerHTML = page(ph('Plant doctor', 'Take a clear photo of the sick leaf, fruit, stem or animal sign. The AI tells you what it is likely to be and what to do.') + ftabs('doctor') + `
+      <div class="detail"><form class="card stack" id="sf"><label class="f">Crop<select name="planting" id="pl">${opt(p.items.map((x) => [x.id, x.crop + (x.variety ? ' · ' + x.variety : '')]), pre && pre.id, 'Other / not on my farm')}</select></label>
+        <label class="f" id="oc">Which crop<select name="crop">${cropOpts(pre ? pre.crop : '', 'Choose…')}</select></label>
+        <label class="f">Photo<input type="file" id="ph" accept="image/*" capture="environment" required></label><div id="pv"></div>
+        <label class="f">What have you noticed? (optional)<input name="notes" maxlength="300" placeholder="e.g. spots started after rain, spreading fast"></label>
+        <p class="err" id="se"></p><button class="btn">${ic('search', 16)} Check my plant</button><p class="hint">AI advice can be wrong. For serious or spreading problems, confirm with your extension officer (AGRITEX in Zimbabwe) or an agro-dealer. Always follow the product label.</p></form>
+      <div class="stack"><div class="card stack" id="res" hidden></div><div class="card stack"><h2>Past scans</h2>${items.length ? items.map((s) => `<details style="border-top:1px solid var(--line2);padding-top:8px"><summary><b>${emo(s.crop)} ${esc(s.crop)}: ${esc(s.problem)}</b> <span class="muted small">${ago(s.created_at)}</span></summary>${resultHTML(s.result, s.id)}</details>`).join('') : '<p class="muted small">No scans yet.</p>'}</div></div></div>`);
+    let photo;
+    const sync = () => { $('#oc', v).hidden = !!$('#pl', v).value; };
+    $('#pl', v).onchange = sync; sync();
+    $('#ph', v).onchange = async (e) => { try { photo = await resizeImage(e.target.files[0], 1000); $('#pv', v).innerHTML = `<img src="${photo}" alt="" style="max-height:200px;border-radius:12px">`; } catch (er) { toast(er.message, true); } };
+    $('#sf', v).addEventListener('submit', (e) => {
+      e.preventDefault(); if (!photo) { $('#se', v).textContent = 'Add a photo first.'; return; }
+      const x = formData(e.target), pl = p.items.find((y) => String(y.id) === x.planting);
+      busy(e.submitter, async () => {
+        e.submitter.textContent = 'Checking… (about 10 seconds)';
+        try {
+          const r = await api('/farm/scan', { photo, planting_id: pl ? pl.id : null, crop: pl ? pl.crop : x.crop, notes: x.notes });
+          const box = $('#res', v); box.hidden = false; box.innerHTML = `<h2>${r.result.healthy ? '✅' : '🩺'} ${esc(r.result.problem)}</h2>` + resultHTML(r.result, r.id) + (pl && !r.result.healthy ? '<p class="small">A treatment task was added to your calendar.</p>' : '');
+          box.scrollIntoView({ behavior: 'smooth' });
+        } finally { e.submitter.innerHTML = `${ic('search', 16)} Check my plant`; }
+      }, $('#se', v));
+    });
+  }
+  function resultHTML(r, id) {
+    if (!r) return '';
+    const L = (t, x) => x ? `<p class="small"><b>${t}:</b> ${esc(x)}</p>` : '';
+    return `<div class="stack" style="gap:6px;margin-top:6px">${id ? `<img src="/api/farm/photo/scan/${id}" alt="" loading="lazy" style="max-height:150px;border-radius:10px">` : ''}<div class="row">${pill((r.confidence || 'low') + ' confidence', r.confidence === 'high' ? 'green' : 'amber')}${r.type && r.type !== 'none' ? pill(r.type, 'blue') : ''}${r.spread_risk ? pill('spread risk ' + r.spread_risk, r.spread_risk === 'high' ? 'red' : '') : ''}</div>
+      ${L('What we see', r.signs)}${L('Cause', r.cause)}${Array.isArray(r.act_now) && r.act_now.length ? `<p class="small"><b>Do now:</b></p><ol class="small" style="margin:0;padding-left:20px">${r.act_now.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}${L('Low-cost / organic option', r.organic)}${L('Product type', r.chemical)}${L('Prevent next time', r.prevent)}
+      ${r.see_expert ? `<div class="banner warn">${ic('alert')}<span>Show this to an extension officer or vet to confirm.</span></div>` : ''}${r.chemical || r.type === 'nutrient' ? `<a class="btn ghost sm" href="#/market?category=Farm%20inputs&q=${encodeURIComponent(r.type === 'nutrient' ? 'Fertiliser' : 'Crop chemicals')}">Find it in the inputs store</a>` : ''}</div>`;
+  }
+  async function farmAdvisor(v) {
+    const { items } = await api('/farm/ask');
+    v.innerHTML = page(ph('Farm advisor', 'Ask anything about your crops, animals, inputs, weather or selling. The advisor knows your farm, crops, stages, weather and store.') + ftabs('advisor') + `
+      <div class="card stack" style="max-width:860px"><div class="chat" id="ch" style="max-height:520px">${items.slice().reverse().map((x) => `<div class="msg me">${esc(x.q)}</div><div class="msg">${esc(x.a)}<small>FreeFarm advisor · ${ago(x.created_at)}</small></div>`).join('') || '<p class="muted small">Try: "When should I top-dress my maize?", "How do I stop tomato blight this week?", "What should I plant next season on Block A?", "How much feed do 500 broilers need?"</p>'}</div>
+        <form class="row" id="qf" style="flex-wrap:nowrap"><input name="q" maxlength="800" placeholder="Ask the advisor" aria-label="Question" autocomplete="off"><button class="btn" aria-label="Ask">${ic('send', 16)}</button></form><p class="err" id="qe"></p><p class="hint">AI advice is a guide. Follow product labels and check with your extension officer for serious problems.</p></div>`);
+    const ch = $('#ch', v); ch.scrollTop = ch.scrollHeight;
+    $('#qf', v).addEventListener('submit', (e) => { e.preventDefault(); const q = e.target.elements.q.value.trim(); if (!q) return; ch.insertAdjacentHTML('beforeend', `<div class="msg me">${esc(q)}</div><div class="msg" id="wait">Thinking…</div>`); ch.scrollTop = ch.scrollHeight; e.target.reset();
+      busy(e.submitter, async () => { try { const r = await api('/farm/ask', { q }); $('#wait', v).outerHTML = `<div class="msg">${esc(r.a)}<small>FreeFarm advisor · just now</small></div>`; ch.scrollTop = ch.scrollHeight; } catch (er) { $('#wait', v).remove(); throw er; } }, $('#qe', v)); });
+  }
+  async function farmSensors(v) {
+    const [d, fl] = await Promise.all([api('/farm/sensors'), api('/farm/fields')]);
+    const MET = { tmin: 'Lowest temperature (next 3 days)', tmax: 'Highest temperature (next 3 days)', rain: 'Rain in a day (mm)', wind: 'Wind (km/h)' };
+    v.innerHTML = page(ph('Automations', 'Rules that watch the weather and your sensors and act for you: send an alert or put a task on the calendar.', `<button class="btn" id="nr">${ic('plus', 16)} New rule</button>`) + ftabs('sensors') + `
+      <div class="card stack"><h2>Built in (always on)</h2><div class="list">${[['🌱', 'Crop calendars create planting, fertiliser, spray, vaccination and harvest tasks'], ['🌦️', 'Frost, heat, heavy rain, wind and dry-spell warnings for your location'], ['🦠', 'Disease and pest risk from the weather, and outbreak alerts from farms near you'], ['📦', 'Low-stock warnings and input suggestions before tasks need them'], ['🧪', 'Chemical withholding periods: warnings before you harvest or sell'], ['💵', 'Month-end payroll reminder and daily farm summary'], ['🛒', 'Reminder to list produce before harvest so it sells, not rots']].map(([e, t]) => `<div class="item" style="grid-template-columns:auto 1fr"><span class="em">${e}</span><span>${t}</span></div>`).join('')}</div></div>
+      <div class="card stack" style="margin-top:16px"><h2>Your rules</h2>${d.rules.length ? d.rules.map((r) => { const s = d.sensors.find((x) => 'sensor:' + x.id === r.source); return `<div class="between" style="border-top:1px solid var(--line2);padding-top:8px"><span><b>If ${r.source === 'weather' ? esc(MET[r.metric]) : esc(s ? s.name : 'sensor')} ${r.op === '<' ? 'below' : 'above'} ${qn(r.value)}</b><br><span class="muted small">then ${r.action === 'task' ? 'add a task' : 'alert me'}${r.message ? ': ' + esc(r.message) : ''}${r.last_fired ? ' · last ' + ago(r.last_fired) : ''}</span></span><span class="row" style="gap:6px"><button class="chip" data-tg="${r.id}" data-a="${r.active ? 0 : 1}" aria-pressed="${!!r.active}">${r.active ? 'On' : 'Off'}</button><button class="link" data-rm="${r.id}">Delete</button></span></div>`; }).join('') : '<p class="muted small">No rules yet. Example: "If the lowest temperature is below 3°C, alert me: cover the nursery".</p>'}</div>
+      <div class="card stack" style="margin-top:16px"><div class="between"><h2>Sensors</h2>${d.full ? `<button class="btn ghost sm" id="ns">${ic('plus', 15)} Add sensor</button>` : ''}</div>
+        ${d.full ? (d.sensors.length ? d.sensors.map((s) => `<div class="between" style="border-top:1px solid var(--line2);padding-top:8px"><span><b>${esc(s.name)}</b><br><span class="muted small">${esc(s.metric.replace('_', ' '))}${s.field ? ' · ' + esc(s.field) : ''} · ${s.last_at ? 'last ' + ago(s.last_at) : 'no data yet'}</span></span><b style="font:800 22px var(--display)">${s.last_value != null ? qn(s.last_value) + esc(s.unit || '') : '—'}</b></div>`).join('') : '<p class="muted small">Connect soil moisture probes, weather stations, tank level sensors or any device that can send data over the internet.</p>') +
+          `<details><summary class="small"><b>How to connect a device</b></summary><p class="small">Send readings to <code>https://${location.host}/api/farm/data</code> with method POST, header <code>content-type: application/json</code>, and body:</p><pre class="code">{ "key": "${esc(d.key || 'your-farm-key')}", "readings": [ { "sensor": "Block A soil", "value": 23.5 } ] }</pre><p class="small">Use the exact sensor name. Keep the key private. <button class="link" id="nk">Make a new key</button></p></details>` : upsell('Sensors (soil moisture, tank levels, weather stations) and sensor automations are part of Farm Manager.')}</div>`);
+    $('#nr', v).onclick = () => dlg(`${head('New automation rule')}<form class="stack" id="rf"><label class="f">Watch<select name="source">${opt([['weather', 'Weather forecast'], ...d.sensors.map((s) => ['sensor:' + s.id, 'Sensor: ' + s.name])], 'weather')}</select></label>
+      <div class="grid3"><label class="f" id="wm">Measure<select name="metric">${opt(Object.entries(MET), 'tmin')}</select></label><label class="f">When it is<select name="op">${opt([['<', 'below'], ['>', 'above']], '<')}</select></label><label class="f">Value<input name="value" type="number" step="any" required></label></div>
+      <label class="f">Then<select name="action">${opt([['alert', 'Send me an alert'], ['task', 'Add a task for today and alert me']], 'alert')}</select></label><label class="f">Message<input name="message" maxlength="160" placeholder="e.g. Frost coming: cover the nursery tonight"></label><p class="err" id="re"></p><button class="btn">Save rule</button></form>`, (dd) => {
+      const f = $('#rf', dd); f.elements.source.onchange = () => { $('#wm', f).hidden = f.elements.source.value !== 'weather'; };
+      f.addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/farm/rules', formData(f)); dd.close(); toast('Rule saved'); route(); }, $('#re', dd)); });
+    });
+    $$('[data-tg]', v).forEach((b) => b.onclick = () => busy(b, async () => { await api('/farm/rules', { id: Number(b.dataset.tg), active: b.dataset.a === '1' }); route(); }));
+    $$('[data-rm]', v).forEach((b) => b.onclick = () => busy(b, async () => { await api('/farm/rules', { id: Number(b.dataset.rm), remove: 1 }); route(); }));
+    if ($('#ns', v)) $('#ns', v).onclick = () => dlg(`${head('Add a sensor')}<form class="stack" id="sf"><label class="f">Name<input name="name" required placeholder="e.g. Block A soil"></label><div class="grid2"><label class="f">Measures<select name="metric">${opt([['soil_moisture', 'Soil moisture %'], ['soil_temp', 'Soil temperature'], ['air_temp', 'Air temperature'], ['humidity', 'Humidity'], ['water_level', 'Water level'], ['tank_level', 'Tank level %'], ['rain', 'Rain gauge'], ['other', 'Other']], 'soil_moisture')}</select></label><label class="f">Field<select name="field_id">${opt(fl.items.map((x) => [x.id, x.name]), '', 'None')}</select></label></div><p class="err" id="se"></p><button class="btn">Add</button></form>`, (dd) => {
+      $('#sf', dd).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/farm/sensors', formData(e.target)); dd.close(); route(); }, $('#se', dd)); });
+    });
+    if ($('#nk', v)) $('#nk', v).onclick = (e) => busy(e.currentTarget, async () => { await api('/farm/sensors', { new_key: 1 }); toast('New key made. Update your devices.'); route(); });
   }
 
   /* ---------- start ---------- */

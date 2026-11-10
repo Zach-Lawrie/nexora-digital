@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 const [PW, ADMIN, APW, ANAME] = process.argv.slice(2);
 const hash = (pw) => { const salt = crypto.randomBytes(16); return { h: crypto.pbkdf2Sync(pw, salt, 100000, 32, 'sha256').toString('hex'), s: salt.toString('hex') }; };
 const q = (v) => (v == null ? 'NULL' : typeof v === 'number' ? String(v) : `'${String(v).replace(/'/g, "''")}'`);
-const day = (n) => { const d = new Date(); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const day = (n) => { const d = new Date(Date.now() + 2 * 3600e3); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const out = [];
 const hp = hash(PW);
 let id = 100;

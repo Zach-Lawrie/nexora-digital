@@ -14,7 +14,7 @@ function client() {
   };
   return { get: (p) => call('GET', p), post: (p, b) => call('POST', p, b || {}) };
 }
-const day = (n) => { const d = new Date(); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const day = (n) => { const d = new Date(Date.now() + 2 * 3600e3); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const pub = client();
 let r = await pub.get('/lookups');
 ok(r.status === 200 && r.data.plans.farmer[1].price === 3 && r.data.fee === 0.3, 'lookups with plans and $0.30 fee');
