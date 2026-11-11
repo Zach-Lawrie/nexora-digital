@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Machine checks</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1b1f26">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap">
+<style>
+:root{--brand:#d9822b;--bg:#f4f5f7;--surface:#fff;--ink:#16181d;--muted:#5d6470;--line:#e2e5ea;--ok:#137a46;--ok-bg:#e1f3e9;--bad:#b42318;--bad-bg:#fde6e3;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--surface:#181b21;--ink:#e8eaee;--muted:#9aa2ae;--line:#2a2f38;--ok:#4ccb8a;--ok-bg:#143325;--bad:#ff7b6e;--bad-bg:#3d1714;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 "DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2{font-family:Poppins,"DM Sans",sans-serif;margin:0;line-height:1.2}
+.top{background:#1b1f26;color:#fff;padding:16px 16px 18px;border-bottom:4px solid var(--brand)}
+.top .co{display:flex;align-items:center;gap:10px;font-size:13px;opacity:.85}
+.top .co img{height:28px;background:#fff;border-radius:6px;padding:2px 4px}
+.top h1{font-size:24px;margin-top:10px}
+.top p{margin:2px 0 0;opacity:.8;font-size:14px}
+main{max-width:620px;margin:0 auto;padding:16px 16px 60px;display:grid;gap:14px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:5px}
+.tabs button{font:700 14px "DM Sans",sans-serif;padding:11px 6px;border-radius:10px;border:0;background:none;color:var(--muted);cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--brand);color:#fff}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px}
+label{display:grid;gap:5px;font-weight:600;font-size:14px}
+input,select,textarea{font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 12px;width:100%;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ck{display:grid;gap:8px;padding:12px 0;border-top:1px solid var(--line)}
+.ck:first-child{border-top:0;padding-top:0}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{font:700 15px "DM Sans",sans-serif;padding:12px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-height:48px}
+.seg button[aria-pressed="true"].ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.seg button[aria-pressed="true"].no{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn{font:700 16px "DM Sans",sans-serif;padding:14px;border-radius:12px;border:0;background:var(--brand);color:#fff;cursor:pointer;width:100%;min-height:52px}
+.btn:disabled{opacity:.6}
+.btn.bad{background:var(--bad)}
+.muted{color:var(--muted)}.small{font-size:13.5px}
+.err{color:var(--bad);font-weight:600;min-height:1em;margin:0}
+.done{background:var(--ok-bg);color:var(--ok);border-radius:14px;padding:16px;font-weight:700}
+.warn{background:var(--bad-bg);color:var(--bad);border-radius:14px;padding:12px 14px;font-weight:600}
+.res{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}.res div{border:1px solid var(--line);border-radius:10px;padding:8px 4px}.res span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.res b{font-size:20px}
+.check{display:flex;gap:8px;align-items:center;font-weight:600}.check input{width:22px;height:22px}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--brand) 55%,#fff);outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="top"><div class="co" id="co"></div><h1 id="tag">Machine checks</h1><p id="nm"></p></header>
+<main id="m"><p class="muted">Loading…</p></main>
+<script>
+(() => {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const tok = new URLSearchParams(location.search).get('t') || '';
+  const m = $('#m');
+  const store = { get: (k) => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* private mode */ } } };
+  const shiftNow = () => { const h = new Date().getHours(); return h >= 6 && h < 18 ? 'Day' : 'Night'; };
+  async function call(method, body) {
+    const r = await fetch('/api/public/' + (body && body.__oee ? 'oee' : 'tpm') + '/' + encodeURIComponent(tok), { method, headers: body ? { 'content-type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Something went wrong. Try again.');
+    return d;
+  }
+  function shrink(file) {
+    return new Promise((res, rej) => { const img = new Image(), u = URL.createObjectURL(file); img.onload = () => { const k = Math.min(1, 1200 / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); let q = 0.75, d = c.toDataURL('image/jpeg', q); while (d.length > 850000 && q > 0.35) { q -= 0.1; d = c.toDataURL('image/jpeg', q); } res(d); }; img.onerror = () => rej(new Error('That photo could not be read.')); img.src = u; });
+  }
+  let D, tab = 'check';
+  async function load() {
+    try { D = await call('GET'); } catch (e) { m.innerHTML = `<div class="warn">${esc(e.message)}</div><p class="muted small">Ask the maintenance team for a new QR code.</p>`; return; }
+    if (/^#[0-9a-f]{6}$/i.test(D.brand.color || '')) document.documentElement.style.setProperty('--brand', D.brand.color);
+    $('#co').innerHTML = `${D.brand.logo ? `<img src="${esc(D.brand.logo)}" alt="">` : ''}<span>${esc(D.brand.short || D.brand.company || '')} · operator checks</span>`;
+    $('#tag').textContent = D.asset.tag; $('#nm').textContent = `${D.asset.name} · ${D.asset.site}`;
+    document.title = D.asset.tag + ' · machine checks';
+    draw();
+  }
+  function who() {
+    return `<div class="grid2"><label>Your name<input name="operator" required autocomplete="name" value="${esc(store.get('tpm-op'))}"></label><label>Shift<select name="shift">${['Day', 'Night', 'Morning', 'Afternoon'].map((s) => `<option${s === shiftNow() ? ' selected' : ''}>${s}</option>`).join('')}</select></label></div>`;
+  }
+  function draw(msg) {
+    const done = D.today.length;
+    m.innerHTML = `<div class="tabs" role="group" aria-label="What do you want to do?">${[['check', 'Daily check'], ['fault', 'Report fault'], ['oee', 'Production']].map(([k, l]) => `<button type="button" data-t="${k}" aria-pressed="${k === tab}">${l}</button>`).join('')}</div>
+      ${msg || ''}
+      ${tab === 'check' ? `${done ? `<p class="small muted">Checked ${done} time${done > 1 ? 's' : ''} today (last by ${esc(D.today[0].operator)}).</p>` : ''}
+        <form class="card" id="f">${who()}<div id="items">${D.items.map((i) => `<div class="ck" data-id="${esc(i.id)}"><b>${esc(i.item)}</b><div class="seg"><button type="button" class="ok" data-r="1" aria-pressed="false">OK</button><button type="button" class="no" data-r="0" aria-pressed="false">Problem</button></div><input class="note" placeholder="What is wrong?" hidden></div>`).join('')}</div>
+        <label>Hour meter reading <span class="muted small">(if the machine has one)</span><input name="hour_meter" type="number" inputmode="decimal" step="any" min="0" placeholder="${D.asset.run_hours != null ? 'Last: ' + D.asset.run_hours : ''}"></label>
+        <label class="check"><input type="checkbox" name="urgent"> A problem stops the machine or is unsafe</label>
+        <p class="err" id="e" role="alert"></p><button class="btn">Submit check</button></form>` : ''}
+      ${tab === 'fault' ? `<form class="card" id="f">${who()}<label>What is wrong?<textarea name="fault" rows="4" required placeholder="What you saw, heard or smelt, and when it started"></textarea></label><label>Photo <span class="muted small">(optional)</span><input type="file" name="photo" accept="image/*" capture="environment"></label><label class="check"><input type="checkbox" name="urgent"> Machine is stopped or unsafe</label><p class="err" id="e" role="alert"></p><button class="btn bad">Send fault to maintenance</button></form>
+        ${D.faults.length ? `<div class="card"><b>Faults already reported</b>${D.faults.map((f) => `<div class="small">${esc(f.number)} · ${esc(f.title)} <span class="muted">(${esc(f.status.replace('_', ' '))})</span></div>`).join('')}</div>` : ''}` : ''}
+      ${tab === 'oee' ? `<form class="card" id="f">${who()}<p class="small muted">Log the shift so the team can see availability, speed and quality (OEE).</p>
+        <div class="grid2"><label>Planned run time (min)<input name="planned_min" type="number" inputmode="numeric" min="1" required value="${esc(store.get('tpm-planned') || 480)}"></label><label>Stopped time (min)<input name="downtime_min" type="number" inputmode="numeric" min="0" value="0" required></label></div>
+        <div class="grid2"><label>Ideal speed (units / min)<input name="ideal_rate" type="number" inputmode="decimal" step="any" min="0" required value="${esc(store.get('tpm-rate'))}"></label><label>Units made<input name="total_units" type="number" inputmode="numeric" min="0" required></label></div>
+        <label>Good units (passed quality)<input name="good_units" type="number" inputmode="numeric" min="0" required></label><p class="err" id="e" role="alert"></p><button class="btn">Save production log</button></form>` : ''}`;
+    m.querySelectorAll('[data-t]').forEach((b) => b.onclick = () => { tab = b.dataset.t; draw(); });
+    m.querySelectorAll('.ck').forEach((el) => el.querySelectorAll('[data-r]').forEach((b) => b.onclick = () => { el.querySelectorAll('[data-r]').forEach((x) => x.setAttribute('aria-pressed', x === b)); el.dataset.v = b.dataset.r; const n = el.querySelector('.note'); n.hidden = b.dataset.r === '1'; if (!n.hidden) n.focus(); }));
+    const f = $('#f');
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault(); const btn = f.querySelector('.btn'), err = $('#e'); err.textContent = '';
+      const x = Object.fromEntries(new FormData(f).entries()); store.set('tpm-op', x.operator || '');
+      try {
+        btn.disabled = true;
+        let r;
+        if (tab === 'check') {
+          const rows = [...m.querySelectorAll('.ck')];
+          const miss = rows.filter((el) => el.dataset.v == null);
+          if (miss.length) { miss[0].scrollIntoView({ behavior: 'smooth', block: 'center' }); throw new Error(`Answer every check (${miss.length} left).`); }
+          r = await call('POST', { operator: x.operator, shift: x.shift, hour_meter: x.hour_meter, urgent: !!x.urgent, results: rows.map((el) => ({ id: el.dataset.id, ok: el.dataset.v === '1', note: el.querySelector('.note').value })) });
+          D.today.unshift({ operator: x.operator });
+          draw(r.fault ? `<div class="warn">Thank you. ${r.issues} problem${r.issues > 1 ? 's' : ''} sent to maintenance as job ${esc(r.fault)}.</div>` : '<div class="done">Thank you. All checks OK and saved.</div>');
+        } else if (tab === 'fault') {
+          const file = f.photo.files[0]; const photo = file ? await shrink(file) : undefined;
+          r = await call('POST', { operator: x.operator, shift: x.shift, fault: x.fault, urgent: !!x.urgent, photo, fault_only: true });
+          D.faults.unshift({ number: r.fault, title: x.fault.slice(0, 60), status: 'requested' });
+          draw(`<div class="done">Fault sent. Maintenance job ${esc(r.fault)} has been raised${x.urgent ? ' and marked urgent' : ''}.</div>`);
+        } else {
+          store.set('tpm-planned', x.planned_min); store.set('tpm-rate', x.ideal_rate);
+          r = await call('POST', { ...x, __oee: true });
+          draw(`<div class="done">Saved. OEE this shift: ${r.oee}%</div><div class="res"><div><span>Availability</span><b>${r.availability}%</b></div><div><span>Performance</span><b>${r.performance}%</b></div><div><span>Quality</span><b>${r.quality}%</b></div><div><span>OEE</span><b>${r.oee}%</b></div></div>`);
+        }
+        scrollTo(0, 0);
+      } catch (er) { err.textContent = er.message; btn.disabled = false; }
+    });
+  }
+  load();
+})();
+</script>
+</body>
+</html>

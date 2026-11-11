@@ -24,6 +24,7 @@ h1,h2,h3{font-family:Poppins,"DM Sans",sans-serif;margin:0;line-height:1.2}
 .co b{display:block;font:700 16px Poppins,sans-serif}
 .co span{display:block;color:var(--muted);font-size:11.5px}
 .ti{text-align:right}
+.cl{display:grid;justify-items:center;gap:3px;margin-left:auto;margin-right:12px}.cl img{max-height:44px;max-width:120px;object-fit:contain}.cl span{color:var(--muted);font-size:10.5px}
 .ti h1{font-size:20px;letter-spacing:.04em;text-transform:uppercase}
 .ti .no{font:700 15px ui-monospace,Menlo,monospace;color:var(--brand)}
 .ti span{display:block;color:var(--muted);font-size:11.5px}
@@ -101,7 +102,7 @@ tr.sec td{background:#fafbfc;font-weight:700;font-size:11.5px}
   const photo = (p) => `/api/photo/${p.id}${tk ? '?t=' + encodeURIComponent(tk) : ''}`;
   out.innerHTML = `<article class="page" id="doc">${r.draft ? '<div class="draft">DRAFT</div>' : ''}
     <header class="hd"><div class="co">${S.logo ? `<img src="${esc(S.logo)}" alt="" crossorigin="anonymous">` : ''}<div><b>${esc(S.company)}</b><span>${esc(S.address || '')}</span><span>${esc([S.phone, S.email, S.website].filter(Boolean).join(' · '))}</span></div></div>
-      <div class="ti"><h1>Job report</h1><div class="no">${esc(w.number)}</div><span>Report date ${fd(w.released_at || w.approved_at || new Date().toISOString())}</span>${w.client_ref ? `<span>Client ref. ${esc(w.client_ref)}</span>` : ''}</div></header>
+      ${w.client_logo ? `<div class="cl"><img src="${esc(w.client_logo)}" alt="${esc(w.client || '')} logo"><span>Prepared for ${esc(w.client || '')}</span></div>` : ''}<div class="ti"><h1>Job report</h1><div class="no">${esc(w.number)}</div><span>Report date ${fd(w.released_at || w.approved_at || new Date().toISOString())}</span>${w.client_ref ? `<span>Client ref. ${esc(w.client_ref)}</span>` : ''}</div></header>
     <h2 class="title">${esc(w.title)}</h2>
     <div class="chips"><span class="chip">${esc(w.discipline)}</span><span class="chip">${esc(w.type)}</span><span class="chip">Priority: ${esc(w.priority)}</span>${fails ? `<span class="chip" style="background:#fde6e3;color:#b42318">${fails} check${fails > 1 ? 's' : ''} failed</span>` : r.checklist.some((c) => !c.result) ? `<span class="chip">${r.checklist.filter((c) => !c.result).length} checks not done yet</span>` : '<span class="chip" style="background:#e1f3e9;color:#137a46">All checks passed or N/A</span>'}${(r.tests || []).length ? `<span class="chip">${r.tests.length} test result${r.tests.length > 1 ? 's' : ''} · ${r.tests.filter((x) => x.result === 'Fail').length} fail</span>` : ''}</div>
     <dl class="grid">
@@ -110,6 +111,7 @@ tr.sec td{background:#fafbfc;font-weight:700;font-size:11.5px}
       <div><dt>Work started</dt><dd>${fd(w.started_at) || '—'}</dd></div><div><dt>Work completed</dt><dd>${fd(w.completed_at) || '—'}</dd></div><div><dt>Hours on site</dt><dd>${hours} h</dd></div>
       <div style="grid-column:1/-1"><dt>Team</dt><dd>${esc(team || '—')}</dd></div>
     </dl>
+    ${w.fail_component || w.downtime_start ? `<section class="avoid"><h2>Failure and downtime</h2><dl class="grid">${w.fail_component ? `<div><dt>Component</dt><dd>${esc(w.fail_component)}</dd></div><div><dt>What happened</dt><dd>${esc(w.fail_mode || '—')}</dd></div><div><dt>Cause</dt><dd>${esc(w.fail_cause || '—')}</dd></div><div><dt>Action taken</dt><dd>${esc(w.fail_action || '—')}</dd></div>` : ''}${w.downtime_start ? `<div><dt>Machine stopped</dt><dd>${fd(w.downtime_start)} ${new Date(w.downtime_start).toTimeString().slice(0, 5)}</dd></div><div><dt>Back in service</dt><dd>${w.downtime_end ? fd(w.downtime_end) + ' ' + new Date(w.downtime_end).toTimeString().slice(0, 5) : '—'}</dd></div><div><dt>Downtime</dt><dd>${w.downtime_end ? (Math.round((new Date(w.downtime_end) - new Date(w.downtime_start)) / 360000) / 10) + ' h' : '—'}</dd></div>` : ''}</dl></section>` : ''}
     ${w.description ? `<section class="avoid"><h2>Job requested</h2><p class="text">${esc(w.description)}</p></section>` : ''}
     ${w.findings ? `<section class="avoid"><h2>What we found</h2><p class="text">${esc(w.findings)}</p></section>` : ''}
     ${w.work_done ? `<section class="avoid"><h2>Work done</h2><p class="text">${esc(w.work_done)}</p></section>` : ''}

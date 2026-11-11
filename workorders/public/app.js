@@ -14,6 +14,7 @@
     send: 'M22 2 11 13M22 2l-7 20-4-9-9-4z', share: 'M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6M8.6 13.5l6.8 4M15.4 6.5l-6.8 4',
     download: 'M12 3v12M7 10l5 5 5-5M5 21h14', printer: 'M6 9V2h12v7M6 18H4v-7h16v7h-2M6 14h12v8H6z', back: 'M15 18l-6-6 6-6', msg: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
     mega: 'M3 10v4h3l7 5V5L6 10zM16.5 8.5a5 5 0 0 1 0 7M19.5 5.5a9 9 0 0 1 0 13', pinf: 'M12 17v5M9 3h6l-1 6 4 4v2H6v-2l4-4z',
+    pulse: 'M22 12h-4l-3 9L9 3l-3 9H2', qr: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM18 18h3v3h-3zM14 20h2M20 14v2', flag: 'M4 22V4M4 4h13l-2 4 2 4H4', layers: 'M12 2 2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
     refresh: 'M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5', trash: 'M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15', phone: 'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z',
   };
   const ic = (n, s = 18) => `<svg class="i" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${P[n] || P.list}"/></svg>`;
@@ -41,7 +42,10 @@
     const opt = { method: method || (body ? 'POST' : 'GET'), credentials: 'same-origin', headers: {} };
     if (body) { opt.headers['content-type'] = 'application/json'; opt.body = JSON.stringify(body); }
     let r;
-    try { r = await fetch('/api' + path, opt); } catch (e) { throw new Error('No connection. Check your internet and try again.'); }
+    try { r = await fetch('/api' + path, opt); } catch (e) {
+      if (opt.method === 'POST' && QUEUEABLE.test(path) && 'indexedDB' in window) { await qAdd({ path, body, at: Date.now() }); offlineBadge(); toast('No signal: saved on this phone, will send when back online'); return { queued: true }; }
+      throw new Error('No connection. Check your internet and try again.');
+    }
     const data = await r.json().catch(() => ({}));
     if (r.status === 401 && ME) { ME = null; login(); }
     if (!r.ok) throw new Error(data.error || 'Something went wrong.');
@@ -98,10 +102,11 @@
 
   /* ---------- branding ---------- */
   function brand() {
-    document.documentElement.style.setProperty('--brand', /^#[0-9a-f]{6}$/i.test(SET.color || '') ? SET.color : '#d9822b');
-    document.title = (SET.short || 'Basa') + ' · Work orders';
+    const cb = SET.client_brand || {};
+    document.documentElement.style.setProperty('--brand', /^#[0-9a-f]{6}$/i.test(cb.color || '') ? cb.color : /^#[0-9a-f]{6}$/i.test(SET.color || '') ? SET.color : '#d9822b');
+    document.title = (cb.name || SET.short || 'Basa') + ' · Work orders';
   }
-  const logoHTML = (cls) => SET.logo ? `<img src="${esc(SET.logo)}" alt="${esc(SET.short || '')} logo" class="${cls || ''}">` : `<span class="mark">${esc(initials(SET.short || 'B'))}</span>`;
+  const logoHTML = (cls) => SET.client_brand && SET.client_brand.logo ? `<img src="${esc(SET.client_brand.logo)}" alt="${esc(SET.client_brand.name)} logo" class="${cls || ''}">` : SET.logo ? `<img src="${esc(SET.logo)}" alt="${esc(SET.short || '')} logo" class="${cls || ''}">` : `<span class="mark">${esc(initials(SET.short || 'B'))}</span>`;
 
   /* ---------- login & password ---------- */
   function login() {
@@ -131,26 +136,27 @@
     $('#pf').addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/me/password', formData(e.target)); ME.must_change = false; toast('Password saved'); await start(); }, $('#pe')); });
     $('#lo').onclick = logout;
   }
-  async function logout() { try { await api('/auth/logout', {}); } catch (e) { /* ignore */ } ME = null; location.hash = ''; login(); }
+  async function logout() { try { await api('/auth/logout', {}); } catch (e) { /* ignore */ } try { if (window.caches) await caches.delete('basa-api'); } catch (e) { /* ignore */ } ME = null; location.hash = ''; login(); }
 
   /* ---------- shell ---------- */
   function navItems() {
     const r = ME.role;
-    if (r === 'client') return [['#/', 'home', 'My jobs'], ['#/new', 'plus', 'Request work'], ['#/notices', 'mega', 'Notices'], ['#/register', 'shield', 'Tagged items'], ['#/assets', 'tag', 'Equipment'], ['#/account', 'user', 'Account']];
-    if (r === 'tech') return [['#/', 'home', 'My jobs'], ['#/jobs', 'list', 'Job history'], ['#/notices', 'mega', 'Notices'], ['#/register', 'shield', 'Test & tag'], ['#/account', 'user', 'Account']];
-    const n = [['#/', 'home', 'Dashboard'], ['#/jobs', 'list', 'Work orders'], ['#/board', 'board', 'Board'], ['#/new', 'plus', 'New work order'], ['#/notices', 'mega', 'Notice board'], ['#/assets', 'tag', 'Assets'], ['#/pm', 'cal', 'Maintenance plans'], ['#/register', 'shield', 'Test & tag register'], ['#/clients', 'building', 'Clients & sites'], ['#/reports', 'chart', 'Reports']];
+    if (r === 'client') return [['#/', 'home', 'My jobs'], ['#/new', 'plus', 'Request work'], ['#/notices', 'mega', 'Notices'], ['#/register', 'shield', 'Tagged items'], ['#/assets', 'tag', 'Equipment'], ['#/projects', 'layers', 'Projects'], ['#/account', 'user', 'Account']];
+    if (r === 'tech') return [['#/', 'home', 'My jobs'], ['#/jobs', 'list', 'Job history'], ['#/notices', 'mega', 'Notices'], ['#/labour', 'clock', 'My hours'], ['#/stores', 'box', 'Stores'], ['#/cm', 'pulse', 'Readings'], ['#/register', 'shield', 'Test & tag'], ['#/projects', 'layers', 'Projects'], ['#/account', 'user', 'Account']];
+    const n = [['#/', 'home', 'Dashboard'], ['#/jobs', 'list', 'Work orders'], ['#/board', 'board', 'Board'], ['#/new', 'plus', 'New work order'], ['#/notices', 'mega', 'Notice board'], ['#/assets', 'tag', 'Assets'], ['#/pm', 'cal', 'Maintenance plans'], ['#/stores', 'box', 'Stores & spares'], ['#/cm', 'pulse', 'Condition monitoring'], ['#/tpm', 'qr', 'TPM & OEE'], ['#/projects', 'layers', 'Projects'], ['#/register', 'shield', 'Test & tag register'], ['#/clients', 'building', 'Clients & sites'], ['#/analysis', 'chart', 'Analysis'], ['#/labour', 'clock', 'Labour'], ['#/reports', 'file', 'Reports & exports']];
     if (BOSS()) n.push(['#/users', 'users', 'People & logins'], ['#/settings', 'gear', 'Settings']);
     n.push(['#/account', 'user', 'My account']);
     return n;
   }
   function shell() {
     const items = navItems();
-    const tab = ME.role === 'client' ? [items[0], items[1], items[2], items[3], items[5]] : ME.role === 'tech' ? items : [items[0], items[1], items[3], items[4], ['#/more', 'gear', 'More']];
+    const pick = (hs) => hs.map((h) => items.find((x) => x[0] === h) || ['#/more', 'gear', 'More']);
+    const tab = ME.role === 'client' ? pick(['#/', '#/new', '#/notices', '#/projects', '#/account']) : ME.role === 'tech' ? pick(['#/', '#/jobs', '#/notices', '#/labour', '#/more']) : [items[0], items[1], items[3], items[4], ['#/more', 'gear', 'More']];
     document.body.innerHTML = `<div class="app">
       <aside class="side"><div class="brand">${logoHTML()}<div><b>${esc(SET.short || 'Basa')}</b><span>Work orders</span></div></div>
         <nav class="nav" aria-label="Main">${items.map(([h, i, l]) => `<a href="${h}">${ic(i)}<span>${l}</span>${h === '#/notices' ? '<em class="nb" hidden></em>' : ''}</a>`).join('')}</nav>
         <div class="me"><div class="who"><span class="av">${esc(initials(ME.name))}</span><div><b>${esc(ME.name)}</b><small>${ROLE[ME.role]}${ME.trade && ME.trade !== 'Multi' ? ' · ' + esc(ME.trade) : ''}</small></div></div>
-        <button id="so">${ic('out', 16)} Sign out</button><p class="credit">Basa by Nexora Digital</p></div></aside>
+        <button id="so">${ic('out', 16)} Sign out</button><p class="credit">${SET.client_brand ? 'Powered by ' + esc(SET.short || 'Basa') : 'Basa by Nexora Digital'}</p></div></aside>
       <div class="main"><header class="topbar"><div><div class="crumb">${esc(SET.short || 'Basa')} work orders</div><h1 id="ttl"></h1></div>
         <div class="row" style="position:relative"><button class="iconbtn" id="bell" aria-label="Notifications">${ic('bell')}<span class="dotn" id="bn" hidden></span></button>
         <button class="iconbtn mobile-only" id="so2" aria-label="Sign out">${ic('out')}</button><div class="menu" id="nm" hidden></div></div></header>
@@ -203,6 +209,7 @@
     const h = (location.hash || '#/').slice(1).split('?')[0];
     const parts = h.split('/').filter(Boolean);
     markNav();
+    $$('dialog[open]').forEach((d) => d.close());
     const v = $('#v'); if (!v) return;
     v.innerHTML = '<p class="loading">Loading…</p>';
     window.scrollTo(0, 0);
@@ -222,6 +229,12 @@
       else if (parts[0] === 'account') await account(v);
       else if (parts[0] === 'notices') await notices(v, parts[1] || 'board');
       else if (parts[0] === 'more') more(v);
+      else if (parts[0] === 'stores') await storesView(v, parts[2]);
+      else if (parts[0] === 'analysis') await analysis(v);
+      else if (parts[0] === 'labour') await labourView(v);
+      else if (parts[0] === 'cm') await cmView(v);
+      else if (parts[0] === 'tpm') await tpmView(v);
+      else if (parts[0] === 'projects') await projectsView(v, parts[1]);
       else v.innerHTML = '<p class="empty">Page not found.</p>';
     } catch (e) { v.innerHTML = `<div class="banner bad">${ic('alert')}<span>${esc(e.message)}</span></div>`; }
     if (!parts.length) pushNudge(v);
@@ -260,6 +273,8 @@
         <a class="kpi ${late.length ? 'alert' : ''}" href="#/jobs?s=late"><span>Overdue</span><b>${late.length}</b><small>Past the due date</small></a>
         <a class="kpi" href="#/jobs?s=completed"><span>To review</span><b>${by(['completed', 'reviewed']).length}</b><small>Submitted by technicians</small></a>
         ${d.tags_due ? `<a class="kpi alert" href="#/register"><span>Tagged items due</span><b>${d.tags_due}</b><small>Overdue or due in 30 days</small></a>` : ''}
+        ${d.cm_alarms ? `<a class="kpi alert" href="#/cm"><span>Condition alarms</span><b>${d.cm_alarms}</b><small>Machines past the alarm limit</small></a>` : ''}
+        ${d.low_parts ? `<a class="kpi alert" href="#/stores"><span>Low stock</span><b>${d.low_parts}</b><small>${d.open_prs} purchase request${d.open_prs === 1 ? '' : 's'} open</small></a>` : ''}
         <div class="kpi"><span>Hours this month</span><b>${Number(d.hours_month).toLocaleString()}</b><small>Logged by the team</small></div>
         <div class="kpi"><span>Work value this month</span><b>${money(d.value_month).replace(/\.00$/, '')}</b><small>Labour + materials, ex VAT</small></div>
       </div>
@@ -267,6 +282,7 @@
         ${act.length ? act.map(([l, list]) => `<div class="card"><div class="card-h"><h2>${l} <span class="muted">(${list.length})</span></h2></div>${jobList(list.slice(0, 6))}</div>`).join('') : `<div class="banner ok">${ic('check')}<span>Nothing is waiting for you right now.</span></div>`}
         <div class="card"><div class="card-h"><h2>Recently updated</h2><a class="link" href="#/jobs">All work orders</a></div>${jobList(W.slice(0, 5))}</div>
       </div><div class="stack">
+        <div class="card"><div class="card-h"><h2>On the clock now</h2><a class="link" href="#/labour">Labour</a></div>${(d.clocked_on || []).length ? d.clocked_on.map((c) => `<a class="between small" href="#/job/${c.wo_id}" style="padding:6px 0;border-top:1px solid var(--line2);text-decoration:none;color:inherit"><span><b>${esc(c.name)}</b> · ${esc((LK.clock_kinds || {})[c.kind] || c.kind)}</span><span class="muted">${esc(c.number)} · since ${hhmm(c.start_at)}</span></a>`).join('') : '<p class="muted small">Nobody is clocked on.</p>'}</div>
         <div class="card"><div class="card-h"><h2>Technician workload</h2></div><div class="workload">${d.workload.map((x) => `<div class="wl"><span><b>${esc(x.name)}</b><br><span class="tiny muted">${esc(x.trade || '')} · ${x.hours} h this month</span></span><span class="bt"><i style="width:${(x.jobs / wmx) * 100}%"></i></span><b>${x.jobs}</b></div>`).join('') || '<p class="muted">No technicians yet.</p>'}</div></div>
         <div class="card"><div class="card-h"><h2>Active jobs by discipline</h2></div><div class="workload">${disc.map(([l, n]) => `<div class="wl"><span>${dp(l)}</span><span class="bt"><i style="width:${(n / mx) * 100}%"></i></span><b>${n}</b></div>`).join('')}</div></div>
         <div class="card"><div class="card-h"><h2>Planned maintenance</h2><a class="link" href="#/pm">Plans</a></div>${d.pm_due.length ? `<div class="tw" style="box-shadow:none"><table><tbody>${d.pm_due.map((p) => `<tr><td><b>${esc(p.title)}</b><br><span class="tiny muted">${esc(p.tag)} · every ${p.every_days} days</span></td><td class="n" style="${p.next_due < t ? 'color:var(--bad);font-weight:700' : ''}">${fdate(p.next_due)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No plans yet.</p>'}</div>
@@ -274,10 +290,12 @@
   }
   async function techHome(v) {
     setTitle('My jobs');
-    const d = await api('/dashboard'); const W = d.wo;
+    const d = await api('/dashboard'); const W = d.wo; await refreshLK();
+    const mc = LK.my_clock;
     const now = W.filter((w) => ['in_progress', 'assigned', 'on_hold'].includes(w.status)).sort((a, b) => (a.status === 'in_progress' ? -1 : 0) - (b.status === 'in_progress' ? -1 : 0) || String(a.scheduled_date || '9').localeCompare(String(b.scheduled_date || '9')));
     const sub = W.filter((w) => ['completed', 'reviewed'].includes(w.status));
     v.innerHTML = `<div><h2>Hi ${esc(ME.name.split(' ')[0])}</h2><p class="muted">${fdate(d.today)} · ${Number(d.hours_month)} hours logged this month</p></div>
+      ${mc ? `<a class="banner info" href="#/job/${mc.wo_id}" style="text-decoration:none">${ic('clock')}<span>You are on the clock: <b>${esc((LK.clock_kinds || {})[mc.kind] || mc.kind)}</b> on ${esc(mc.number)} since ${hhmm(mc.start_at)}. Tap to open the job.</span></a>` : ''}
       <div class="kpis"><div class="kpi"><span>To do</span><b>${now.length}</b></div><div class="kpi"><span>Waiting for review</span><b>${sub.length}</b></div></div>
       <div class="card"><div class="card-h"><h2>To do</h2></div>${jobList(now, 'No jobs assigned to you right now.')}</div>
       ${sub.length ? `<div class="card"><div class="card-h"><h2>Submitted, waiting for the foreman</h2></div>${jobList(sub)}</div>` : ''}
@@ -355,7 +373,9 @@
         <label class="f">Site<select name="site_id" id="si"></select></label>
         <label class="f">Equipment / asset <span class="hint">(optional)</span><select name="asset_id" id="as"></select></label>
       </div>
+      <label class="f" id="dtw" hidden>When did the machine stop?<input type="datetime-local" name="downtime_start" value="${toLocalInput(new Date().toISOString())}"><span class="hint">Downtime runs from here until the job records it back in service.</span></label>
       <label class="f">Describe the problem or the work<textarea name="description" rows="4" placeholder="What is happening, where, since when, any error codes, access or safety notes"></textarea></label>
+      ${isC || !(LK.projects || []).length ? '' : `<label class="f">Part of a project <span class="hint">(optional)</span><select name="project_id">${opt(LK.projects.map((p) => [p.id, p.number + ' · ' + p.name]), new URLSearchParams(location.hash.split('?')[1] || '').get('project') || '', 'Not part of a project')}</select></label>`}
       <div class="grid3"><label class="f">Needed by<input type="date" name="due_date"></label>${isC ? '<label class="f">Your order / reference no. <span class="hint">(optional)</span><input name="client_ref"></label>' : `<label class="f">Client order no. <span class="hint">(optional)</span><input name="client_ref"></label><label class="f">Quoted amount <span class="hint">(optional)</span><input name="quote" type="number" step="any" min="0"></label>`}</div>
       ${isC ? '' : `<fieldset class="card" style="box-shadow:none;background:var(--brand-soft);border-color:var(--brand-mid)"><legend class="small" style="font-weight:700;padding:0 6px">Assign now (optional)</legend><div class="grid3">
         <label class="f">Lead technician<select name="lead_id">${opt(techs.map((s) => [s.id, `${s.name} · ${s.trade || s.role} · ${s.active_jobs} active`]), '', 'Assign later')}</select></label>
@@ -368,9 +388,12 @@
     const fillSites = () => { const cid = isC ? ME.client_id : Number(cl.value); const s = LK.sites.filter((x) => x.client_id === cid); si.innerHTML = opt(s.map((x) => [x.id, x.name]), preSite ? preSite.id : '', s.length ? 'All sites / not sure' : 'No sites yet'); fillAssets(); };
     const fillAssets = () => { const ids = si.value ? [Number(si.value)] : LK.sites.filter((x) => x.client_id === (isC ? ME.client_id : Number(cl && cl.value))).map((x) => x.id); const a = LK.assets.filter((x) => ids.includes(x.site_id)); as.innerHTML = opt(a.map((x) => [x.id, `${x.tag} · ${x.name}`]), pre ? pre.id : '', a.length ? 'Not linked to equipment' : 'No equipment listed'); };
     if (cl) cl.onchange = fillSites; si.onchange = fillAssets; fillSites();
+    const ty = $('[name="type"]', v), dtw = $('#dtw', v); const syncT = () => { dtw.hidden = ty.value !== 'Breakdown'; }; ty.onchange = syncT; syncT();
+    const prj = new URLSearchParams(location.hash.split('?')[1] || '').get('project'); if (prj && cl) { const P2 = (LK.projects || []).find((x) => String(x.id) === prj); if (P2) { cl.value = P2.client_id; fillSites(); ty.value = 'Project work'; } }
     $('#nf', v).addEventListener('submit', (e) => {
       e.preventDefault();
       const d = formData(e.target);
+      if (d.type === 'Breakdown' && d.downtime_start) d.downtime_start = fromLocalInput(d.downtime_start); else delete d.downtime_start;
       busy(e.submitter, async () => { const r = await api('/wo', d); toast(isC ? 'Request sent' : 'Work order created: ' + r.wo.number); location.hash = '#/job/' + r.wo.id; }, $('#ne', v));
     });
   }
@@ -406,7 +429,8 @@
         if (['requested', 'open'].includes(st)) A.push(['assign', 'Assign technician', st === 'open' ? '' : 'ghost']);
         if (['assigned', 'in_progress', 'on_hold'].includes(st)) A.push(['assign', 'Reassign', 'ghost']);
         if (st === 'completed') A.push(['reviewed', 'Mark as reviewed', 'ok']);
-        if (BOSS() && ['completed', 'reviewed'].includes(st)) A.push(['approved', 'Approve job', 'ok']);
+        const ap = d.approval || {};
+        if (can.approve && ['completed', 'reviewed'].includes(st) && !(ap.separate && (st !== 'reviewed' || w.reviewed_by === ME.id))) A.push(['approved', 'Approve job', 'ok']);
         if (['completed', 'reviewed'].includes(st)) A.push(['sendback', 'Send back for rework', 'bad']);
         if (BOSS() && st === 'approved') A.push(['release', 'Send report to client', '']);
         if (BOSS() && st === 'sent') A.push(['share', 'Share report again', 'ghost']);
@@ -430,15 +454,17 @@
     if (st === 'on_hold') { const why = (d.activity || []).find((a) => /On hold/.test(a.text)); banner = `<div class="banner bad">${ic('pause')}<span>${esc(why ? why.text : 'On hold')}</span></div>`; }
     const sentBack = (d.activity || []).find((a) => a.kind === 'status');
     if (st === 'in_progress' && sentBack && /rework/.test(sentBack.text)) banner = `<div class="banner bad">${ic('alert')}<span>${esc(sentBack.text)} (${esc(sentBack.who)})</span></div>`;
+    if (SUP() && d.approval && d.approval.separate && st === 'reviewed' && w.reviewed_by === ME.id) banner = `<div class="banner info">${ic('users')}<span>You reviewed this job, so another manager must approve it. Review and approval are kept separate (Settings).</span></div>`;
     if (ME.role === 'client' && st === 'sent') banner = `<div class="banner info">${ic('file')}<span>Your report is ready. Read it, then sign off to confirm the work.</span></div>`;
     v.innerHTML = `<div class="jobhead"><a class="link" href="#/${ME.role === 'tech' || ME.role === 'client' ? '' : 'jobs'}">${ic('back', 14)} Back</a>
         <div class="between" style="align-items:flex-start"><div><span class="mono muted">${esc(w.number)}</span><h1>${esc(w.title)}</h1>
         <div class="row" style="margin-top:6px">${sp(st)}${pp(w.priority)}${dp(w.discipline)}<span class="pill">${esc(w.type)}</span></div></div></div>
         ${stepper(w)}${banner}
-        <div class="actions">${A.map(([k, l, c]) => `<button class="btn ${c}" data-a="${k}">${l}</button>`).join('')}</div></div>
+        <div class="actions">${A.map(([k, l, c]) => `<button class="btn ${c}" data-a="${k}">${l}</button>`).join('')}</div>${ME.role !== 'client' ? clockBox(d) : ''}</div>
       <nav class="tabs">${tabs.map(([k, l]) => `<a href="#/job/${w.id}/${k}" aria-current="${k === tab ? 'page' : 'false'}">${l}</a>`).join('')}</nav>
       <div id="tab"></div>`;
     $$('[data-a]', v).forEach((b) => b.onclick = () => action(b.dataset.a, d, b));
+    $$('[data-clk]', v).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/wo/${w.id}/clock`, b.dataset.clk === 'stop' ? { action: 'stop' } : { action: 'start', kind: b.dataset.clk }); toast(b.dataset.clk === 'stop' ? 'Clocked off' : 'Clocked on: ' + d.clock.kinds[b.dataset.clk]); job(v, id, tab); }));
     const T = $('#tab', v);
     const reload = () => job(v, id, tab);
     if (tab === 'details') tabDetails(T, d, can, reload);
@@ -460,6 +486,7 @@
         <label class="f">Recommendations<textarea name="recommendations" rows="3">${esc(w.recommendations || '')}</textarea></label>
         <div class="row"><button class="btn">Save notes</button><span class="muted small" id="ws"></span></div></form>`
       : (w.findings || w.work_done || w.recommendations) ? `<div class="card stack">${w.findings ? `<div><h3>What was found</h3><p class="textblock">${esc(w.findings)}</p></div>` : ''}${w.work_done ? `<div><h3>Work done</h3><p class="textblock">${esc(w.work_done)}</p></div>` : ''}${w.recommendations ? `<div><h3>Recommendations</h3><p class="textblock">${esc(w.recommendations)}</p></div>` : ''}</div>` : ''}
+      ${ME.role !== 'client' ? failCard(d, can) : ''}
       ${w.tech_sign_name ? `<div class="card"><h3>Signed by technician</h3><p>${esc(w.tech_sign_name)} · ${fdt(w.completed_at)}</p></div>` : ''}
       ${w.client_sign_name ? `<div class="card"><h3>Signed off by client</h3><p>${esc(w.client_sign_name)} · ${fdt(w.signed_at)}</p></div>` : ''}
       </div><div class="stack">
@@ -471,12 +498,17 @@
         <div><dt>Created</dt><dd>${fdate(w.created_at)}</dd></div><div><dt>Scheduled</dt><dd>${fdate(w.scheduled_date) || '—'}</dd></div><div><dt>Due</dt><dd>${fdate(w.due_date) || '—'}</dd></div>
         ${ME.role !== 'client' ? `<div><dt>Estimated hours</dt><dd>${w.est_hours ?? '—'}</dd></div><div><dt>Quote</dt><dd>${w.quote != null ? money(w.quote) : '—'}</dd></div>` : ''}
         <div><dt>Client ref.</dt><dd>${esc(w.client_ref || '—')}</dd></div>
+        ${d.project ? `<div><dt>Project</dt><dd><a href="#/projects/${d.project.id}">${esc(d.project.number)} · ${esc(d.project.name)}</a></dd></div>` : ''}
+        ${w.reviewer ? `<div><dt>Reviewed by</dt><dd>${esc(w.reviewer)} · ${fdate(w.reviewed_at)}</dd></div>` : ''}
         ${w.approver ? `<div><dt>Approved by</dt><dd>${esc(w.approver)} · ${fdate(w.approved_at)}</dd></div>` : ''}
       </dl></div>
+      ${ME.role !== 'client' ? labourCard(d) : ''}
       ${ME.role !== 'client' ? `<div class="card"><h3>Team</h3><p>${esc([w.lead, ...d.team.map((t) => t.name)].filter(Boolean).join(', ') || 'No one yet')}</p></div>` : ''}
       </div></div>`;
     const f = $('#wf', T);
     if (f) f.addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { const x = formData(f); await api(`/wo/${w.id}/update`, x); Object.assign(w, x); $('#ws', T).textContent = 'Saved ' + new Date().toLocaleTimeString().slice(0, 5); toast('Notes saved'); }); });
+    const ff = $('#ff', T);
+    if (ff) ff.addEventListener('submit', (e) => { e.preventDefault(); const x = formData(ff); x.downtime_start = fromLocalInput(x.downtime_start); x.downtime_end = fromLocalInput(x.downtime_end); busy(e.submitter, async () => { await api(`/wo/${w.id}/update`, x); Object.assign(w, x); toast('Failure details saved'); reload(); }); });
   }
   function tabChecklist(T, d, can, reload) {
     const w = d.wo, ro = !can.work;
@@ -527,7 +559,10 @@
         ${canTeam ? `<form class="stack" id="tf" style="margin-top:12px"><div class="grid2"><label class="f">Add a technician<select name="user_id">${opt(avail.map((s) => [s.id, `${s.name} · ${s.trade || ''} · ${s.active_jobs} active`]), '', 'Choose from the team…')}</select></label>
           <label class="f">…or a helper not in the system<input name="name" placeholder="Name"></label></div>
           <div class="row"><label class="f" style="flex:1;min-width:180px">Role on this job<input name="role_text" placeholder="e.g. Assistant, Rigger, Instrument tech"></label><button class="btn ghost" style="align-self:end">${ic('plus', 16)} Add to team</button></div><p class="err" id="te"></p></form>` : ''}
-      </div></div>
+      </div>
+      ${d.clock && d.clock.people.length ? `<div class="card"><div class="card-h"><h2>On the clock</h2><span class="tiny muted">Start / Stop times</span></div><div class="tw" style="box-shadow:none"><table><thead><tr><th>Who</th><th class="n">Work</th><th class="n">Travel / waiting</th><th></th></tr></thead><tbody>${d.clock.people.map((p) => `<tr><td><b>${esc(p.name)}</b>${p.open ? `<br><span class="pill s-in_progress">${esc(d.clock.kinds[p.open])}</span>` : ''}</td><td class="n">${dur(p.work)}</td><td class="n">${dur(p.other)}</td><td class="n">${lead && can.work && p.user_id !== ME.id && p.open ? `<button class="link small" data-cstop="${p.user_id}">Stop</button>` : ''}</td></tr>`).join('')}</tbody></table></div></div>` : ''}
+      ${lead && can.work && w.status === 'in_progress' ? `<div class="card"><h3>Clock a team member on</h3><div class="row" style="margin-top:8px">${[...(w.lead_id && w.lead_id !== ME.id ? [[w.lead_id, w.lead]] : []), ...d.team.filter((t) => t.user_id && t.user_id !== ME.id).map((t) => [t.user_id, t.name])].map(([u, n]) => `<button class="btn sm ghost" data-cstart="${u}">${ic('play', 13)} ${esc(n)}</button>`).join('') || '<span class="muted small">Add technicians with a login to the team first. Outside helpers are booked by hours only.</span>'}</div></div>` : ''}
+      </div>
       <div class="stack"><div class="card"><div class="card-h"><h2>Hours</h2><b>${hours} h</b></div>
         ${d.time.length ? `<div class="tw" style="box-shadow:none"><table><thead><tr><th>Date</th><th>Who</th><th class="n">Hours</th><th></th></tr></thead><tbody>${d.time.map((t) => `<tr><td>${fdate(t.date)}</td><td>${esc(t.worker)}${t.note ? `<br><span class="tiny muted">${esc(t.note)}</span>` : ''}</td><td class="n">${t.hours}</td><td class="n">${can.work && (t.added_by === ME.id || lead) ? `<button class="link" data-rt="${t.id}" aria-label="Remove">${ic('trash', 16)}</button>` : ''}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No hours logged yet.</p>'}
         ${can.work ? `<form class="stack" id="hf" style="margin-top:12px"><div class="grid3"><label class="f">Who<select name="who">${opt(workers)}</select></label><label class="f">Date<input type="date" name="date" value="${today()}"></label><label class="f">Hours<input name="hours" type="number" step="0.25" min="0.25" max="24" required></label></div>
@@ -539,6 +574,8 @@
     const hf = $('#hf', T);
     if (hf) hf.addEventListener('submit', (e) => { e.preventDefault(); const x = formData(hf); const body = { date: x.date, hours: x.hours, note: x.note }; if (x.who.startsWith('t')) body.team_id = x.who.slice(1); if (x.who.startsWith('u')) body.user_id = x.who.slice(1); busy(e.submitter, async () => { await api(`/wo/${w.id}/time`, body); toast('Hours logged'); reload(); }, $('#he', T)); });
     $$('[data-rt]', T).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/wo/${w.id}/time`, { remove: b.dataset.rt }); reload(); }));
+    $$('[data-cstart]', T).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/wo/${w.id}/clock`, { action: 'start', kind: 'work', user_id: b.dataset.cstart }); toast('Clocked on'); reload(); }));
+    $$('[data-cstop]', T).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/wo/${w.id}/clock`, { action: 'stop', user_id: b.dataset.cstop }); toast('Clocked off'); reload(); }));
   }
   function tabTests(T, d, can, reload) {
     const w = d.wo, defs = d.sheet_defs, ro = !can.work;
@@ -585,15 +622,6 @@
       }, 'wide');
     }
   }
-  function tabMaterials(T, d, can, reload, total) {
-    const w = d.wo;
-    T.innerHTML = `<div class="card"><div class="card-h"><h2>Materials and parts used</h2><b>${money(total)}</b></div>
-      ${d.materials.length ? `<div class="tw" style="box-shadow:none"><table><thead><tr><th>Item</th><th class="n">Qty</th><th class="n">Unit cost</th><th class="n">Total</th><th></th></tr></thead><tbody>${d.materials.map((m) => `<tr><td>${esc(m.item)}</td><td class="n">${m.qty} ${esc(m.unit || '')}</td><td class="n">${money(m.unit_cost)}</td><td class="n">${money(m.qty * m.unit_cost)}</td><td class="n">${can.work ? `<button class="link" data-rmm="${m.id}" aria-label="Remove">${ic('trash', 16)}</button>` : ''}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Nothing recorded yet.</p>'}
-      ${can.work ? `<form class="stack" id="mf" style="margin-top:14px"><label class="f">Item or part<input name="item" required placeholder="e.g. Contactor 40 A 230 V coil"></label><div class="grid3"><label class="f">Quantity<input name="qty" type="number" step="any" min="0" required></label><label class="f">Unit<select name="unit">${opt(['each', 'm', 'kg', 'L', 'box', 'set', 'roll'])}</select></label><label class="f">Unit cost <span class="hint">(${esc(SET.currency || 'USD')})</span><input name="unit_cost" type="number" step="any" min="0"></label></div><button class="btn ghost">${ic('box', 16)} Add material</button><p class="err" id="me"></p></form>` : ''}</div>`;
-    const mf = $('#mf', T);
-    if (mf) mf.addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api(`/wo/${w.id}/material`, formData(mf)); toast('Material added'); reload(); }, $('#me', T)); });
-    $$('[data-rmm]', T).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/wo/${w.id}/material`, { remove: b.dataset.rmm }); reload(); }));
-  }
   function tabPhotos(T, d, can, reload) {
     const w = d.wo;
     T.innerHTML = `${can.work ? `<form class="card stack" id="pf"><h2>Add photos</h2><div class="grid3"><label class="f">Photo<input type="file" name="file" accept="image/*" capture="environment" multiple required></label><label class="f">Stage<select name="stage">${opt(['Before', 'During', 'After', 'Defect'], 'During')}</select></label><label class="f">Caption<input name="caption" placeholder="What does it show?"></label></div><button class="btn ghost">${ic('camera', 16)} Upload</button><p class="err" id="phe"></p></form>` : ''}
@@ -631,7 +659,7 @@
     });
     const reasonDlg = (title, sub, label, to, ok) => dlg(`${head(title, sub)}<form class="stack" id="rf"><label class="f">${label}<textarea name="note" rows="3" required></textarea></label><p class="err" id="re"></p><div class="acts"><button class="btn ghost" type="button" data-close>Back</button><button class="btn">${title}</button></div></form>`,
       (dl) => $('#rf', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await status(to, e.target.note.value); dl.close(); toast(ok); reload(); }, $('#re', dl)); }));
-    if (k === 'hold') return reasonDlg('Put on hold', 'The foreman will be notified.', 'Why? (e.g. waiting for parts, no access, shutdown needed)', 'on_hold', 'Job put on hold');
+    if (k === 'hold') return holdDlg(id, reload);
     if (k === 'cancel') return reasonDlg(ME.role === 'client' ? 'Cancel request' : 'Cancel job', '', 'Reason', 'cancelled', 'Cancelled');
     if (k === 'sendback') return reasonDlg('Send back for rework', 'The lead technician will see your note.', 'What needs to be fixed or added?', 'in_progress', 'Sent back to the technician');
     if (k === 'assign') {
@@ -653,14 +681,14 @@
         <div class="grid2"><label class="f">Site<select name="site_id">${opt(LK.sites.filter((s) => s.client_id === w.client_id).map((s) => [s.id, s.name]), w.site_id, '—')}</select></label><label class="f">Equipment<select name="asset_id">${opt(LK.assets.filter((a) => LK.sites.some((s) => s.id === a.site_id && s.client_id === w.client_id)).map((a) => [a.id, a.tag + ' · ' + a.name]), w.asset_id, '—')}</select></label></div>
         <label class="f">Description<textarea name="description" rows="4">${esc(w.description || '')}</textarea></label>
         <div class="grid3"><label class="f">Due<input type="date" name="due_date" value="${esc(w.due_date || '')}"></label><label class="f">Scheduled<input type="date" name="scheduled_date" value="${esc(w.scheduled_date || '')}"></label><label class="f">Estimated hours<input name="est_hours" type="number" step="0.5" value="${esc(w.est_hours ?? '')}"></label></div>
-        <div class="grid2"><label class="f">Quote<input name="quote" type="number" step="any" value="${esc(w.quote ?? '')}"></label><label class="f">Client ref.<input name="client_ref" value="${esc(w.client_ref || '')}"></label></div>
+        <div class="grid3"><label class="f">Quote<input name="quote" type="number" step="any" value="${esc(w.quote ?? '')}"></label><label class="f">Client ref.<input name="client_ref" value="${esc(w.client_ref || '')}"></label><label class="f">Project<select name="project_id">${opt((LK.projects || []).filter((p) => p.client_id === w.client_id || p.id === w.project_id).map((p) => [p.id, p.number + ' · ' + p.name]), w.project_id, 'None')}</select></label></div>
         <p class="err" id="ee"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`,
       (dl) => $('#ef', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api(`/wo/${id}/update`, formData(e.target)); dl.close(); toast('Saved'); reload(); }, $('#ee', dl)); }), 'wide');
     }
     if (k === 'submit') {
       const blank = d.checklist.filter((c) => !c.result).length, failNoNote = d.checklist.filter((c) => c.result === 'Fail' && !c.note).length;
       const emptySheets = d.sheets.filter((k) => !d.tests.some((t) => t.sheet === k)).map((k) => `Test sheet "${d.sheet_defs[k].title}" has no results`); const failNoRemark = d.tests.filter((t) => t.result === 'Fail' && !t.remarks).length;
-      const issues = [...emptySheets, failNoRemark && `${failNoRemark} failed test line${failNoRemark > 1 ? 's' : ''} without a remark`, blank && `${blank} checklist item${blank > 1 ? 's' : ''} not answered`, failNoNote && `${failNoNote} failed check${failNoNote > 1 ? 's' : ''} without a note`, !d.time.length && 'No hours logged', !(w.work_done || '').trim() && '"Work done" is empty (Details tab)'].filter(Boolean);
+      const issues = [...emptySheets, failNoRemark && `${failNoRemark} failed test line${failNoRemark > 1 ? 's' : ''} without a remark`, blank && `${blank} checklist item${blank > 1 ? 's' : ''} not answered`, failNoNote && `${failNoNote} failed check${failNoNote > 1 ? 's' : ''} without a note`, !d.time.length && 'No hours logged', !(w.work_done || '').trim() && '"Work done" is empty (Details tab)', d.unplanned && !(w.fail_component && w.fail_mode && w.fail_cause && w.fail_action) && 'Failure details are missing (Details tab)'].filter(Boolean);
       return dlg(`${head('Submit completed job', 'Your foreman will review it before the client gets the report.')}
         ${issues.length ? `<div class="banner warn">${ic('alert')}<span>Still to do:<br>${issues.map(esc).join('<br>')}</span></div>` : `<div class="banner ok">${ic('check')}<span>Checklist, hours and notes are complete. ${d.photos.length} photo${d.photos.length === 1 ? '' : 's'} attached.</span></div>`}
         <form class="stack" id="sf"><label class="f">Your name<input name="sign_name" value="${esc(ME.name)}"></label><div><p class="small" style="font-weight:700;color:var(--muted);margin-bottom:5px">Sign here</p><canvas class="sig" id="sig" aria-label="Signature pad"></canvas><button type="button" class="link" id="clr">Clear signature</button></div>
@@ -707,10 +735,23 @@
     const add = $('#add', v); if (add) add.onclick = () => assetForm(null);
     async function assetDlg(a) {
       const hist = (await api('/wo?status=&asset=' + a.id)).items;
-      dlg(`${head(esc(a.tag + ' · ' + a.name), esc(a.client + ' · ' + a.site))}<dl class="dl"><div><dt>Discipline</dt><dd>${esc(a.discipline)}</dd></div><div><dt>Make / model</dt><dd>${esc([a.make, a.model].filter(Boolean).join(' ') || '—')}</dd></div><div><dt>Serial</dt><dd>${esc(a.serial || '—')}</dd></div><div><dt>Rating</dt><dd>${esc(a.rating || '—')}</dd></div><div><dt>Criticality</dt><dd>${esc(a.criticality)}</dd></div><div><dt>Next planned job</dt><dd>${fdate(a.next_pm) || '—'}</dd></div></dl>
+      dlg(`${head(esc(a.tag + ' · ' + a.name), esc(a.client + ' · ' + a.site))}<dl class="dl"><div><dt>Discipline</dt><dd>${esc(a.discipline)}</dd></div><div><dt>Make / model</dt><dd>${esc([a.make, a.model].filter(Boolean).join(' ') || '—')}</dd></div><div><dt>Serial</dt><dd>${esc(a.serial || '—')}</dd></div><div><dt>Rating</dt><dd>${esc(a.rating || '—')}</dd></div><div><dt>Criticality</dt><dd>${esc(a.criticality)}</dd></div><div><dt>Next planned job</dt><dd>${fdate(a.next_pm) || '—'}</dd></div>${a.run_hours != null ? `<div><dt>Running hours</dt><dd>${num(a.run_hours, 0)} h</dd></div>` : ''}</dl>
+        ${ME.role !== 'client' ? `<div id="ax" class="stack"><p class="muted small">Loading spares and condition…</p></div>` : ''}
         <h3>Job history (${hist.length})</h3>${jobList(hist.slice(0, 10), 'No jobs on this equipment yet.')}
-        <div class="acts">${SUP() ? '<button class="btn ghost" id="ed">Edit</button>' : ''}<a class="btn" href="#/new/${a.id}">${ic('plus', 16)} ${ME.role === 'client' ? 'Request work' : 'New work order'}</a></div>`,
-      (dl) => { $$('a', dl).forEach((x) => x.addEventListener('click', () => dl.close())); const e = $('#ed', dl); if (e) e.onclick = () => { dl.close(); assetForm(a); }; }, 'wide');
+        <div class="acts">${SUP() ? '<button class="btn ghost" id="qrb">QR code</button><button class="btn ghost" id="ed">Edit</button>' : ''}<a class="btn" href="#/new/${a.id}">${ic('plus', 16)} ${ME.role === 'client' ? 'Request work' : 'New work order'}</a></div>`,
+      (dl) => {
+        $$('a', dl).forEach((x) => x.addEventListener('click', () => dl.close())); const e = $('#ed', dl); if (e) e.onclick = () => { dl.close(); assetForm(a); };
+        const qb = $('#qrb', dl); if (qb) qb.onclick = () => { dl.close(); qrDlg(a); };
+        const ax = $('#ax', dl);
+        if (ax) (async () => {
+          const [st, cm] = await Promise.all([api('/stores').catch(() => null), api('/cm').catch(() => null)]);
+          const sp = st ? st.parts.filter((p) => (p.used_on || '').split(', ').includes(a.tag)) : [];
+          const pts = cm ? cm.items.filter((p) => p.asset_id === a.id) : [];
+          ax.innerHTML = `<div class="grid2"><div><h3>Spares</h3>${sp.length ? sp.map((p) => `<p class="small"><b>${esc(p.part_no)}</b> ${esc(p.name)} · <span class="${p.low ? 'bad' : 'muted'}">${num(p.total)} ${esc(p.unit)} in stock</span></p>`).join('') : '<p class="muted small">No spares linked.</p>'}${SUP() ? '<button class="link small" id="lnk">Link a spare part</button>' : ''}</div>
+            <div><h3>Condition</h3>${pts.length ? pts.map((p) => `<div class="between small" style="gap:6px"><span>${esc(p.name)}<br>${cmPill(p.last_status)} <b>${p.last_value ?? '—'}</b> ${esc(p.unit || '')}</span>${spark(p.history.map((h) => h.value), { w: 110, h: 32, lines: [p.warn, p.alarm] })}</div>`).join('') : '<p class="muted small">No measurement points.</p>'}</div></div>`;
+          const lk = $('#lnk', ax); if (lk) lk.onclick = () => { dl.close(); linkDlg(null, a.id, route); };
+        })();
+      }, 'wide');
     }
     function assetForm(a) {
       a = a || {};
@@ -718,7 +759,7 @@
         <label class="f">Site<select name="site_id" required>${opt(LK.sites.map((s) => [s.id, `${(LK.clients.find((c) => c.id === s.client_id) || {}).name} · ${s.name}`]), a.site_id, 'Choose…')}</select></label>
         <div class="grid3"><label class="f">Discipline<select name="discipline">${opt(LK.disciplines, a.discipline || 'Electrical')}</select></label><label class="f">Criticality<select name="criticality">${opt([['A', 'A · stops production'], ['B', 'B · slows production'], ['C', 'C · can wait']], a.criticality || 'B')}</select></label><label class="f">Rating<input name="rating" value="${esc(a.rating || '')}" placeholder="kW, V, A, range"></label></div>
         <div class="grid3"><label class="f">Make<input name="make" value="${esc(a.make || '')}"></label><label class="f">Model<input name="model" value="${esc(a.model || '')}"></label><label class="f">Serial no.<input name="serial" value="${esc(a.serial || '')}"></label></div>
-        <label class="f">Notes<input name="notes" value="${esc(a.notes || '')}"></label><p class="err" id="ae"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`,
+        <div class="grid2"><label class="f">Notes<input name="notes" value="${esc(a.notes || '')}"></label><label class="f">Running hours (hour meter)<input name="run_hours" type="number" step="any" min="0" value="${esc(a.run_hours ?? '')}"></label></div><p class="err" id="ae"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`,
       (dl) => $('#af', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/assets', { ...formData(e.target), id: a.id }); dl.close(); toast('Saved'); route(); }, $('#ae', dl)); }), 'wide');
     }
   }
@@ -728,8 +769,8 @@
     setTitle('Maintenance plans');
     await refreshLK();
     const items = (await api('/pm')).items; const t = today();
-    v.innerHTML = `<div class="between"><p class="muted" style="max-width:70ch">Planned jobs are created automatically up to 7 days before they are due, assigned to the plan's foreman, and the next date moves on.</p><div class="row"><button class="btn ghost" id="gen">${ic('refresh', 16)} Create due jobs now</button><button class="btn" id="add">${ic('plus', 16)} Add plan</button></div></div>
-      ${items.length ? `<div class="tw"><table><thead><tr><th>Plan</th><th>Asset</th><th>Type</th><th class="n">Every</th><th>Next due</th><th>Foreman</th><th></th></tr></thead><tbody>${items.map((p) => `<tr class="click" data-id="${p.id}"><td><b>${esc(p.title)}</b><br>${dp(p.discipline)}</td><td>${esc(p.tag)} · ${esc(p.asset)}<br><span class="tiny muted">${esc(p.client)} · ${esc(p.site)}</span></td><td>${esc(p.type)}</td><td class="n">${p.every_days} days</td><td style="${p.next_due < t ? 'color:var(--bad);font-weight:700' : ''}">${fdate(p.next_due)}</td><td>${esc(p.foreman || '—')}</td><td>${p.active ? '<span class="pill s-approved">Active</span>' : '<span class="pill">Paused</span>'}</td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">No maintenance plans yet.</p>'}`;
+    v.innerHTML = `<div class="between"><p class="muted" style="max-width:70ch">Planned jobs are created automatically up to 7 days before they are due (or when the machine reaches its running hours), assigned to the plan's foreman, with the spares reserved in stores.</p><div class="row"><button class="btn ghost" id="gen">${ic('refresh', 16)} Create due jobs now</button><button class="btn" id="add">${ic('plus', 16)} Add plan</button></div></div>
+      ${items.length ? `<div class="tw"><table><thead><tr><th>Plan</th><th>Asset</th><th>Type</th><th class="n">Every</th><th>Next due</th><th>Foreman</th><th></th></tr></thead><tbody>${items.map((p) => `<tr class="click" data-id="${p.id}"><td><b>${esc(p.title)}</b><br>${dp(p.discipline)}</td><td>${esc(p.tag)} · ${esc(p.asset)}<br><span class="tiny muted">${esc(p.client)} · ${esc(p.site)}</span></td><td>${esc(p.type)}</td><td class="n">${p.every_days < 3650 ? p.every_days + ' days' : ''}${p.every_hours ? `${p.every_days < 3650 ? '<br>' : ''}<span class="small">${num(p.every_hours, 0)} run h</span>` : ''}</td><td style="${p.next_due < t ? 'color:var(--bad);font-weight:700' : ''}">${fdate(p.next_due)}</td><td>${esc(p.foreman || '—')}</td><td>${p.active ? '<span class="pill s-approved">Active</span>' : '<span class="pill">Paused</span>'}</td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">No maintenance plans yet.</p>'}`;
     $('#gen', v).onclick = (e) => busy(e.currentTarget, async () => { const r = await api('/pm', { generate: true }); toast(r.created.length ? `${r.created.length} job${r.created.length > 1 ? 's' : ''} created: ${r.created.join(', ')}` : 'Nothing is due in the next 7 days'); route(); });
     $('#add', v).onclick = () => form(null);
     $$('tr[data-id]', v).forEach((tr) => tr.onclick = () => form(items.find((p) => String(p.id) === tr.dataset.id)));
@@ -739,7 +780,8 @@
       dlg(`${head(p.id ? 'Edit plan' : 'Add maintenance plan')}<form class="stack" id="pf"><label class="f">What is the planned job?<input name="title" value="${esc(p.title || '')}" required placeholder="e.g. Monthly motor inspection"></label>
         <label class="f">Asset<select name="asset_id" required>${opt(LK.assets.map((a) => [a.id, a.tag + ' · ' + a.name]), p.asset_id, 'Choose…')}</select></label>
         <div class="grid2"><label class="f">Discipline<select name="discipline">${opt(LK.disciplines, p.discipline || 'Electrical')}</select></label><label class="f">Type<select name="type">${typeOpts(p.type || 'Preventive maintenance')}</select></label></div>
-        <div class="grid3"><label class="f">Every (days)<input name="every_days" type="number" min="1" value="${esc(p.every_days || 30)}" required></label><label class="f">Next due<input name="next_due" type="date" value="${esc(p.next_due || today())}" required></label><label class="f">Est. hours<input name="est_hours" type="number" step="0.5" value="${esc(p.est_hours ?? '')}"></label></div>
+        <div class="grid3"><label class="f">Every (days)<input name="every_days" type="number" min="1" value="${esc(p.every_days && p.every_days < 3650 ? p.every_days : p.id ? '' : 30)}"><span class="hint">Blank if it only goes by running hours</span></label><label class="f">…or every (running hours)<input name="every_hours" type="number" min="10" step="any" value="${esc(p.every_hours ?? '')}"><span class="hint">Whichever comes first. Needs an hour meter reading.</span></label><label class="f">Next due<input name="next_due" type="date" value="${esc(p.next_due || today())}"></label></div>
+        <label class="f" style="max-width:200px">Est. hours<input name="est_hours" type="number" step="0.5" value="${esc(p.est_hours ?? '')}"></label>
         <label class="f">Foreman<select name="foreman_id">${opt(foremen.map((s) => [s.id, s.name]), p.foreman_id, 'Any foreman')}</select></label>
         <label class="check"><input type="checkbox" name="active" ${p.active ? 'checked' : ''}> Active</label><p class="err" id="pe"></p>
         <div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`,
@@ -772,9 +814,12 @@
     setTitle('Clients & sites');
     const d = await api('/clients');
     v.innerHTML = `<div class="between"><p class="muted">Client companies, their sites and portal logins. Create client logins under People & logins.</p>${BOSS() ? `<button class="btn" id="add">${ic('plus', 16)} Add client</button>` : ''}</div>
-      <div class="stack">${d.items.map((c) => `<div class="card"><div class="card-h"><div><h2>${esc(c.name)}</h2><p class="muted small">${esc([c.contact, c.phone, c.email].filter(Boolean).join(' · '))}</p></div><div class="row"><span class="pill">${c.open_jobs} open job${c.open_jobs === 1 ? '' : 's'}</span><span class="pill">${c.logins} login${c.logins === 1 ? '' : 's'}</span>${BOSS() ? `<button class="btn ghost sm" data-ec="${c.id}">Edit</button>` : ''}<button class="btn ghost sm" data-as="${c.id}">${ic('plus', 14)} Site</button></div></div>
+      <div class="stack">${d.items.map((c) => `<div class="card"><div class="card-h"><div><h2>${esc(c.name)}</h2><p class="muted small">${esc([c.contact, c.phone, c.email].filter(Boolean).join(' · '))}</p></div><div class="row"><span class="pill">${c.open_jobs} open job${c.open_jobs === 1 ? '' : 's'}</span><span class="pill">${c.logins} login${c.logins === 1 ? '' : 's'}</span>${c.white_label ? '<span class="pill s-in_progress">White label</span>' : ''}${BOSS() ? `<button class="btn ghost sm" data-ec="${c.id}">Edit</button>` : ''}<button class="btn ghost sm" data-as="${c.id}">${ic('plus', 14)} Site</button></div></div>
         ${d.sites.filter((s) => s.client_id === c.id).map((s) => `<div class="between" style="padding:8px 0;border-top:1px solid var(--line2)"><span>${ic('pin', 14)} <b>${esc(s.name)}</b> <span class="muted small">${esc(s.address || '')}</span></span><span class="row"><span class="tiny muted">${s.assets} assets</span><button class="link" data-es="${s.id}">Edit</button></span></div>`).join('') || '<p class="muted small">No sites yet.</p>'}</div>`).join('') || '<p class="empty">No clients yet.</p>'}</div>`;
-    const cform = (c) => { c = c || {}; dlg(`${head(c.id ? 'Edit client' : 'Add client')}<form class="stack" id="cf"><label class="f">Company name<input name="name" value="${esc(c.name || '')}" required></label><div class="grid2"><label class="f">Contact person<input name="contact" value="${esc(c.contact || '')}"></label><label class="f">Phone<input name="phone" value="${esc(c.phone || '')}"></label></div><label class="f">Email<input name="email" type="email" value="${esc(c.email || '')}"></label><label class="f">Address<input name="address" value="${esc(c.address || '')}"></label><label class="f">Notes<textarea name="notes" rows="2">${esc(c.notes || '')}</textarea></label><p class="err" id="ce"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`, (dl) => $('#cf', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/clients', { ...formData(e.target), id: c.id }); dl.close(); toast('Saved'); route(); }, $('#ce', dl)); })); };
+    const cform = (c) => { c = c || {}; dlg(`${head(c.id ? 'Edit client' : 'Add client')}<form class="stack" id="cf"><label class="f">Company name<input name="name" value="${esc(c.name || '')}" required></label><div class="grid2"><label class="f">Contact person<input name="contact" value="${esc(c.contact || '')}"></label><label class="f">Phone<input name="phone" value="${esc(c.phone || '')}"></label></div><label class="f">Email<input name="email" type="email" value="${esc(c.email || '')}"></label><label class="f">Address<input name="address" value="${esc(c.address || '')}"></label><label class="f">Notes<textarea name="notes" rows="2">${esc(c.notes || '')}</textarea></label>
+      <fieldset class="card" style="box-shadow:none"><legend class="small" style="font-weight:700;padding:0 6px">Client branding</legend><div class="grid3"><label class="f">Client logo<input type="file" id="clg" accept="image/*"><span class="hint">Shown on their reports</span></label><div>${c.logo ? `<img src="${esc(c.logo)}" alt="" style="max-height:50px;max-width:150px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px"><br><label class="check tiny"><input type="checkbox" name="clear_logo"> Remove logo</label>` : '<span class="muted small">No logo</span>'}</div><label class="f">Colour<input type="color" name="color" value="${esc(c.color || '#1f5aa6')}" class="swatch"></label></div>
+      <label class="check"><input type="checkbox" name="white_label" ${c.white_label ? 'checked' : ''}> White label: their staff see the client portal in their own logo and colour</label></fieldset><p class="err" id="ce"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`, (dl) => { let lg = null; $('#clg', dl).onchange = async (ev) => { const f = ev.target.files[0]; if (!f) return; try { lg = await resizeImage(f, 400, 'image/png'); toast('Logo ready. Press Save.'); } catch (er) { toast(er.message, true); } };
+      $('#cf', dl).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); x.white_label = !!x.white_label; x.logo = lg || (x.clear_logo ? '' : c.logo || ''); delete x.clear_logo; busy(e.submitter, async () => { await api('/clients', { ...x, id: c.id }); dl.close(); toast('Saved'); route(); }, $('#ce', dl)); }); }, 'wide'); };
     const sform = (s) => { dlg(`${head(s.id ? 'Edit site' : 'Add site')}<form class="stack" id="sf"><label class="f">Client<select name="client_id">${opt(d.items.map((c) => [c.id, c.name]), s.client_id)}</select></label><label class="f">Site name<input name="name" value="${esc(s.name || '')}" required></label><label class="f">Address / directions<input name="address" value="${esc(s.address || '')}"></label><p class="err" id="se"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`, (dl) => $('#sf', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/sites', { ...formData(e.target), id: s.id }); dl.close(); toast('Saved'); route(); }, $('#se', dl)); })); };
     const add = $('#add', v); if (add) add.onclick = () => cform(null);
     $$('[data-ec]', v).forEach((b) => b.onclick = () => cform(d.items.find((c) => String(c.id) === b.dataset.ec)));
@@ -820,7 +865,7 @@
       const hrs = done.reduce((a, w) => a + w.hours, 0);
       const q = `from=${from}&to=${to}`;
       $('#rp', v).innerHTML = `<div class="kpis"><div class="kpi"><span>Jobs created</span><b>${inR.length}</b></div><div class="kpi"><span>Jobs completed</span><b>${done.length}</b></div><div class="kpi"><span>Hours on completed jobs</span><b>${hrs}</b></div><div class="kpi"><span>Breakdowns</span><b>${inR.filter((w) => w.type === 'Breakdown').length}</b></div></div>
-        <div class="card"><h2>Download for Excel</h2><p class="muted small" style="margin:4px 0 12px">CSV files open in Excel and Google Sheets. Use them for invoicing, payroll and monthly client reports.</p><div class="row"><a class="btn ghost" href="/api/export/workorders?${q}">${ic('download', 16)} Work orders with value</a><a class="btn ghost" href="/api/export/timesheets?${q}">${ic('download', 16)} Timesheets</a><a class="btn ghost" href="/api/export/materials?${q}">${ic('download', 16)} Materials used</a><a class="btn ghost" href="/api/export/tests?${q}">${ic('download', 16)} Test results</a></div></div>
+        <div class="card"><h2>Download for Excel</h2><p class="muted small" style="margin:4px 0 12px">CSV files open in Excel and Google Sheets. Use them for invoicing, payroll and monthly client reports.</p><div class="row"><a class="btn ghost" href="/api/export/workorders?${q}">${ic('download', 16)} Work orders with value</a><a class="btn ghost" href="/api/export/timesheets?${q}">${ic('download', 16)} Timesheets</a><a class="btn ghost" href="/api/export/materials?${q}">${ic('download', 16)} Materials used</a><a class="btn ghost" href="/api/export/tests?${q}">${ic('download', 16)} Test results</a><a class="btn ghost" href="/api/export/moves?${q}">${ic('download', 16)} Stock movements</a><a class="btn ghost" href="/api/export/stock">${ic('download', 16)} Stock on hand</a></div><p class="small" style="margin-top:10px">${ic('chart', 14)} Reliability, labour utilisation and the monthly management PDF are under <a href="#/analysis">Analysis</a>.</p></div>
         <div class="grid2">${box('Jobs by client', grp(inR, 'client'))}${box('Jobs by type', grp(inR, 'type'))}${box('Jobs by discipline', grp(inR, 'discipline'))}${box('Completed by lead technician', grp(done, 'lead'))}</div>`;
     };
     draw();
@@ -841,6 +886,9 @@
       <h2 style="margin-top:8px">Costing</h2><div class="grid3"><label class="f">Currency<input name="currency" value="${esc(s.currency)}" maxlength="6"></label><label class="f">Labour rate per hour<input name="labour_rate" type="number" step="any" value="${esc(s.labour_rate)}"></label><label class="f">VAT %<input name="vat" type="number" step="any" value="${esc(s.vat)}"></label></div>
       <label class="check"><input type="checkbox" name="report_costs" ${s.report_costs === '1' ? 'checked' : ''}> Show labour, materials and totals on client reports</label>
       <label class="f">Report footer<textarea name="report_footer" rows="2">${esc(s.report_footer)}</textarea></label>
+      <h2 style="margin-top:8px">Approvals and labour</h2>
+      <label class="check"><input type="checkbox" name="separate_approval" ${s.separate_approval !== '0' ? 'checked' : ''}> Review and approval must be done by different people</label>
+      <div class="grid3"><label class="f">Foreman approval limit (${esc(s.currency || 'USD')})<input name="approval_limit" type="number" min="0" step="any" value="${esc(s.approval_limit || '0')}"><span class="hint">0 = only managers approve. Above 0, foremen may approve jobs up to this value.</span></label><label class="f">Shift length (hours)<input name="shift_hours" type="number" min="1" max="24" step="0.5" value="${esc(s.shift_hours || '8')}"></label><label class="f">Working days a week<input name="work_days" type="number" min="1" max="7" value="${esc(s.work_days || '5')}"><span class="hint">Used for labour utilisation and backlog weeks</span></label></div>
       <h2 style="margin-top:8px">Alerts, reminders and SMS</h2><p class="muted small">Phone alerts are free and need no setup: each person turns them on under My account. SMS text messages need an account with an SMS provider and are only sent for urgent jobs, urgent notices and reminders you mark for SMS.</p>
       <div class="grid3"><label class="f">Daily job reminders at<select name="reminder_hour">${opt(Array.from({ length: 24 }, (_, h) => [h, String(h).padStart(2, '0') + ':00']), s.reminder_hour || 6)}</select></label><label class="f">Time zone<select name="tz">${opt([[0, 'UTC / GMT'], [60, 'UTC+1 (Lagos, Kinshasa)'], [120, 'UTC+2 (Harare, Lusaka, Johannesburg)'], [180, 'UTC+3 (Nairobi, Dar es Salaam)'], [240, 'UTC+4 (Dubai)']], s.tz || 120)}</select></label><label class="f">Country code<input name="sms_country" value="${esc(s.sms_country || '263')}" maxlength="4" inputmode="numeric"><span class="hint">Used for numbers saved like 077…</span></label></div>
       <div class="grid2"><label class="f">SMS provider<select name="sms_provider" id="smp">${opt([['none', 'No SMS'], ['africastalking', "Africa's Talking"], ['twilio', 'Twilio'], ['webhook', 'Other (webhook)']], s.sms_provider || 'none')}</select></label><label class="f" id="smf">Sender name or number<input name="sms_from" value="${esc(s.sms_from || '')}" maxlength="20"></label></div>
@@ -852,19 +900,477 @@
     smp.onchange = smx; smx();
     $('#smtest', v).onclick = (e) => busy(e.currentTarget, async () => { const r = await api('/sms/test', {}); toast(`Test SMS sent (${r.sent})`); });
     $('#lg', v).onchange = async (e) => { const f = e.target.files[0]; if (!f) return; try { logo = await resizeImage(f, 500, 'image/png'); toast('Logo ready. Press Save.'); } catch (er) { toast(er.message, true); } };
-    $('#sf', v).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); x.report_costs = x.report_costs ? '1' : '0'; if (logo) x.logo = logo; busy(e.submitter, async () => { await api('/settings', x); SET = (await api('/me')).settings; brand(); toast('Settings saved'); shell(); route(); }, $('#se', v)); });
+    $('#sf', v).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); x.report_costs = x.report_costs ? '1' : '0'; x.separate_approval = x.separate_approval ? '1' : '0'; if (logo) x.logo = logo; busy(e.submitter, async () => { await api('/settings', x); SET = (await api('/me')).settings; brand(); toast('Settings saved'); shell(); route(); }, $('#se', v)); });
   }
   async function account(v) {
     setTitle('My account');
     v.innerHTML = `<div class="grid2" style="max-width:900px"><form class="card stack" id="pf"><h2>Profile</h2><label class="f">Name<input name="name" value="${esc(ME.name)}"></label><label class="f">Phone<input name="phone" value="${esc(ME.phone || '')}"></label><p class="muted small">${esc(ME.email)} · ${ROLE[ME.role]}</p><button class="btn ghost">Save</button></form>
       <section class="card stack" id="al"><h2>Alerts on this phone</h2><p class="muted small">Get job alerts, notices and reminders as phone notifications, even when the app is closed.</p><div id="pst" class="muted small">Checking…</div><div class="row" id="pbt"></div>
         <label class="check"><input type="checkbox" id="nsms" ${ME.notify_sms ? 'checked' : ''}> Send me SMS text messages for urgent jobs, urgent notices and reminders</label><p class="hint">SMS goes to the phone number in your profile.</p></section>
+      <section class="card stack"><h2>Appearance</h2><p class="muted small">Dark mode is easier on the eyes at night and in dark plant rooms.</p><div class="chips" id="thm">${[['auto', 'Match my phone'], ['light', 'Light'], ['dark', 'Dark']].map(([k, l]) => `<button class="chip" type="button" data-th="${k}" aria-pressed="${getTheme() === k}">${l}</button>`).join('')}</div></section>
       <form class="card stack" id="cf"><h2>Change password</h2><label class="f">Current password<input name="current" type="password" autocomplete="current-password" required></label><label class="f">New password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label><p class="err" id="ce"></p><button class="btn ghost">Change password</button></form></div>`;
     $('#pf', v).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); busy(e.submitter, async () => { await api('/me/profile', x); ME.name = x.name; ME.phone = x.phone; toast('Saved'); }); });
     $('#cf', v).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/me/password', formData(e.target)); e.target.reset(); toast('Password changed'); }, $('#ce', v)); });
     $('#nsms', v).onchange = (e) => busy(null, async () => { await api('/me/prefs', { notify_push: ME.notify_push, notify_sms: e.target.checked }); ME.notify_sms = e.target.checked; toast(e.target.checked ? 'SMS alerts on' : 'SMS alerts off'); });
+    $$('[data-th]', v).forEach((b) => b.onclick = () => { try { localStorage.setItem('basa-theme', b.dataset.th); } catch (e) { /* private mode */ } applyTheme(b.dataset.th); $$('[data-th]', v).forEach((x) => x.setAttribute('aria-pressed', x === b)); });
     pushPanel(v);
   }
+  /* ---------- v3 helpers ---------- */
+  const num = (v, d = 1) => (v == null || v === '' || Number.isNaN(Number(v)) ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: d }));
+  const pctTxt = (v) => (v == null ? '—' : v + '%');
+  const dur = (h) => (h == null ? '—' : h < 1 ? Math.round(h * 60) + ' min' : Math.round(h * 10) / 10 + ' h');
+  const hhmm = (iso) => (iso ? new Date(iso).toTimeString().slice(0, 5) : '');
+  const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
+  const fromLocalInput = (s) => (s ? new Date(s).toISOString() : '');
+  const dayShift = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  function spark(vals, o = {}) {
+    if (!vals.length) return '<span class="tiny muted">No readings yet</span>';
+    const w = o.w || 170, h = o.h || 44, all = [...vals, ...(o.lines || []).filter((x) => x != null)];
+    const mn = Math.min(...all), mx = Math.max(...all), rg = mx - mn || 1;
+    const X = (i) => (vals.length === 1 ? w / 2 : 4 + (i * (w - 8)) / (vals.length - 1)), Y = (v) => h - 5 - ((v - mn) / rg) * (h - 10);
+    const lines = (o.lines || []).map((l, i) => (l == null ? '' : `<line x1="0" x2="${w}" y1="${Y(l).toFixed(1)}" y2="${Y(l).toFixed(1)}" stroke="var(${i ? '--bad' : '--warn'})" stroke-dasharray="4 3" stroke-width="1.2"/>`)).join('');
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(o.label || 'Trend')}">${lines}<polyline fill="none" stroke="var(--brand)" stroke-width="2" stroke-linejoin="round" points="${vals.map((v, i) => X(i).toFixed(1) + ',' + Y(v).toFixed(1)).join(' ')}"/>${vals.map((v, i) => `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="2.6" fill="var(--brand)"><title>${v}</title></circle>`).join('')}</svg>`;
+  }
+  const bars = (rows, fmt) => { const mx = Math.max(1, ...rows.map((r) => Math.abs(r[1]))); return rows.length ? `<div class="workload">${rows.map(([l, n]) => `<div class="wl"><span>${esc(l)}</span><span class="bt"><i style="width:${(Math.abs(n) / mx) * 100}%"></i></span><b>${fmt ? fmt(n) : n}</b></div>`).join('')}</div>` : '<p class="muted small">No data in this period.</p>'; };
+  const cmPill = (s) => (s === 'alarm' ? '<span class="pill s-on_hold">Alarm</span>' : s === 'warn' ? '<span class="pill s-in_progress">Warning</span>' : s ? '<span class="pill s-approved">OK</span>' : '<span class="pill">No reading</span>');
+  const meter = (p, warnAt = 90) => `<div class="bar" style="height:8px"><i style="width:${Math.min(100, Math.max(0, p || 0))}%;${p > 100 ? 'background:var(--bad)' : p > warnAt ? 'background:var(--warn)' : ''}"></i></div>`;
+  function printDoc(title, body) {
+    const w = window.open('', '_blank');
+    if (!w) { toast('Allow pop-ups for this site to print the report', true); return; }
+    const color = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#d9822b';
+    w.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
+      <style>:root{--brand:${color}}*{box-sizing:border-box}body{margin:0;background:#e9ebef;color:#15171b;font:12.5px/1.45 "DM Sans",system-ui,sans-serif}
+      .tb{position:sticky;top:0;display:flex;justify-content:center;gap:8px;padding:10px;background:#1b1f26}.tb button{font:700 14px system-ui;padding:9px 16px;border-radius:10px;border:0;background:var(--brand);color:#fff;cursor:pointer}
+      .page{width:210mm;max-width:100%;margin:18px auto 40px;background:#fff;padding:13mm;box-shadow:0 10px 40px -10px rgba(0,0,0,.3)}
+      h1{font-size:20px;margin:0}h2{font-size:14px;margin:18px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--brand)}h3{font-size:13px;margin:10px 0 4px}
+      .hd{display:flex;justify-content:space-between;align-items:center;gap:14px;border-bottom:3px solid var(--brand);padding-bottom:10px}.hd img{max-height:50px;max-width:150px;object-fit:contain}
+      .muted{color:#5b616c}table{width:100%;border-collapse:collapse;margin:4px 0}th,td{text-align:left;padding:5px 6px;border-bottom:1px solid #e3e6ea;vertical-align:top}th{background:#f4f5f7;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:#5b616c}.n{text-align:right;font-variant-numeric:tabular-nums}
+      .k{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.k div{border:1px solid #e3e6ea;border-radius:8px;padding:8px}.k span{display:block;font-size:10.5px;color:#5b616c;text-transform:uppercase;letter-spacing:.03em}.k b{font-size:18px}
+      .bar{height:8px;background:#eceef2;border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--brand)}.ok{color:#137a46}.bad{color:#b42318}
+      @media print{body{background:#fff}.tb{display:none}.page{margin:0;box-shadow:none;width:auto;padding:0}@page{size:A4;margin:12mm}h2{break-after:avoid}tr{break-inside:avoid}}</style></head>
+      <body><div class="tb"><button onclick="print()">Print or save as PDF</button></div><div class="page">${body}</div></body></html>`);
+    w.document.close();
+  }
+  const docHead = (title, sub) => `<div class="hd"><div style="display:flex;gap:12px;align-items:center">${SET.logo ? `<img src="${esc(SET.logo)}" alt="">` : ''}<div><b style="font-size:15px">${esc(SET.company || '')}</b><div class="muted">${esc([SET.phone, SET.email, SET.website].filter(Boolean).join(' · '))}</div></div></div><div style="text-align:right"><h1>${esc(title)}</h1><div class="muted">${sub}</div></div></div>`;
+
+  /* ---------- job: clock, failure, labour ---------- */
+  function clockBox(d) {
+    const c = d.clock; if (!c) return '';
+    const w = d.wo, st = w.status, m = c.mine, K = c.kinds, l = d.labour || {};
+    const onJob = w.lead_id === ME.id || d.team.some((t) => t.user_id === ME.id);
+    const line = `Booked ${dur(l.booked)} · on the clock ${dur(l.actual)}${w.est_hours ? ' · estimate ' + dur(w.est_hours) : ''}${l.flag ? ` <span class="pill s-on_hold">Check hours</span>` : ''}`;
+    if (!onJob || !['assigned', 'in_progress', 'on_hold'].includes(st)) return c.rows.length || l.booked ? `<div class="clockbar"><span class="small">${ic('clock', 16)} ${line}</span></div>` : '';
+    const kinds = Object.entries(K).filter(([k]) => k !== 'work' || st === 'in_progress');
+    return `<div class="clockbar ${m ? 'on' : ''}"><div class="small">${ic('clock', 18)} ${m ? `<b>On the clock: ${esc(K[m.kind])}</b> since ${hhmm(m.start_at)}` : '<b>Not clocked on</b>'}<br><span class="tiny muted">${line}</span></div>
+      <div class="row">${kinds.map(([k, lb]) => `<button class="chip" type="button" data-clk="${k}" aria-pressed="${!!(m && m.kind === k)}">${esc(lb)}</button>`).join('')}${m ? `<button class="btn sm ghost" type="button" data-clk="stop">${ic('pause', 14)} Stop</button>` : ''}</div></div>`;
+  }
+  function failCard(d, can) {
+    const w = d.wo; if (!(d.unplanned || w.downtime_start || w.fail_component)) return '';
+    const F = d.fail_lists || LK.fail || {}, edit = can.work && ME.role !== 'client';
+    const sel = (k, lab) => `<label class="f">${lab}<select name="fail_${k}">${opt(F[k] || [], w['fail_' + k], 'Choose…')}</select></label>`;
+    const down = w.downtime_start ? (new Date(w.downtime_end || Date.now()) - new Date(w.downtime_start)) / 3600e3 : null;
+    if (!edit) return `<div class="card"><h2 style="margin-bottom:10px">Failure and downtime</h2><dl class="dl"><div><dt>Component</dt><dd>${esc(w.fail_component || '—')}</dd></div><div><dt>What happened</dt><dd>${esc(w.fail_mode || '—')}</dd></div><div><dt>Cause</dt><dd>${esc(w.fail_cause || '—')}</dd></div><div><dt>Action</dt><dd>${esc(w.fail_action || '—')}</dd></div>${w.downtime_start ? `<div><dt>Machine stopped</dt><dd>${fdt(toLocalInput(w.downtime_start).replace('T', ' '))}</dd></div><div><dt>Back in service</dt><dd>${w.downtime_end ? fdt(toLocalInput(w.downtime_end).replace('T', ' ')) : 'Still down'}</dd></div><div><dt>Downtime</dt><dd>${dur(down)}</dd></div>` : ''}</dl></div>`;
+    return `<form class="card stack" id="ff"><div><h2>Failure and downtime</h2><p class="muted small">${d.unplanned ? 'Needed before you submit. This feeds the reliability analysis (MTBF, MTTR, bad actors).' : 'Optional.'}</p></div>
+      <div class="grid2">${sel('component', 'Component that failed')}${sel('mode', 'What happened')}${sel('cause', 'Cause')}${sel('action', 'Action taken')}</div>
+      <div class="grid2"><label class="f">Machine stopped<input type="datetime-local" name="downtime_start" value="${toLocalInput(w.downtime_start)}"></label><label class="f">Back in service <span class="hint">(blank = still down)</span><input type="datetime-local" name="downtime_end" value="${toLocalInput(w.downtime_end)}"></label></div>
+      <div class="row"><button class="btn ghost">Save failure details</button>${down != null ? `<span class="muted small">Downtime so far: <b>${dur(down)}</b></span>` : ''}</div></form>`;
+  }
+  function labourCard(d) {
+    const l = d.labour; if (!l) return '';
+    return `<div class="card"><h3>Booked vs actual time</h3><dl class="dl" style="margin-top:8px"><div><dt>Estimate</dt><dd>${dur(d.wo.est_hours)}</dd></div><div><dt>Hours booked</dt><dd>${dur(l.booked)}</dd></div><div><dt>On the clock (work)</dt><dd>${dur(l.actual)}</dd></div>${Object.entries(d.clock.by).filter(([k]) => k !== 'work').map(([k, h]) => `<div><dt>${esc(d.clock.kinds[k])}</dt><dd>${dur(h)}</dd></div>`).join('')}</dl>
+      ${l.note ? `<p class="small ${l.flag ? '' : 'muted'}" style="margin-top:8px">${l.flag ? ic('alert', 14) + ' ' : ''}${esc(l.note)}</p>` : ''}</div>`;
+  }
+  function holdDlg(id, done) {
+    dlg(`${head('Put on hold', 'The foreman will be notified.')}<form class="stack" id="hf"><label class="f">Waiting for<select name="wait">${opt([['', 'Something else'], ['wait_parts', 'Parts'], ['wait_permit', 'Permit / isolation / access']], '')}</select><span class="hint">Parts and permit waiting time is tracked separately from work time.</span></label>
+      <label class="f">Details<textarea name="note" rows="3" required placeholder="e.g. Seal kit ordered, ETA Friday"></textarea></label><p class="err" id="he"></p><div class="acts"><button class="btn ghost" type="button" data-close>Back</button><button class="btn">Put on hold</button></div></form>`,
+    (dl) => $('#hf', dl).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); busy(e.submitter, async () => { await api(`/wo/${id}/status`, { to: 'on_hold', note: x.note, wait: x.wait || undefined }); dl.close(); toast('Job put on hold'); done(); }, $('#he', dl)); }));
+  }
+
+  /* ---------- job: materials with stores ---------- */
+  function tabMaterials(T, d, can, reload, total) {
+    const w = d.wo, staff = ME.role !== 'client';
+    const stores = LK.stores || [], parts = LK.parts || [], stock = LK.stock || [];
+    const freeIn = (pid) => stock.filter((s) => s.part_id === pid && s.free > 0);
+    const issued = d.materials.filter((m) => m.part_id);
+    T.innerHTML = `<div class="cols2"><div class="stack"><div class="card"><div class="card-h"><h2>Materials and parts used</h2><b>${money(total)}</b></div>
+      ${d.materials.length ? `<div class="tw" style="box-shadow:none"><table><thead><tr><th>Item</th><th class="n">Qty</th><th class="n">Unit cost</th><th class="n">Total</th><th></th></tr></thead><tbody>${d.materials.map((m) => `<tr><td>${esc(m.item)}${m.part_id ? `<br><span class="tiny muted">${ic('box', 12)} From stores</span>` : ''}</td><td class="n">${m.qty} ${esc(m.unit || '')}</td><td class="n">${money(m.unit_cost)}</td><td class="n">${money(m.qty * m.unit_cost)}</td><td class="n">${can.work ? (m.part_id ? `<button class="link small" data-ret="${m.id}">Return</button>` : `<button class="link" data-rmm="${m.id}" aria-label="Remove">${ic('trash', 16)}</button>`) : ''}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Nothing recorded yet.</p>'}
+      ${can.work && staff ? `<form class="stack" id="if" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line2)"><h3>${ic('box', 16)} Issue from stores</h3><div class="grid3"><label class="f" style="grid-column:span 2">Part<select name="part_id" id="ip" required>${opt(parts.map((p) => [p.id, `${p.part_no} · ${p.name}`]), '', 'Choose a part…')}</select></label><label class="f">Quantity<input name="qty" type="number" step="any" min="0" required value="1"></label></div>
+        <label class="f">Store<select name="store_id" id="is" required><option value="">Choose the part first</option></select></label><button class="btn">${ic('box', 16)} Issue to this job</button><p class="err" id="ie"></p></form>
+        <details style="margin-top:12px"><summary class="small" style="cursor:pointer;font-weight:700">Add something not kept in stores</summary><form class="stack" id="mf" style="margin-top:10px"><label class="f">Item<input name="item" required placeholder="e.g. Bought locally: cable ties"></label><div class="grid3"><label class="f">Quantity<input name="qty" type="number" step="any" min="0" required></label><label class="f">Unit<select name="unit">${opt(['each', 'm', 'kg', 'L', 'box', 'set', 'roll'])}</select></label><label class="f">Unit cost<input name="unit_cost" type="number" step="any" min="0"></label></div><button class="btn ghost">Add</button><p class="err" id="me"></p></form></details>` : can.work ? '' : ''}
+      </div></div>
+      ${staff ? `<div class="stack">
+        ${d.spares && d.spares.length ? `<div class="card"><h2 style="margin-bottom:8px">Spares for ${esc(w.asset_tag || 'this machine')}</h2><div class="tw" style="box-shadow:none"><table><tbody>${d.spares.map((s) => `<tr><td><b>${esc(s.part_no)}</b><br><span class="tiny muted">${esc(s.name)} · uses ${s.qty}${s.on_pm ? ' · on PM' : ''}</span></td><td class="n ${s.in_stock < s.qty ? 'bad' : ''}">${num(s.in_stock)} ${esc(s.unit)}<br><span class="tiny muted">in stock</span></td><td class="n">${can.work ? `<button class="btn sm ghost" data-pick="${s.part_id}" data-q="${s.qty}">Issue</button>` : ''}</td></tr>`).join('')}</tbody></table></div></div>` : ''}
+        ${d.reservations && d.reservations.length ? `<div class="card"><h2 style="margin-bottom:8px">Held in stores for this job</h2>${d.reservations.map((r) => `<div class="between" style="padding:6px 0;border-top:1px solid var(--line2)"><span><b>${esc(r.part_no)}</b> ${esc(r.name)}<br><span class="tiny muted">${r.qty} ${esc(r.unit)} · ${esc(r.store)}</span></span>${can.work || SUP() ? `<span class="row"><button class="btn sm" data-issue-res="${r.id}">Issue</button><button class="link small" data-rel="${r.id}">Release</button></span>` : ''}</div>`).join('')}</div>` : ''}
+        <div class="card"><h3>Need a part that is not in stock?</h3><p class="muted small" style="margin:4px 0 10px">Raise a purchase request. The manager is notified and you are told when it arrives.</p><button class="btn ghost" id="prq">${ic('plus', 16)} Request a purchase</button>${issued.length ? `<p class="tiny muted" style="margin-top:10px">Unused parts: tap Return on the line to put them back in stores.</p>` : ''}</div>
+      </div>` : ''}</div>`;
+    const ip = $('#ip', T), is = $('#is', T);
+    const fillStores = () => { const pid = Number(ip.value); const f = freeIn(pid); is.innerHTML = pid ? (f.length ? opt(f.map((s) => [s.store_id, `${(stores.find((x) => x.id === s.store_id) || {}).name} · ${num(s.free)} free`]), f[0].store_id) : '<option value="">None free in any store. Request a purchase.</option>') : '<option value="">Choose the part first</option>'; };
+    if (ip) ip.onchange = fillStores;
+    const iF = $('#if', T);
+    if (iF) iF.addEventListener('submit', (e) => { e.preventDefault(); const x = formData(iF); busy(e.submitter, async () => { const r = await api(`/wo/${w.id}/issue`, x); toast(`Issued. ${num(r.left)} ${r.unit} left in ${r.store}`); await refreshLK(); reload(); }, $('#ie', T)); });
+    $$('[data-pick]', T).forEach((b) => b.onclick = () => { ip.value = b.dataset.pick; fillStores(); iF.qty.value = b.dataset.q; iF.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+    const mf = $('#mf', T);
+    if (mf) mf.addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api(`/wo/${w.id}/material`, formData(mf)); toast('Material added'); reload(); }, $('#me', T)); });
+    $$('[data-rmm]', T).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/wo/${w.id}/material`, { remove: b.dataset.rmm }); reload(); }));
+    $$('[data-ret]', T).forEach((b) => b.onclick = () => { const m = d.materials.find((x) => String(x.id) === b.dataset.ret); dlg(`${head('Return to stores', esc(m.item))}<form class="stack" id="rf"><label class="f">How many are you returning?<input name="qty" type="number" step="any" min="0" max="${m.qty}" value="${m.qty}" required></label><p class="err" id="re"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Return</button></div></form>`, (dl) => $('#rf', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api(`/wo/${w.id}/return`, { material_id: m.id, qty: e.target.qty.value }); dl.close(); toast('Returned to stores'); await refreshLK(); reload(); }, $('#re', dl)); })); });
+    $$('[data-rel]', T).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/wo/${w.id}/reserve`, { release: b.dataset.rel }); toast('Released back to stores'); reload(); }));
+    $$('[data-issue-res]', T).forEach((b) => b.onclick = () => { const r = d.reservations.find((x) => String(x.id) === b.dataset.issueRes); busy(b, async () => { await api(`/wo/${w.id}/issue`, { part_id: r.part_id, store_id: r.store_id, qty: r.qty }); toast('Issued'); await refreshLK(); reload(); }); });
+    const prq = $('#prq', T); if (prq) prq.onclick = () => purchaseDlg(null, w.id, reload);
+  }
+  function purchaseDlg(partId, woId, done) {
+    dlg(`${head('Request a purchase', 'The manager is notified straight away.')}<form class="stack" id="pf"><label class="f">Part<select name="part_id" required>${opt((LK.parts || []).map((p) => [p.id, `${p.part_no} · ${p.name}`]), partId || '', 'Choose…')}</select><span class="hint">Not in the list? Ask the stores or a manager to add it to the catalogue first.</span></label>
+      <div class="grid2"><label class="f">Quantity<input name="qty" type="number" step="any" min="0" required></label><label class="f">Deliver to store<select name="store_id">${opt((LK.stores || []).map((s) => [s.id, s.name]), (LK.stores || [])[0] ? LK.stores[0].id : '')}</select></label></div>
+      <label class="f">Note<input name="note" placeholder="Why it is needed, how urgent"></label><p class="err" id="pe"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Send request</button></div></form>`,
+    (dl) => $('#pf', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/purchase', { ...formData(e.target), wo_id: woId || undefined }); dl.close(); toast('Purchase request sent'); if (done) done(); }, $('#pe', dl)); }));
+  }
+
+  /* ---------- stores & spares ---------- */
+  async function storesView(v, partId) {
+    setTitle('Stores & spares');
+    await refreshLK();
+    const d = await api('/stores');
+    if (partId) return partDlg(Number(partId));
+    let tab = 'parts', q = '', f = 'all';
+    const value = d.stores.reduce((a, s) => a + s.value, 0);
+    v.innerHTML = `<div class="between"><p class="muted" style="max-width:70ch">Every spare part, where it is and how many are left. Parts issued to a job are costed on the job and the stock goes down.</p>
+        <div class="row">${SUP() ? `<a class="btn ghost" href="/api/export/stock">${ic('download', 16)} Stock list</a><button class="btn ghost" id="ast">${ic('plus', 16)} Store</button><button class="btn" id="apt">${ic('plus', 16)} Part</button>` : `<button class="btn" id="prq">${ic('plus', 16)} Request a purchase</button>`}</div></div>
+      <div class="kpis"><div class="kpi"><span>Parts in catalogue</span><b>${d.parts.length}</b></div>${SUP() ? `<div class="kpi"><span>Stock value</span><b>${money(value).replace(/\.\d\d$/, '')}</b><small>${d.stores.length} store${d.stores.length === 1 ? '' : 's'}</small></div>` : ''}<button class="kpi ${d.parts.some((p) => p.low) ? 'alert' : ''}" data-f="low" type="button"><span>Low stock</span><b>${d.parts.filter((p) => p.low).length}</b><small>At or below minimum</small></button><button class="kpi" type="button" data-tab="requests"><span>Purchase requests</span><b>${d.requests.length}</b><small>Open</small></button></div>
+      <div class="chips">${[['parts', 'Parts'], ['requests', 'Purchase requests'], ['stores', 'Stores'], ...(SUP() ? [['usage', 'Most used and slow moving']] : [])].map(([k, l]) => `<button class="chip" data-tab="${k}" aria-pressed="${k === tab}">${l}</button>`).join('')}</div><div id="sv"></div>`;
+    const draw = () => {
+      $$('.chips [data-tab]', v).forEach((b) => b.setAttribute('aria-pressed', b.dataset.tab === tab));
+      const box = $('#sv', v);
+      if (tab === 'parts') {
+        let l = d.parts.filter((p) => f === 'all' || (f === 'low' && p.low));
+        if (q) l = l.filter((p) => [p.part_no, p.name, p.category, p.supplier, p.used_on].join(' ').toLowerCase().includes(q));
+        box.innerHTML = `<div class="toolbar"><label class="search">${ic('search', 16)}<input type="search" id="q" value="${esc(q)}" placeholder="Search part no., description, machine" aria-label="Search parts"></label><div class="chips">${[['all', 'All'], ['low', 'Low stock']].map(([k, lb]) => `<button class="chip" data-f="${k}" aria-pressed="${k === f}">${lb}</button>`).join('')}</div></div>
+          ${l.length ? `<div class="tw"><table><thead><tr><th>Part</th><th>Category</th><th class="n">In stock</th><th class="n">Held</th><th class="n">Min</th><th class="n">Used 90 days</th>${SUP() ? '<th class="n">Value</th>' : ''}</tr></thead><tbody>${l.map((p) => `<tr class="click" data-pid="${p.id}"><td><b class="mono">${esc(p.part_no)}</b>${p.low ? ' <span class="pill s-on_hold">Low</span>' : ''}<br><span class="small">${esc(p.name)}</span>${p.used_on ? `<br><span class="tiny muted">${ic('tag', 12)} ${esc(p.used_on)}</span>` : ''}</td><td>${esc(p.category || '—')}</td><td class="n"><b>${num(p.total)}</b> ${esc(p.unit)}<br><span class="tiny muted">${p.stock.map((s) => `${esc((d.stores.find((x) => x.id === s.store_id) || {}).name || '').split(' (')[0]}: ${num(s.qty)}`).join(' · ')}</span></td><td class="n">${p.reserved ? num(p.reserved) : '—'}</td><td class="n">${p.min_qty ?? '—'}</td><td class="n">${num(p.used_90)}</td>${SUP() ? `<td class="n">${money(p.total * p.cost)}</td>` : ''}</tr>`).join('')}</tbody></table></div>` : '<p class="empty">No parts match.</p>'}`;
+        const qi = $('#q', box); qi.oninput = (e) => { q = e.target.value.toLowerCase(); draw(); $('#q', v).focus(); const n = $('#q', v); n.setSelectionRange(n.value.length, n.value.length); };
+        $$('[data-f]', box).forEach((b) => b.onclick = () => { f = b.dataset.f; draw(); });
+        $$('tr[data-pid]', box).forEach((tr) => tr.onclick = () => partDlg(Number(tr.dataset.pid)));
+      }
+      if (tab === 'requests') {
+        box.innerHTML = d.requests.length ? `<div class="tw"><table><thead><tr><th>Request</th><th>Part</th><th class="n">Qty</th><th>Asked by</th><th>Status</th><th></th></tr></thead><tbody>${d.requests.map((r) => `<tr><td class="mono">PR-${r.id}<br><span class="tiny muted">${fdate(r.created_at)}</span></td><td><b>${esc(r.part_no)}</b> ${esc(r.name)}${r.note ? `<br><span class="tiny muted">${esc(r.note)}</span>` : ''}${r.number ? `<br><a class="tiny" href="#/job/${r.wo_id}">${esc(r.number)}</a>` : ''}</td><td class="n">${num(r.qty)} ${esc(r.unit)}</td><td>${esc(r.by_name || '—')}</td><td><span class="pill ${r.status === 'ordered' ? 's-in_progress' : 's-open'}">${r.status === 'ordered' ? 'Ordered' : 'Requested'}</span>${r.supplier ? `<br><span class="tiny muted">${esc(r.supplier)}</span>` : ''}</td><td class="n">${SUP() ? `<div class="row" style="justify-content:flex-end">${r.status === 'requested' ? `<button class="btn sm ghost" data-pr="ordered" data-id="${r.id}">Ordered</button>` : ''}<button class="btn sm" data-pr="received" data-id="${r.id}">Received</button><button class="link small" data-pr="cancelled" data-id="${r.id}">Cancel</button></div>` : ''}</td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">No open purchase requests.</p>';
+        $$('[data-pr]', box).forEach((b) => b.onclick = () => {
+          const r = d.requests.find((x) => String(x.id) === b.dataset.id), to = b.dataset.pr;
+          if (to === 'received') return dlg(`${head('Receive delivery', `PR-${r.id} · ${esc(r.part_no)} ${esc(r.name)}`)}<form class="stack" id="rf"><div class="grid3"><label class="f">Quantity received<input name="qty" type="number" step="any" value="${r.qty}" required></label><label class="f">Unit cost<input name="unit_cost" type="number" step="any" value="${r.unit_cost ?? ''}"></label><label class="f">Into store<select name="store_id">${opt(d.stores.map((s) => [s.id, s.name]), r.store_id)}</select></label></div><label class="f">Delivery note / invoice no.<input name="ref"></label><p class="err" id="re"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Receive into stock</button></div></form>`,
+            (dl) => $('#rf', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/purchase', { id: r.id, status: 'received', ...formData(e.target) }); dl.close(); toast('Received into stock'); route(); }, $('#re', dl)); }));
+          busy(b, async () => { await api('/purchase', { id: r.id, status: to }); toast(to === 'ordered' ? 'Marked as ordered' : 'Request cancelled'); route(); });
+        });
+      }
+      if (tab === 'stores') {
+        box.innerHTML = `<div class="grid2">${d.stores.map((s) => `<div class="card"><div class="card-h"><h2>${esc(s.name)}</h2>${SUP() ? `<button class="link small" data-es="${s.id}">Edit</button>` : ''}</div><p class="muted small">${esc(s.site || 'Not at a client site')}${s.notes ? ' · ' + esc(s.notes) : ''}</p><p style="margin-top:8px">${d.parts.filter((p) => p.stock.some((x) => x.store_id === s.id && x.qty > 0)).length} parts${SUP() ? ` · <b>${money(s.value)}</b>` : ''}</p>${SUP() ? `<button class="btn sm ghost" style="margin-top:10px" data-count="${s.id}">${ic('check', 14)} Stock count</button>` : ''}</div>`).join('')}</div>`;
+        $$('[data-es]', box).forEach((b) => b.onclick = () => storeDlg(d.stores.find((s) => String(s.id) === b.dataset.es)));
+        $$('[data-count]', box).forEach((b) => b.onclick = () => countDlg(d, Number(b.dataset.count)));
+      }
+      if (tab === 'usage') {
+        const used = [...d.parts].filter((p) => p.used_90 > 0).sort((a, b) => b.used_90 * b.cost - a.used_90 * a.cost).slice(0, 12);
+        const slow = d.parts.filter((p) => p.total > 0 && !p.used_90).sort((a, b) => b.total * b.cost - a.total * a.cost);
+        box.innerHTML = `<div class="grid2"><div class="card"><h2 style="margin-bottom:10px">Most used (last 90 days, by value)</h2>${bars(used.map((p) => [p.part_no + ' · ' + p.name, Math.round(p.used_90 * p.cost)]), (n) => money(n).replace(/\.\d\d$/, ''))}</div>
+          <div class="card"><h2 style="margin-bottom:4px">Slow moving</h2><p class="muted small" style="margin-bottom:10px">In stock but not used in 90 days. ${money(slow.reduce((a, p) => a + p.total * p.cost, 0))} tied up.</p>${slow.length ? `<div class="tw" style="box-shadow:none"><table><tbody>${slow.map((p) => `<tr><td><b>${esc(p.part_no)}</b><br><span class="tiny muted">${esc(p.name)}</span></td><td class="n">${num(p.total)} ${esc(p.unit)}</td><td class="n">${money(p.total * p.cost)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted small">Everything has moved recently.</p>'}</div></div>`;
+      }
+    };
+    draw();
+    $$('.chips [data-tab], .kpis [data-tab]', v).forEach((b) => b.onclick = () => { tab = b.dataset.tab; draw(); });
+    $$('.kpis [data-f]', v).forEach((b) => b.onclick = () => { tab = 'parts'; f = 'low'; draw(); });
+    const apt = $('#apt', v); if (apt) apt.onclick = () => partForm(null, d);
+    const ast = $('#ast', v); if (ast) ast.onclick = () => storeDlg(null);
+    const prq = $('#prq', v); if (prq) prq.onclick = () => purchaseDlg(null, null, route);
+    function storeDlg(s) {
+      s = s || {};
+      dlg(`${head(s.id ? 'Edit store' : 'Add a store', 'A workshop store, a site container or a van.')}<form class="stack" id="sf"><label class="f">Name<input name="name" value="${esc(s.name || '')}" required placeholder="e.g. Kariba site container"></label><label class="f">At client site <span class="hint">(optional)</span><select name="site_id">${opt(LK.sites.map((x) => [x.id, `${(LK.clients.find((c) => c.id === x.client_id) || {}).name} · ${x.name}`]), s.site_id, 'Not at a client site')}</select></label><label class="f">Notes<input name="notes" value="${esc(s.notes || '')}"></label><p class="err" id="se"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`,
+      (dl) => $('#sf', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/stores', { ...formData(e.target), id: s.id }); dl.close(); toast('Saved'); route(); }, $('#se', dl)); }));
+    }
+  }
+  function partForm(p, d) {
+    p = p || {}; const stores = LK.stores || [];
+    dlg(`${head(p.id ? 'Edit part' : 'Add a part to the catalogue')}<form class="stack" id="pf"><div class="grid3"><label class="f">Part number<input name="part_no" value="${esc(p.part_no || '')}" required></label><label class="f" style="grid-column:span 2">Description<input name="name" value="${esc(p.name || '')}" required></label></div>
+      <div class="grid3"><label class="f">Category<input name="category" value="${esc(p.category || '')}" list="cats"><datalist id="cats">${[...new Set(((d && d.parts) || []).map((x) => x.category).filter(Boolean))].map((c) => `<option>${esc(c)}</option>`).join('')}</datalist></label><label class="f">Unit<input name="unit" value="${esc(p.unit || 'each')}"></label><label class="f">Unit cost<input name="cost" type="number" step="any" min="0" value="${esc(p.cost ?? '')}"></label></div>
+      <div class="grid3"><label class="f">Minimum stock<input name="min_qty" type="number" step="any" min="0" value="${esc(p.min_qty ?? '')}"><span class="hint">Alert when stock falls to this</span></label><label class="f">Order quantity<input name="reorder_qty" type="number" step="any" min="0" value="${esc(p.reorder_qty ?? '')}"></label><label class="f">Supplier<input name="supplier" value="${esc(p.supplier || '')}"></label></div>
+      ${p.id ? '' : `<fieldset class="card" style="box-shadow:none"><legend class="small" style="font-weight:700;padding:0 6px">Opening stock (optional)</legend><div class="grid3"><label class="f">Store<select name="store_id">${opt(stores.map((s) => [s.id, s.name]), stores[0] ? stores[0].id : '')}</select></label><label class="f">Quantity<input name="qty" type="number" step="any" min="0"></label><label class="f">Bin / shelf<input name="bin"></label></div></fieldset>`}
+      <label class="f">Notes<input name="notes" value="${esc(p.notes || '')}"></label><p class="err" id="pe"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`,
+    (dl) => $('#pf', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/parts', { ...formData(e.target), id: p.id }); dl.close(); toast('Saved'); await refreshLK(); route(); }, $('#pe', dl)); }), 'wide');
+  }
+  async function partDlg(id) {
+    const r = await api('/stores/part/' + id), p = r.part, stores = LK.stores || [];
+    const total = r.stock.reduce((a, s) => a + s.qty, 0);
+    const kindL = { receive: 'Received', issue: 'Issued to job', return: 'Returned', adjust: 'Adjusted', transfer: 'Moved', count: 'Counted' };
+    dlg(`${head(esc(p.part_no + ' · ' + p.name), esc([p.category, p.supplier].filter(Boolean).join(' · ')))}
+      <div class="kpis" style="margin:0"><div class="kpi"><span>In stock</span><b>${num(total)}</b><small>${esc(p.unit)}</small></div><div class="kpi"><span>Unit cost</span><b>${money(p.cost)}</b><small>Average</small></div><div class="kpi ${p.min_qty != null && total <= p.min_qty ? 'alert' : ''}"><span>Minimum</span><b>${p.min_qty ?? '—'}</b><small>Order ${p.reorder_qty ?? '—'}</small></div></div>
+      <div class="grid2"><div><h3>Where it is</h3><div class="tw" style="box-shadow:none"><table><tbody>${r.stock.map((s) => `<tr><td>${esc(s.store)}${s.bin ? `<br><span class="tiny muted">Bin ${esc(s.bin)}</span>` : ''}</td><td class="n"><b>${num(s.qty)}</b>${s.reserved ? `<br><span class="tiny muted">${num(s.reserved)} held</span>` : ''}</td></tr>`).join('') || '<tr><td class="muted">Not in any store yet</td></tr>'}</tbody></table></div></div>
+        <div><h3>Used on</h3>${r.assets.length ? r.assets.map((a) => `<p class="small">${ic('tag', 13)} <b>${esc(a.tag)}</b> ${esc(a.name)} · ${a.qty}${a.on_pm ? ' · reserved for PM' : ''}</p>`).join('') : '<p class="muted small">Not linked to a machine.</p>'}${r.reservations.length ? `<h3 style="margin-top:10px">Held for jobs</h3>${r.reservations.map((x) => `<p class="small"><a href="#/job/${x.wo_id}">${esc(x.number)}</a> · ${num(x.qty)} in ${esc(x.store)}</p>`).join('')}` : ''}</div></div>
+      ${SUP() ? `<form class="card stack" id="mv" style="box-shadow:none"><h3>Record stock</h3><div class="grid3"><label class="f">What happened<select name="kind" id="mk">${opt([['receive', 'Delivery received'], ['count', 'Stock count (set the quantity)'], ['adjust', 'Adjust (+/−)'], ['transfer', 'Move to another store']], 'receive')}</select></label><label class="f">Store<select name="store_id">${opt(stores.map((s) => [s.id, s.name]), r.stock[0] ? r.stock[0].store_id : stores[0] && stores[0].id)}</select></label><label class="f">Quantity<input name="qty" type="number" step="any" required></label></div>
+        <div class="grid3"><label class="f" id="mto" hidden>To store<select name="to_store_id">${opt(stores.map((s) => [s.id, s.name]))}</select></label><label class="f" id="mcost">Unit cost<input name="unit_cost" type="number" step="any" min="0"></label><label class="f">Reference / note<input name="note"></label><label class="f">Bin / shelf<input name="bin"></label></div><p class="err" id="mve"></p><button class="btn ghost">Save</button></form>` : ''}
+      <h3>History</h3><div class="tw" style="box-shadow:none;max-height:260px;overflow:auto"><table><tbody>${r.moves.map((m) => `<tr><td>${fdate(m.created_at)}<br><span class="tiny muted">${esc(m.by_name || 'System')}</span></td><td>${esc(kindL[m.kind] || m.kind)}${m.number ? ` <a href="#/job/${m.wo_id}" class="tiny">${esc(m.number)}</a>` : ''}<br><span class="tiny muted">${esc(m.store)}${m.note ? ' · ' + esc(m.note) : ''}${m.ref && !m.number ? ' · ' + esc(m.ref) : ''}</span></td><td class="n ${m.qty < 0 ? 'bad' : 'ok'}">${m.qty > 0 ? '+' : ''}${num(m.qty)}</td></tr>`).join('') || '<tr><td class="muted">No movements yet.</td></tr>'}</tbody></table></div>
+      <div class="acts">${SUP() ? '<button class="btn ghost" id="ed">Edit part</button><button class="btn ghost" id="ln">Link to a machine</button>' : ''}<button class="btn" id="pr">Request a purchase</button></div>`,
+    (dl) => {
+      $$('a', dl).forEach((a) => a.addEventListener('click', () => dl.close()));
+      $('#pr', dl).onclick = () => { dl.close(); purchaseDlg(p.id, null, route); };
+      const ed = $('#ed', dl); if (ed) ed.onclick = () => { dl.close(); partForm(p, null); };
+      const ln = $('#ln', dl); if (ln) ln.onclick = () => { dl.close(); linkDlg(p); };
+      const mv = $('#mv', dl);
+      if (mv) {
+        const mk = $('#mk', dl), sync = () => { $('#mto', dl).hidden = mk.value !== 'transfer'; $('#mcost', dl).hidden = mk.value !== 'receive'; }; mk.onchange = sync; sync();
+        mv.addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { const x = formData(mv); const res = await api('/stock', { ...x, part_id: p.id }); toast(x.kind === 'count' ? `Counted. Difference ${res.diff > 0 ? '+' : ''}${res.diff}` : 'Saved'); dl.close(); await refreshLK(); partDlg(p.id); }, $('#mve', dl)); });
+      }
+    }, 'wide');
+  }
+  function linkDlg(p, assetId, done) {
+    dlg(`${head('Link part to a machine', p ? esc(p.part_no + ' · ' + p.name) : 'Spares list')}<form class="stack" id="lf">${p ? '' : `<label class="f">Part<select name="part_id" required>${opt((LK.parts || []).map((x) => [x.id, x.part_no + ' · ' + x.name]), '', 'Choose…')}</select></label>`}
+      ${assetId ? '' : `<label class="f">Machine<select name="asset_id" required>${opt(LK.assets.map((a) => [a.id, a.tag + ' · ' + a.name]), '', 'Choose…')}</select></label>`}
+      <div class="grid2"><label class="f">Quantity per job<input name="qty" type="number" step="any" min="1" value="1"></label><label class="check" style="align-self:end"><input type="checkbox" name="on_pm"> Reserve automatically for planned jobs</label></div>
+      <p class="err" id="le"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Link</button></div></form>`,
+    (dl) => $('#lf', dl).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); busy(e.submitter, async () => { await api('/parts', { link: { asset_id: assetId || x.asset_id, part_id: p ? p.id : x.part_id, qty: x.qty, on_pm: !!x.on_pm } }); dl.close(); toast('Linked'); if (done) done(); }, $('#le', dl)); }));
+  }
+  function countDlg(d, storeId) {
+    const store = d.stores.find((s) => s.id === storeId);
+    const lines = d.parts.filter((p) => p.stock.some((s) => s.store_id === storeId));
+    dlg(`${head('Stock count', esc(store.name) + ' · enter what is on the shelf')}<form class="stack" id="cf"><div class="tw" style="box-shadow:none;max-height:55vh;overflow:auto"><table><thead><tr><th>Part</th><th class="n">System</th><th class="n">Counted</th></tr></thead><tbody>${lines.map((p) => { const s = p.stock.find((x) => x.store_id === storeId); return `<tr><td><b>${esc(p.part_no)}</b><br><span class="tiny muted">${esc(p.name)}${s.bin ? ' · bin ' + esc(s.bin) : ''}</span></td><td class="n">${num(s.qty)}</td><td class="n"><input name="p${p.id}" type="number" step="any" min="0" style="max-width:90px" placeholder="${num(s.qty)}" inputmode="decimal"></td></tr>`; }).join('')}</tbody></table></div>
+      <p class="hint">Leave a line blank if you did not count it. Differences are saved as adjustments with a stock-count note.</p><p class="err" id="ce"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save count</button></div></form>`,
+    (dl) => $('#cf', dl).addEventListener('submit', (e) => { e.preventDefault(); const x = formData(e.target); busy(e.submitter, async () => { let n = 0, diff = 0; for (const [k, val] of Object.entries(x)) { if (val === '') continue; const r = await api('/stock', { part_id: k.slice(1), store_id: storeId, qty: val, kind: 'count' }); n++; if (r.diff) diff++; } dl.close(); toast(`${n} line${n === 1 ? '' : 's'} counted, ${diff} adjusted`); await refreshLK(); route(); }, $('#ce', dl)); }), 'wide');
+  }
+
+  /* ---------- analysis ---------- */
+  async function analysis(v) {
+    setTitle('Analysis');
+    const t = today(); let from = t.slice(0, 8) + '01', to = t, cid = '';
+    v.innerHTML = `<div class="card row"><label class="f">From<input type="date" id="fr" value="${from}"></label><label class="f">To<input type="date" id="to" value="${to}"></label><label class="f">Client<select id="cl">${opt(LK.clients.map((c) => [c.id, c.name]), '', 'All clients')}</select></label>
+      <div class="row" style="align-self:end">${[['This month', 0], ['Last month', -1], ['Last 3 months', 90], ['This year', 365]].map(([l, n]) => `<button class="chip" data-p="${n}">${l}</button>`).join('')}<button class="btn" id="pr">${ic('printer', 16)} Monthly report (PDF)</button></div></div><div id="an"><p class="loading">Working it out…</p></div>`;
+    let D = null;
+    const load = async () => {
+      D = await api(`/analysis?from=${from}&to=${to}${cid ? '&client_id=' + cid : ''}`); const S = D.summary;
+      const L = D.labour.filter((p) => p.available);
+      $('#an', v).innerHTML = `<h2 class="sec">Reliability</h2><div class="kpis">
+        <div class="kpi"><span>Breakdowns</span><b>${S.failures}</b><small>Unplanned jobs on machines</small></div><div class="kpi ${S.downtime > 24 ? 'alert' : ''}"><span>Downtime</span><b>${num(S.downtime)} h</b><small>Machines stopped</small></div>
+        <div class="kpi"><span>MTBF</span><b>${S.mtbf == null ? '—' : num(S.mtbf, 0) + ' h'}</b><small>Mean time between failures</small></div><div class="kpi"><span>MTTR</span><b>${S.mttr == null ? '—' : num(S.mttr) + ' h'}</b><small>Mean time to repair</small></div>
+        <div class="kpi"><span>Planned work</span><b>${pctTxt(S.planned_pct)}</b><small>${S.planned} planned · ${S.unplanned} unplanned</small></div><div class="kpi ${S.pm_compliance != null && S.pm_compliance < 80 ? 'alert' : ''}"><span>PM compliance</span><b>${pctTxt(S.pm_compliance)}</b><small>${S.pm_on_time} of ${S.pm_due} done on time</small></div>
+        <div class="kpi ${S.backlog_weeks > 3 ? 'alert' : ''}"><span>Backlog</span><b>${num(S.backlog_weeks)} wk</b><small>${S.open_jobs} open jobs · ${num(S.backlog_hours, 0)} h</small></div>${S.oee != null ? `<div class="kpi"><span>OEE</span><b>${S.oee}%</b><small>Average of operator logs</small></div>` : ''}</div>
+        <div class="cols2"><div class="stack">
+          <div class="card"><div class="card-h"><h2>Bad actors</h2><span class="muted small">Machines costing the most downtime</span></div>${D.bad_actors.length ? `<div class="tw" style="box-shadow:none"><table><thead><tr><th>Machine</th><th class="n">Failures</th><th class="n">Downtime</th><th class="n">MTBF</th><th class="n">MTTR</th><th class="n">Avail.</th><th class="n">Cost</th></tr></thead><tbody>${D.bad_actors.map((a) => `<tr><td><b>${esc(a.tag)}</b> <span class="tiny muted">${esc(a.criticality || '')}</span><br><span class="tiny muted">${esc(a.name)}</span></td><td class="n">${a.failures}</td><td class="n">${num(a.downtime)} h</td><td class="n">${a.mtbf == null ? '—' : num(a.mtbf, 0) + ' h'}</td><td class="n">${a.mttr == null ? '—' : num(a.mttr) + ' h'}</td><td class="n">${a.availability}%</td><td class="n">${money(a.cost).replace(/\.\d\d$/, '')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No machine jobs in this period.</p>'}</div>
+          <div class="card"><div class="card-h"><h2>Labour utilisation</h2><a class="link small" href="#/labour">Details</a></div><p class="muted small" style="margin-bottom:10px">Hours booked against hours available (${SET.shift_hours || 8} h × ${SET.work_days || 5} days a week). Wrench time = hands-on share of clocked time.</p>
+            ${L.length ? `<div class="tw" style="box-shadow:none"><table><thead><tr><th>Who</th><th class="n">Available</th><th class="n">Booked</th><th>Utilisation</th><th class="n">Wrench</th><th class="n">Overtime</th><th class="n">Estimates</th></tr></thead><tbody>${L.map((p) => `<tr><td><b>${esc(p.name)}</b><br><span class="tiny muted">${esc(p.trade || '')} · ${p.jobs_done} done</span></td><td class="n">${p.available} h</td><td class="n">${num(p.booked)} h</td><td style="min-width:110px">${meter(p.utilisation)}<span class="tiny">${pctTxt(p.utilisation)}</span></td><td class="n">${pctTxt(p.wrench)}</td><td class="n">${p.overtime ? num(p.overtime) + ' h' : '—'}</td><td class="n">${pctTxt(p.estimate_accuracy)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No working days in this period yet.</p>'}
+            ${(() => { const g = {}; L.forEach((p) => { const k = p.trade || 'Other'; g[k] = g[k] || [0, 0]; g[k][0] += p.booked; g[k][1] += p.available; }); const rows = Object.entries(g).map(([k, [b, a]]) => [k, a ? Math.round((b / a) * 100) : 0]); return rows.length ? `<h3 style="margin:12px 0 8px">By trade</h3>${bars(rows, (n) => n + '%')}` : ''; })()}</div>
+          <div class="card"><div class="card-h"><h2>Booked vs actual time</h2><span class="muted small">Completed jobs, biggest differences first</span></div>${D.booked_vs_actual.length ? `<div class="tw" style="box-shadow:none"><table><thead><tr><th>Job</th><th class="n">Estimate</th><th class="n">Booked</th><th class="n">On the clock</th><th></th></tr></thead><tbody>${D.booked_vs_actual.slice(0, 12).map((j) => `<tr class="click" data-job="${j.id}"><td><span class="mono">${esc(j.number)}</span><br><span class="tiny muted">${esc(j.title)}</span></td><td class="n">${dur(j.est)}</td><td class="n">${dur(j.booked)}</td><td class="n">${dur(j.actual)}</td><td>${j.flag ? '<span class="pill s-on_hold">Check</span>' : j.actual == null ? '<span class="pill">No clock</span>' : '<span class="pill s-approved">OK</span>'}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No completed jobs in this period.</p>'}</div>
+        </div><div class="stack">
+          <div class="card"><h2 style="margin-bottom:10px">Cost</h2><dl class="dl"><div><dt>Total (labour + parts)</dt><dd><b>${money(S.cost)}</b></dd></div><div><dt>Labour</dt><dd>${money(S.labour_cost)}</dd></div><div><dt>Parts and materials</dt><dd>${money(S.parts_cost)}</dd></div><div><dt>Stock on hand</dt><dd>${money(S.stock_value)}${S.low_parts ? ` · <a href="#/stores">${S.low_parts} low</a>` : ''}</dd></div></dl>
+            <h3 style="margin:14px 0 8px">By month</h3>${bars(D.by_month.map(([m, n]) => [fdate(m + '-01').slice(2), n]), (n) => money(n).replace(/\.\d\d$/, ''))}<h3 style="margin:14px 0 8px">By client</h3>${bars(D.by_client, (n) => money(n).replace(/\.\d\d$/, ''))}</div>
+          <div class="card"><h2 style="margin-bottom:10px">Why machines fail</h2><h3 style="margin-bottom:6px">Component</h3>${bars(D.pareto.component)}<h3 style="margin:12px 0 6px">Cause</h3>${bars(D.pareto.cause)}</div>
+          <div class="card"><h2 style="margin-bottom:10px">Spares used</h2>${bars(D.spares.map((s) => [s.part_no + ' · ' + s.name, Math.round(s.value)]), (n) => money(n).replace(/\.\d\d$/, ''))}</div>
+          <div class="card"><h2 style="margin-bottom:10px">Condition and TPM</h2><dl class="dl"><div><dt>Condition readings</dt><dd>${S.cm_readings} · <span class="bad">${S.cm_alarms} alarm</span> · ${S.cm_warns} warning</dd></div><div><dt>Operator checks</dt><dd>${S.tpm_checks} · ${S.tpm_issues || 0} problems found</dd></div><div><dt>OEE</dt><dd>${S.oee == null ? '—' : S.oee + '%'}</dd></div></dl></div>
+          <div class="card"><h2 style="margin-bottom:10px">Jobs by type</h2>${bars(D.by_type)}</div>
+        </div></div>`;
+      $$('[data-job]', v).forEach((tr) => tr.onclick = () => { location.hash = '#/job/' + tr.dataset.job; });
+    };
+    const go = () => { $('#an', v).innerHTML = '<p class="loading">Working it out…</p>'; load().catch((e) => { $('#an', v).innerHTML = `<div class="banner bad">${esc(e.message)}</div>`; }); };
+    go();
+    $('#fr', v).onchange = (e) => { from = e.target.value; go(); }; $('#to', v).onchange = (e) => { to = e.target.value; go(); }; $('#cl', v).onchange = (e) => { cid = e.target.value; go(); };
+    $$('[data-p]', v).forEach((b) => b.onclick = () => { const n = +b.dataset.p; to = t; if (n === 0) from = t.slice(0, 8) + '01'; else if (n === -1) { const d = new Date(t.slice(0, 8) + '01T00:00:00Z'); d.setUTCDate(0); to = d.toISOString().slice(0, 10); from = to.slice(0, 8) + '01'; } else if (n === 365) from = t.slice(0, 5) + '01-01'; else from = dayShift(-n); $('#fr', v).value = from; $('#to', v).value = to; go(); });
+    $('#pr', v).onclick = () => { if (D) monthlyReport(D, cid ? (LK.clients.find((c) => String(c.id) === String(cid)) || {}).name : ''); };
+  }
+  function monthlyReport(D, client) {
+    const S = D.summary, m = (n) => money(n).replace(/\.\d\d$/, '');
+    const tbl = (head, rows) => `<table><thead><tr>${head.map((h, i) => `<th${i ? ' class="n"' : ''}>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c, i) => `<td${i ? ' class="n"' : ''}>${c}</td>`).join('')}</tr>`).join('') || `<tr><td colspan="${head.length}" class="muted">Nothing in this period.</td></tr>`}</tbody></table>`;
+    printDoc(`Maintenance report ${D.from} to ${D.to}`, `${docHead('Maintenance management report', `${fdate(D.from)} to ${fdate(D.to)}${client ? ' · ' + esc(client) : ''}`)}
+      <div class="k"><div><span>Jobs</span><b>${S.jobs}</b></div><div><span>Completed</span><b>${S.completed}</b></div><div><span>Planned work</span><b>${pctTxt(S.planned_pct)}</b></div><div><span>PM compliance</span><b>${pctTxt(S.pm_compliance)}</b></div>
+      <div><span>Breakdowns</span><b>${S.failures}</b></div><div><span>Downtime</span><b>${num(S.downtime)} h</b></div><div><span>MTBF / MTTR</span><b>${S.mtbf == null ? '—' : num(S.mtbf, 0)} / ${S.mttr == null ? '—' : num(S.mttr)} h</b></div><div><span>Backlog</span><b>${num(S.backlog_weeks)} weeks</b></div>
+      <div><span>Total cost</span><b>${m(S.cost)}</b></div><div><span>Labour</span><b>${m(S.labour_cost)}</b></div><div><span>Parts</span><b>${m(S.parts_cost)}</b></div><div><span>OEE</span><b>${S.oee == null ? '—' : S.oee + '%'}</b></div></div>
+      <h2>Bad actors (most downtime)</h2>${tbl(['Machine', 'Failures', 'Downtime h', 'MTBF h', 'MTTR h', 'Availability', 'Cost'], D.bad_actors.map((a) => [`<b>${esc(a.tag)}</b> ${esc(a.name)}`, a.failures, num(a.downtime), a.mtbf == null ? '—' : num(a.mtbf, 0), a.mttr == null ? '—' : num(a.mttr), a.availability + '%', m(a.cost)]))}
+      <h2>Why machines failed</h2>${tbl(['Component', 'Breakdowns'], D.pareto.component.map(([k, n]) => [esc(k), n]))}${tbl(['Cause', 'Breakdowns'], D.pareto.cause.map(([k, n]) => [esc(k), n]))}
+      <h2>Labour utilisation</h2>${tbl(['Technician', 'Available h', 'Booked h', 'Utilisation', 'Wrench time', 'Overtime h'], D.labour.filter((p) => p.available).map((p) => [`${esc(p.name)} <span class="muted">${esc(p.trade || '')}</span>`, p.available, num(p.booked), pctTxt(p.utilisation), pctTxt(p.wrench), num(p.overtime)]))}
+      <h2>Booked vs actual time</h2>${tbl(['Job', 'Estimate', 'Booked', 'On the clock', ''], D.booked_vs_actual.slice(0, 15).map((j) => [`${esc(j.number)} ${esc(j.title)}`, dur(j.est), dur(j.booked), dur(j.actual), j.flag ? '<b class="bad">Check</b>' : '']))}
+      <h2>Cost by client</h2>${tbl(['Client', 'Cost'], D.by_client.map(([k, n]) => [esc(k), m(n)]))}
+      <h2>Spares used</h2>${tbl(['Part', 'Qty', 'Value'], D.spares.map((s) => [`${esc(s.part_no)} ${esc(s.name)}`, num(s.qty) + ' ' + esc(s.unit), m(s.value)]))}
+      <p class="muted" style="margin-top:18px">Generated ${fdate(today())} by ${esc(ME.name)} from the ${esc(SET.short || '')} work order system.</p>`);
+  }
+  async function labourView(v) {
+    setTitle(SUP() ? 'Labour' : 'My hours');
+    const t = today(); let from = t.slice(0, 8) + '01', to = t;
+    v.innerHTML = `<div class="card row"><label class="f">From<input type="date" id="fr" value="${from}"></label><label class="f">To<input type="date" id="to" value="${to}"></label></div><div id="lb"></div>`;
+    const draw = async () => {
+      const d = await api(`/labour?from=${from}&to=${to}`);
+      const me = d.people[0];
+      $('#lb', v).innerHTML = `${!SUP() && me ? `<div class="kpis"><div class="kpi"><span>Hours booked</span><b>${num(me.booked)}</b><small>of ${me.available} h available</small></div><div class="kpi"><span>Utilisation</span><b>${pctTxt(me.utilisation)}</b></div><div class="kpi"><span>Wrench time</span><b>${pctTxt(me.wrench)}</b><small>Hands-on share of clocked time</small></div><div class="kpi"><span>Overtime</span><b>${num(me.overtime)} h</b></div><div class="kpi"><span>Travel / waiting</span><b>${num(me.travel)} / ${num(me.wait)} h</b></div><div class="kpi"><span>Estimates hit</span><b>${pctTxt(me.estimate_accuracy)}</b></div></div><p class="muted small">Only you and your managers see these figures.</p>` : ''}
+        ${SUP() ? `<div class="tw"><table><thead><tr><th>Who</th><th class="n">Available</th><th class="n">Booked</th><th>Utilisation</th><th class="n">Hands-on</th><th class="n">Travel</th><th class="n">Waiting</th><th class="n">Wrench</th><th class="n">Overtime</th><th class="n">Estimates</th></tr></thead><tbody>${d.people.map((p) => `<tr><td><b>${esc(p.name)}</b><br><span class="tiny muted">${esc(p.trade || '')}</span></td><td class="n">${p.available}</td><td class="n">${num(p.booked)}</td><td style="min-width:110px">${meter(p.utilisation)}<span class="tiny">${pctTxt(p.utilisation)}</span></td><td class="n">${num(p.work)}</td><td class="n">${num(p.travel)}</td><td class="n">${num(p.wait)}</td><td class="n">${pctTxt(p.wrench)}</td><td class="n">${num(p.overtime)}</td><td class="n">${pctTxt(p.estimate_accuracy)}</td></tr>`).join('')}</tbody></table></div>` : ''}
+        <div class="card"><div class="card-h"><h2>Jobs: booked vs on the clock</h2></div>${d.jobs.length ? `<div class="tw" style="box-shadow:none"><table><thead><tr><th>Job</th><th class="n">Estimate</th><th class="n">Booked</th><th class="n">On the clock</th><th></th></tr></thead><tbody>${d.jobs.map((j) => `<tr class="click" data-job="${j.id}"><td><span class="mono">${esc(j.number)}</span><br><span class="tiny muted">${esc(j.title)}</span></td><td class="n">${dur(j.est)}</td><td class="n">${dur(j.booked)}</td><td class="n">${dur(j.actual)}</td><td>${j.flag ? '<span class="pill s-on_hold">Check</span>' : j.actual == null ? '<span class="pill">No clock</span>' : '<span class="pill s-approved">OK</span>'}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No hours booked in this period.</p>'}<p class="muted small" style="margin-top:8px">Use Start / Stop on each job so the clock time is recorded. Big differences between booked and clocked hours are flagged for the foreman.</p></div>`;
+      $$('[data-job]', v).forEach((tr) => tr.onclick = () => { location.hash = '#/job/' + tr.dataset.job; });
+    };
+    await draw();
+    $('#fr', v).onchange = (e) => { from = e.target.value; draw(); }; $('#to', v).onchange = (e) => { to = e.target.value; draw(); };
+  }
+
+  /* ---------- condition monitoring ---------- */
+  async function cmView(v) {
+    setTitle('Condition monitoring');
+    const d = await api('/cm'); const K = d.kinds;
+    let f = 'all';
+    v.innerHTML = `<div class="between"><p class="muted" style="max-width:72ch">Readings taken on the machines. A reading past the alarm limit creates a job automatically; a warning tells the foreman to watch the trend.</p>${SUP() ? `<button class="btn" id="add">${ic('plus', 16)} Measurement point</button>` : ''}</div>
+      <div class="kpis"><div class="kpi alert"><span>In alarm</span><b>${d.items.filter((p) => p.last_status === 'alarm').length}</b></div><div class="kpi"><span>Warning</span><b>${d.items.filter((p) => p.last_status === 'warn').length}</b></div><div class="kpi"><span>Reading due</span><b>${d.items.filter((p) => p.overdue).length}</b></div><div class="kpi"><span>Points</span><b>${d.items.length}</b></div></div>
+      <div class="chips">${[['all', 'All'], ['bad', 'Alarm and warning'], ['due', 'Reading due']].map(([k, l]) => `<button class="chip" data-f="${k}" aria-pressed="${k === f}">${l}</button>`).join('')}</div><div id="cl" class="cmgrid"></div>`;
+    const draw = () => {
+      const l = d.items.filter((p) => f === 'all' || (f === 'bad' ? ['alarm', 'warn'].includes(p.last_status) : p.overdue));
+      $('#cl', v).innerHTML = l.map((p) => `<article class="card cm cm-${p.last_status || 'none'}"><div class="between" style="align-items:flex-start"><div><b>${esc(p.tag)}</b> <span class="muted small">${esc(p.asset)}</span><br><span class="small">${esc(p.name)}</span></div>${cmPill(p.last_status)}</div>
+        <div class="between" style="align-items:flex-end;margin-top:8px"><div><b style="font-size:24px">${p.last_value != null ? num(p.last_value, 2) : '—'}</b> <span class="muted">${esc(p.unit || '')}</span><br><span class="tiny muted">${p.last_at ? ago(p.last_at) : 'Never read'}${p.warn != null || p.alarm != null ? ` · ${p.direction === 'low' ? 'low' : 'high'} limits ${p.warn ?? '—'} / ${p.alarm ?? '—'}` : ''}</span></div>${spark(p.history.map((h) => h.value), { lines: [p.warn, p.alarm], label: p.name + ' trend' })}</div>
+        <form class="row" data-pt="${p.id}" style="margin-top:10px"><input name="value" type="number" step="any" inputmode="decimal" required placeholder="New reading (${esc(p.unit || '')})" style="flex:1;min-width:120px"><button class="btn sm">Save</button>${SUP() ? `<button class="link small" type="button" data-edit="${p.id}">Edit</button>` : ''}</form>
+        ${p.due ? `<p class="tiny ${p.overdue ? 'bad' : 'muted'}" style="margin-top:6px">Next reading ${p.overdue ? 'due now' : 'due ' + fdate(p.due)} · every ${p.interval_days} days</p>` : ''}</article>`).join('') || '<p class="empty">Nothing here.</p>';
+      $$('form[data-pt]', v).forEach((fm) => fm.addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { const r = await api('/cm/readings', { point_id: fm.dataset.pt, value: fm.value.value }); toast(r.job ? `ALARM: job ${r.job} created` : r.status === 'warn' ? 'Saved: warning, watch this one' : 'Reading saved', r.status !== 'ok'); route(); }); }));
+      $$('[data-edit]', v).forEach((b) => b.onclick = () => pointDlg(d.items.find((p) => String(p.id) === b.dataset.edit)));
+    };
+    draw();
+    $$('[data-f]', v).forEach((b) => b.onclick = () => { f = b.dataset.f; $$('[data-f]', v).forEach((x) => x.setAttribute('aria-pressed', x === b)); draw(); });
+    const add = $('#add', v); if (add) add.onclick = () => pointDlg(null);
+    function pointDlg(p) {
+      p = p || { direction: 'high', kind: 'vibration' };
+      dlg(`${head(p.id ? 'Edit measurement point' : 'Add a measurement point')}<form class="stack" id="pf"><label class="f">Machine<select name="asset_id" required>${opt(LK.assets.map((a) => [a.id, a.tag + ' · ' + a.name]), p.asset_id, 'Choose…')}</select></label>
+        <div class="grid2"><label class="f">What is measured<select name="kind" id="pk">${opt(Object.entries(K).map(([k, x]) => [k, x[0]]), p.kind)}</select></label><label class="f">Name<input name="name" value="${esc(p.name || '')}" placeholder="e.g. Motor DE bearing vibration"></label></div>
+        <div class="grid3"><label class="f">Unit<input name="unit" id="pu" value="${esc(p.unit || K[p.kind][1])}"></label><label class="f">Warning at<input name="warn" type="number" step="any" value="${esc(p.warn ?? '')}"></label><label class="f">Alarm at<input name="alarm" type="number" step="any" value="${esc(p.alarm ?? '')}"></label></div>
+        <div class="grid2"><label class="f">Bad when the value is<select name="direction">${opt([['high', 'Too high (vibration, temperature, current)'], ['low', 'Too low (insulation, pressure)']], p.direction)}</select></label><label class="f">Read every (days)<input name="interval_days" type="number" min="1" value="${esc(p.interval_days ?? '')}"></label></div>
+        <p class="hint">Run hours: choose "Run hours" so readings update the machine's hour meter and running-hour maintenance plans.</p><p class="err" id="pe"></p>
+        <div class="acts">${p.id ? '<button class="btn bad" type="button" id="rm">Remove</button>' : ''}<button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`,
+      (dl) => {
+        $('#pk', dl).onchange = (e) => { $('#pu', dl).value = K[e.target.value][1]; };
+        $('#pf', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api('/cm/points', { ...formData(e.target), id: p.id }); dl.close(); toast('Saved'); route(); }, $('#pe', dl)); });
+        const rm = $('#rm', dl); if (rm) rm.onclick = () => busy(rm, async () => { await api('/cm/points', { id: p.id, remove: true }); dl.close(); route(); });
+      }, 'wide');
+    }
+  }
+
+  /* ---------- TPM ---------- */
+  let qrLib = null;
+  const loadQR = () => qrLib || (qrLib = new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'; s.onload = () => res(window.QRCode); s.onerror = () => { qrLib = null; rej(new Error('Could not load the QR code maker. Check the connection.')); }; document.head.appendChild(s); }));
+  async function qrDlg(a) {
+    const r = await api('/tpm', { asset_id: a.id, qr: true });
+    const link = `${location.origin}/tpm.html?t=${r.token}`;
+    dlg(`${head('Machine QR code', esc(a.tag + ' · ' + a.name))}<div class="qrwrap"><div id="qr" class="qr"></div><div><p>Stick this on the machine. Operators scan it with their phone camera to do the daily checks, tag a fault or log production (OEE). No login needed.</p><input readonly value="${esc(link)}" aria-label="Link"><div class="row" style="margin-top:10px"><button class="btn" id="pq">${ic('printer', 16)} Print label</button><a class="btn ghost" href="${esc(link)}" target="_blank" rel="noopener">Open page</a><button class="link small" id="nw">New code (old one stops working)</button></div></div></div>`,
+    async (dl) => {
+      try { const Q = await loadQR(); new Q($('#qr', dl), { text: link, width: 200, height: 200, correctLevel: Q.CorrectLevel.M }); } catch (e) { $('#qr', dl).textContent = e.message; }
+      $('#pq', dl).onclick = () => { const img = $('#qr img', dl) || $('#qr canvas', dl); const src = img ? (img.tagName === 'CANVAS' ? img.toDataURL() : img.src) : ''; printDoc('QR ' + a.tag, `<div style="border:2px solid #15171b;border-radius:14px;padding:18px;width:90mm;margin:0 auto;text-align:center"><b style="font-size:13px">${esc(SET.short || '')} · operator checks</b><img src="${src}" alt="" style="width:62mm;height:62mm;display:block;margin:10px auto"><div style="font:700 22px system-ui">${esc(a.tag)}</div><div>${esc(a.name)}</div><p class="muted" style="margin-top:8px">Scan with your phone camera: daily checks, fault tag, production log</p></div>`); };
+      $('#nw', dl).onclick = () => busy($('#nw', dl), async () => { await api('/tpm', { asset_id: a.id, qr: true, renew: true }); dl.close(); toast('New code made. Print a new label.'); qrDlg(a); });
+    }, 'wide');
+  }
+  async function tpmView(v) {
+    setTitle('TPM & OEE');
+    const d = await api('/tpm'); const t = today();
+    v.innerHTML = `<p class="muted" style="max-width:75ch">Operators look after their own machines: they scan the QR code on the machine for the daily clean, inspect, lubricate and tighten checks, raise a fault tag (it becomes a work request) and log production for OEE.</p>
+      <div class="kpis"><div class="kpi"><span>Checks this week</span><b>${d.assets.reduce((a, x) => a + x.checks_7, 0)}</b></div><div class="kpi"><span>Machines checked today</span><b>${d.assets.filter((a) => a.last_check === t).length}</b><small>of ${d.assets.length}</small></div><div class="kpi ${d.assets.some((a) => a.issues_30) ? 'alert' : ''}"><span>Problems found (30 days)</span><b>${d.assets.reduce((a, x) => a + x.issues_30, 0)}</b></div>
+        <div class="kpi"><span>Latest OEE</span><b>${d.oee.length ? (() => { const o = d.oee[0]; const A = (o.planned_min - o.downtime_min) / o.planned_min, P = Math.min(1, o.total_units / Math.max(1e-9, (o.planned_min - o.downtime_min) * o.ideal_rate)), Q = o.total_units ? o.good_units / o.total_units : 0; return Math.round(A * P * Q * 1000) / 10 + '%'; })() : '—'}</b><small>${d.oee.length ? esc(d.oee[0].tag) + ' · ' + fdate(d.oee[0].date) : 'No logs yet'}</small></div></div>
+      <div class="tw"><table><thead><tr><th>Machine</th><th>Client / site</th><th class="n">Checks (7 days)</th><th>Last check</th><th class="n">Problems (30 days)</th><th>Run hours</th><th></th></tr></thead><tbody>${d.assets.map((a) => `<tr><td><b>${esc(a.tag)}</b><br><span class="tiny muted">${esc(a.name)}</span></td><td>${esc(a.client)}<br><span class="tiny muted">${esc(a.site)}</span></td><td class="n">${a.checks_7}</td><td>${a.last_check ? (a.last_check === t ? '<span class="pill s-approved">Today</span>' : fdate(a.last_check)) : '<span class="muted">Never</span>'}</td><td class="n">${a.issues_30 || '—'}</td><td>${a.run_hours != null ? num(a.run_hours, 0) + ' h' : '—'}</td><td class="n"><div class="row" style="justify-content:flex-end"><button class="btn sm ghost" data-qr="${a.id}">${ic('tag', 14)} QR code</button><button class="link small" data-items="${a.id}">Checklist</button></div></td></tr>`).join('')}</tbody></table></div>
+      <div class="grid2"><div class="card"><h2 style="margin-bottom:10px">Recent operator checks</h2>${d.logs.length ? d.logs.slice(0, 12).map((l) => `<div class="between" style="padding:7px 0;border-top:1px solid var(--line2)"><span><b>${esc(l.tag)}</b> · ${esc(l.operator)} <span class="tiny muted">${esc(l.shift || '')} · ${fdate(l.date)}</span>${l.issues ? `<br><span class="tiny bad">${l.results.filter((r) => !r.ok).map((r) => esc(r.item + (r.note ? ': ' + r.note : ''))).join('; ')}</span>` : ''}</span>${l.issues ? `<span class="pill s-on_hold">${l.issues} problem${l.issues > 1 ? 's' : ''}</span>` : '<span class="pill s-approved">All OK</span>'}</div>`).join('') : '<p class="muted">No checks yet. Print a QR code and stick it on a machine.</p>'}</div>
+        <div class="card"><h2 style="margin-bottom:10px">OEE log</h2>${d.oee.length ? `<div class="tw" style="box-shadow:none"><table><thead><tr><th>Date</th><th>Machine</th><th class="n">Avail.</th><th class="n">Perf.</th><th class="n">Quality</th><th class="n">OEE</th></tr></thead><tbody>${d.oee.slice(0, 14).map((o) => { const A = (o.planned_min - o.downtime_min) / o.planned_min, P = Math.min(1, o.total_units / Math.max(1e-9, (o.planned_min - o.downtime_min) * o.ideal_rate)), Q = o.total_units ? o.good_units / o.total_units : 0, r = (x) => Math.round(x * 1000) / 10 + '%'; return `<tr><td>${fdate(o.date)}<br><span class="tiny muted">${esc(o.shift || '')}</span></td><td>${esc(o.tag)}</td><td class="n">${r(A)}</td><td class="n">${r(P)}</td><td class="n">${r(Q)}</td><td class="n"><b>${r(A * P * Q)}</b></td></tr>`; }).join('')}</tbody></table></div><p class="tiny muted" style="margin-top:8px">OEE = availability × performance × quality. 85% is world class; 60% is typical.</p>` : '<p class="muted">No production logged yet.</p>'}</div></div>`;
+    $$('[data-qr]', v).forEach((b) => b.onclick = () => busy(b, () => qrDlg(d.assets.find((a) => String(a.id) === b.dataset.qr))));
+    $$('[data-items]', v).forEach((b) => b.onclick = async () => {
+      const a = d.assets.find((x) => String(x.id) === b.dataset.items);
+      const cur = a.own_items ? (await api('/public/tpm/' + (await api('/tpm', { asset_id: a.id, qr: true })).token)).items.map((i) => i.item) : (d.defaults[a.discipline] || d.defaults.Mechanical);
+      dlg(`${head('Operator checklist', esc(a.tag + ' · ' + a.name))}<form class="stack" id="tf"><label class="f">One check per line<textarea name="items" rows="10">${esc(cur.join('\n'))}</textarea><span class="hint">${a.own_items ? 'Custom list for this machine.' : 'This is the standard list for ' + esc(a.discipline || 'Mechanical') + '. Change it to make a list for this machine.'}</span></label><p class="err" id="te"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save list</button></div></form>`,
+      (dl) => $('#tf', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { const items = e.target.items.value.split('\n').map((x) => x.trim()).filter(Boolean); await api('/tpm', { asset_id: a.id, items }); dl.close(); toast('Checklist saved'); route(); }, $('#te', dl)); }), 'wide');
+    });
+  }
+
+  /* ---------- projects ---------- */
+  const PST = { planning: 'Planning', active: 'Active', on_hold: 'On hold', done: 'Done', cancelled: 'Cancelled' };
+  const pst = (s) => `<span class="pill ${s === 'active' ? 's-in_progress' : s === 'done' ? 's-approved' : s === 'on_hold' ? 's-on_hold' : ''}">${PST[s] || s}</span>`;
+  async function projectsView(v, id) {
+    if (id) return projectView(v, id);
+    setTitle('Projects');
+    const d = await api('/projects');
+    v.innerHTML = `<div class="between"><p class="muted" style="max-width:70ch">${ME.role === 'client' ? 'Your projects with us and how far they are.' : 'Installations, upgrades and shutdowns run as projects: milestones, linked work orders and budget against actual (labour, parts and subcontractors).'}</p>${SUP() ? `<button class="btn" id="add">${ic('plus', 16)} New project</button>` : ''}</div>
+      <div class="grid2">${d.items.map((p) => `<a class="card prj" href="#/projects/${p.id}"><div class="between" style="align-items:flex-start"><div><span class="mono muted small">${esc(p.number)}</span><h2>${esc(p.name)}</h2><p class="muted small">${esc(p.client || '')}${p.site ? ' · ' + esc(p.site) : ''}</p></div>${pst(p.status)}</div>
+        <div style="margin-top:12px"><div class="between small"><span>Progress</span><b>${p.progress}%</b></div>${meter(p.progress, 101)}</div>
+        ${p.budget != null && p.spent != null ? `<div style="margin-top:10px"><div class="between small"><span>Budget used</span><b>${money(p.spent).replace(/\.\d\d$/, '')} of ${money(p.budget).replace(/\.\d\d$/, '')}</b></div>${meter(p.budget_pct, 90)}</div>` : ''}
+        <p class="tiny muted" style="margin-top:10px">${p.jobs} job${p.jobs === 1 ? '' : 's'} · ${p.ms_done}/${p.ms_total} milestones${p.end_date ? ' · finish ' + fdate(p.end_date) : ''}</p></a>`).join('') || '<p class="empty">No projects yet.</p>'}</div>`;
+    const add = $('#add', v); if (add) add.onclick = () => projectForm(null);
+  }
+  function projectForm(p) {
+    p = p || { status: 'planning' };
+    const mgrs = LK.staff.filter((s) => ['manager', 'admin', 'foreman'].includes(s.role));
+    dlg(`${head(p.id ? 'Edit project' : 'New project')}<form class="stack" id="pf"><label class="f">Project name<input name="name" value="${esc(p.name || '')}" required placeholder="e.g. Line 3 conveyor installation"></label>
+      <div class="grid3"><label class="f">Client<select name="client_id" id="pc" required>${opt(LK.clients.map((c) => [c.id, c.name]), p.client_id, 'Choose…')}</select></label><label class="f">Site<select name="site_id" id="ps"></select></label><label class="f">Project manager<select name="manager_id">${opt(mgrs.map((s) => [s.id, s.name]), p.manager_id || ME.id)}</select></label></div>
+      <div class="grid3"><label class="f">Start<input type="date" name="start_date" value="${esc(p.start_date || today())}"></label><label class="f">Finish<input type="date" name="end_date" value="${esc(p.end_date || '')}"></label><label class="f">Budget (${esc(SET.currency || 'USD')})<input name="budget" type="number" step="any" min="0" value="${esc(p.budget ?? '')}"></label></div>
+      <div class="grid2"><label class="f">Status<select name="status">${opt(Object.entries(PST), p.status)}</select></label><label class="f">Client order no.<input name="client_ref" value="${esc(p.client_ref || '')}"></label></div>
+      <label class="f">Scope<textarea name="description" rows="3">${esc(p.description || '')}</textarea></label><p class="err" id="pe"></p><div class="acts"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn">Save</button></div></form>`,
+    (dl) => {
+      const pc = $('#pc', dl), ps = $('#ps', dl); const fill = () => { ps.innerHTML = opt(LK.sites.filter((s) => s.client_id === Number(pc.value)).map((s) => [s.id, s.name]), p.site_id, '—'); }; pc.onchange = fill; fill();
+      $('#pf', dl).addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { const r = await api('/projects', { ...formData(e.target), id: p.id }); dl.close(); toast('Saved'); await refreshLK(); location.hash = '#/projects/' + r.id; route(); }, $('#pe', dl)); });
+    }, 'wide');
+  }
+  async function projectView(v, id) {
+    const r = await api('/projects/' + id), p = r.item, cl = ME.role === 'client';
+    setTitle(p.number);
+    const dates = [p.start_date, p.end_date, ...p.milestones.map((m) => m.due), ...p.wos.map((w) => w.scheduled_date || w.due_date)].filter(Boolean).sort();
+    const t0 = dates[0] || today(), t1 = dates[dates.length - 1] || today();
+    const span = Math.max(1, (new Date(t1) - new Date(t0)) / 864e5);
+    const pos = (d) => Math.min(100, Math.max(0, ((new Date(d) - new Date(t0)) / 864e5 / span) * 100));
+    const nowPos = pos(today());
+    const timeline = `<div class="tl"><div class="tl-axis"><span>${fdate(t0)}</span><span>${fdate(t1)}</span></div><div class="tl-track">${p.start_date && p.end_date ? `<i class="tl-bar" style="left:${pos(p.start_date)}%;width:${pos(p.end_date) - pos(p.start_date)}%"></i>` : ''}<i class="tl-now" style="left:${nowPos}%" title="Today"></i>
+      ${p.milestones.filter((m) => m.due).map((m) => `<span class="tl-ms ${m.done_at ? 'done' : m.due < today() ? 'late' : ''}" style="left:${pos(m.due)}%" title="${esc(m.name)} · ${fdate(m.due)}"></span>`).join('')}</div>
+      ${p.wos.filter((w) => w.scheduled_date || w.due_date).map((w) => `<div class="tl-row"><span class="tiny">${esc(w.number)}</span><div class="tl-track sm"><span class="tl-job s-${w.status}" style="left:${pos(w.scheduled_date || w.due_date)}%" title="${esc(w.title)}"></span></div></div>`).join('')}</div>`;
+    v.innerHTML = `<div class="jobhead"><a class="link" href="#/projects">${ic('back', 14)} Projects</a><div class="between" style="align-items:flex-start"><div><span class="mono muted">${esc(p.number)}</span><h1>${esc(p.name)}</h1><p class="muted small">${esc(p.client || '')}${p.site ? ' · ' + esc(p.site) : ''}${p.manager ? ' · Project manager ' + esc(p.manager) : ''}</p></div>${pst(p.status)}</div>
+      <div class="actions">${SUP() ? `<button class="btn ghost" id="ed">Edit project</button><a class="btn ghost" href="#/new?project=${p.id}">${ic('plus', 16)} Work order</a>` : ''}<button class="btn" id="pr">${ic('printer', 16)} Progress report (PDF)</button></div></div>
+      <div class="kpis"><div class="kpi"><span>Progress</span><b>${p.progress}%</b><small>${p.milestones.filter((m) => m.done_at).length}/${p.milestones.length} milestones</small></div><div class="kpi"><span>Work orders</span><b>${p.wos.length}</b><small>${p.wos.filter((w) => ['completed', 'reviewed', 'approved', 'sent', 'closed'].includes(w.status)).length} done</small></div><div class="kpi"><span>Finish</span><b style="font-size:20px">${fdate(p.end_date) || '—'}</b></div>
+        ${cl ? '' : `<div class="kpi ${p.budget_pct > 100 ? 'alert' : ''}"><span>Spent</span><b>${money(p.spent).replace(/\.\d\d$/, '')}</b><small>${p.budget != null ? `${p.budget_pct}% of ${money(p.budget).replace(/\.\d\d$/, '')}` : 'No budget set'}</small></div>`}</div>
+      <div class="cols2"><div class="stack">
+        <div class="card"><h2 style="margin-bottom:10px">Timeline</h2>${timeline}</div>
+        <div class="card"><div class="card-h"><h2>Milestones</h2></div>${p.milestones.map((m) => `<div class="ms ${m.done_at ? 'done' : ''}">${SUP() ? `<button class="tick" data-ms="${m.id}" aria-pressed="${!!m.done_at}" aria-label="Done">${m.done_at ? ic('check', 14) : ''}</button>` : `<span class="tick" aria-hidden="true">${m.done_at ? ic('check', 14) : ''}</span>`}<div><b>${esc(m.name)}</b><br><span class="tiny muted">${m.due ? 'Due ' + fdate(m.due) : 'No date'}${m.done_at ? ' · done ' + fdate(m.done_at) : m.due && m.due < today() ? ' · <span class="bad">late</span>' : ''} · weight ${m.weight}</span></div>${SUP() ? `<button class="link" data-rmms="${m.id}" aria-label="Remove">${ic('trash', 15)}</button>` : ''}</div>`).join('') || '<p class="muted small">No milestones yet.</p>'}
+          ${SUP() ? `<form class="row" id="mf" style="margin-top:12px"><input name="name" placeholder="New milestone" required style="flex:2;min-width:160px"><input type="date" name="due" style="flex:1;min-width:140px" aria-label="Due"><input name="weight" type="number" min="1" value="1" style="width:70px" aria-label="Weight"><button class="btn ghost">${ic('plus', 16)} Add</button></form>` : ''}</div>
+        <div class="card"><div class="card-h"><h2>Work orders</h2></div>${jobList(p.wos, 'No work orders linked yet.')}</div>
+      </div><div class="stack">
+        ${p.description ? `<div class="card"><h2 style="margin-bottom:8px">Scope</h2><p class="textblock">${esc(p.description)}</p></div>` : ''}
+        ${cl ? '' : `<div class="card"><h2 style="margin-bottom:10px">Budget vs actual</h2>${p.budget != null ? `<div class="between small"><span>${money(p.spent)} spent</span><b>${p.budget_left >= 0 ? money(p.budget_left) + ' left' : '<span class="bad">' + money(-p.budget_left) + ' over</span>'}</b></div>${meter(p.budget_pct, 90)}` : ''}
+          <dl class="dl" style="margin-top:12px"><div><dt>Labour (${num(p.hours)} h)</dt><dd>${money(p.labour)}</dd></div><div><dt>Parts and materials</dt><dd>${money(p.parts)}</dd></div><div><dt>Subcontractors and other</dt><dd>${money(p.other)}</dd></div><div><dt>Budget</dt><dd>${p.budget != null ? money(p.budget) : '—'}</dd></div></dl>
+          <h3 style="margin:14px 0 6px">Other costs</h3>${p.costs.map((c) => `<div class="between small" style="padding:5px 0;border-top:1px solid var(--line2)"><span>${fdate(c.date)} · <b>${esc(c.kind)}</b><br><span class="tiny muted">${esc(c.note || '')}</span></span><span class="row"><b>${money(c.amount)}</b>${SUP() ? `<button class="link" data-rmc="${c.id}" aria-label="Remove">${ic('trash', 14)}</button>` : ''}</span></div>`).join('') || '<p class="muted small">None yet.</p>'}
+          ${SUP() ? `<form class="stack" id="cf" style="margin-top:10px"><div class="grid3"><label class="f">Type<select name="kind">${opt(['Subcontractor', 'Equipment hire', 'Transport', 'Materials (bought direct)', 'Other'])}</select></label><label class="f">Amount<input name="amount" type="number" step="any" min="0" required></label><label class="f">Date<input type="date" name="date" value="${today()}"></label></div><label class="f">Note<input name="note" placeholder="Supplier, invoice no."></label><button class="btn ghost">${ic('plus', 16)} Add cost</button></form>` : ''}</div>`}
+      </div></div>`;
+    const re = () => projectView(v, id);
+    const ed = $('#ed', v); if (ed) ed.onclick = () => projectForm(p);
+    $$('[data-ms]', v).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/projects/${p.id}/milestone`, { id: b.dataset.ms, done: b.getAttribute('aria-pressed') !== 'true' }); re(); }));
+    $$('[data-rmms]', v).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/projects/${p.id}/milestone`, { id: b.dataset.rmms, remove: true }); re(); }));
+    $$('[data-rmc]', v).forEach((b) => b.onclick = () => busy(b, async () => { await api(`/projects/${p.id}/cost`, { remove: b.dataset.rmc }); re(); }));
+    const mf = $('#mf', v); if (mf) mf.addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api(`/projects/${p.id}/milestone`, formData(mf)); re(); }); });
+    const cf = $('#cf', v); if (cf) cf.addEventListener('submit', (e) => { e.preventDefault(); busy(e.submitter, async () => { await api(`/projects/${p.id}/cost`, formData(cf)); toast('Cost added'); re(); }); });
+    $('#pr', v).onclick = () => printDoc(`${p.number} progress report`, `${docHead('Project progress report', `${esc(p.number)} · ${fdate(today())}`)}
+      <h2 style="border:0;font-size:17px;margin-top:14px">${esc(p.name)}</h2><p class="muted">${esc(p.client || '')}${p.site ? ' · ' + esc(p.site) : ''}${p.client_ref ? ' · Your ref. ' + esc(p.client_ref) : ''}</p>
+      <div class="k"><div><span>Progress</span><b>${p.progress}%</b></div><div><span>Milestones</span><b>${p.milestones.filter((m) => m.done_at).length} / ${p.milestones.length}</b></div><div><span>Started</span><b style="font-size:14px">${fdate(p.start_date) || '—'}</b></div><div><span>Planned finish</span><b style="font-size:14px">${fdate(p.end_date) || '—'}</b></div></div>
+      <div class="bar"><i style="width:${p.progress}%"></i></div>
+      ${p.description ? `<h2>Scope</h2><p>${esc(p.description)}</p>` : ''}
+      <h2>Milestones</h2><table><thead><tr><th>Milestone</th><th>Due</th><th>Status</th></tr></thead><tbody>${p.milestones.map((m) => `<tr><td>${esc(m.name)}</td><td>${fdate(m.due) || '—'}</td><td>${m.done_at ? `<b class="ok">Done ${fdate(m.done_at)}</b>` : m.due && m.due < today() ? '<b class="bad">Late</b>' : 'Planned'}</td></tr>`).join('')}</tbody></table>
+      <h2>Work carried out</h2><table><thead><tr><th>Job</th><th>Title</th><th>Status</th><th>Date</th></tr></thead><tbody>${p.wos.map((w) => `<tr><td>${esc(w.number)}</td><td>${esc(w.title)}</td><td>${esc(LABEL[w.status] || w.status)}</td><td>${fdate(w.completed_at || w.scheduled_date || w.due_date) || '—'}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">No jobs yet.</td></tr>'}</tbody></table>
+      ${!cl && p.budget != null && BOSS() ? `<h2>Budget (internal)</h2><table><tbody><tr><td>Budget</td><td class="n">${money(p.budget)}</td></tr><tr><td>Labour</td><td class="n">${money(p.labour)}</td></tr><tr><td>Parts and materials</td><td class="n">${money(p.parts)}</td></tr><tr><td>Subcontractors and other</td><td class="n">${money(p.other)}</td></tr><tr><td><b>Spent</b></td><td class="n"><b>${money(p.spent)} (${p.budget_pct}%)</b></td></tr></tbody></table><p class="muted">Remove this page before sending to the client if costs are confidential.</p>` : ''}`);
+  }
+
+  /* ---------- offline: queue changes made with no signal ---------- */
+  const OUTBOX = 'basa-outbox';
+  const QUEUEABLE = /^\/wo\/\d+\/(checklist|time|material|photo|update|test|comment|clock)$/;
+  const idb = () => new Promise((res, rej) => { const r = indexedDB.open('basa', 1); r.onupgradeneeded = () => r.result.createObjectStore('q', { keyPath: 'id', autoIncrement: true }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  async function qAdd(item) { const db = await idb(); return new Promise((res, rej) => { const tx = db.transaction('q', 'readwrite'); tx.objectStore('q').add(item); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+  async function qAll() { const db = await idb(); return new Promise((res) => { const r = db.transaction('q').objectStore('q').getAll(); r.onsuccess = () => res(r.result || []); r.onerror = () => res([]); }); }
+  async function qDel(id) { const db = await idb(); return new Promise((res) => { const tx = db.transaction('q', 'readwrite'); tx.objectStore('q').delete(id); tx.oncomplete = res; tx.onerror = res; }); }
+  let flushing = false;
+  async function flushOutbox(silent) {
+    if (flushing || !navigator.onLine || !('indexedDB' in window)) return;
+    flushing = true; let sent = 0, failed = 0;
+    try {
+      for (const it of await qAll()) {
+        try {
+          const r = await fetch('/api' + it.path, { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(it.body) });
+          if (r.ok) { sent++; await qDel(it.id); } else if (r.status >= 400 && r.status < 500 && r.status !== 401) { failed++; await qDel(it.id); const e = await r.json().catch(() => ({})); toast(`A change made offline was not accepted: ${e.error || r.status}`, true); } else break;
+        } catch (e) { break; }
+      }
+    } finally { flushing = false; }
+    if (sent && !silent) { toast(`Back online: ${sent} change${sent > 1 ? 's' : ''} sent`); route(); }
+    offlineBadge();
+  }
+  async function offlineBadge() {
+    let b = $('#offb'); const n = 'indexedDB' in window ? (await qAll()).length : 0;
+    if (navigator.onLine && !n) { if (b) b.remove(); return; }
+    if (!b) { b = document.createElement('div'); b.id = 'offb'; b.className = 'offbar'; b.setAttribute('role', 'status'); document.body.appendChild(b); }
+    b.innerHTML = `${ic('alert', 15)} ${navigator.onLine ? '' : 'Offline. '}${n ? `${n} change${n > 1 ? 's' : ''} waiting to send` : 'Changes you make on jobs are saved and sent when the signal is back.'}`;
+  }
+  window.addEventListener('online', () => flushOutbox());
+  window.addEventListener('offline', offlineBadge);
+
+  /* ---------- theme ---------- */
+  const getTheme = () => { try { return localStorage.getItem('basa-theme') || 'auto'; } catch (e) { return 'auto'; } };
+  function applyTheme(t) { const root = document.documentElement; if (t === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', t); }
+  applyTheme(getTheme());
+
   /* ---------- push notifications ---------- */
   const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -1013,6 +1519,7 @@
     shell();
     swReady();
     route();
+    flushOutbox(true); offlineBadge();
   }
   window.addEventListener('hashchange', route);
   if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', (e) => {
