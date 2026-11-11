@@ -1,6 +1,6 @@
 /* Basa work orders: service worker for phone and desktop notifications */
 /* offline: the app shell is cached; job data falls back to the last copy when there is no signal */
-const SHELL = 'basa-shell-v3', DATA = 'basa-api';
+const SHELL = 'basa-shell-v4', DATA = 'basa-api';
 const FILES = ['/', '/app.js', '/app.css', '/icon.svg', '/icon-192.png', '/manifest.webmanifest', '/report.html'];
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(SHELL).then((c) => c.addAll(FILES)).catch(() => {})); });
 self.addEventListener('activate', (e) => e.waitUntil((async () => { for (const k of await caches.keys()) if (k.startsWith('basa-shell') && k !== SHELL) await caches.delete(k); await self.clients.claim(); })()));
@@ -16,12 +16,11 @@ self.addEventListener('fetch', (e) => {
     })());
     return;
   }
+  // network first, so a new version of the app is used as soon as it is published; the saved copy is only for no signal
   e.respondWith((async () => {
     const c = await caches.open(SHELL), key = url.pathname === '/index.html' ? '/' : url.pathname;
-    const hit = await c.match(key);
-    const net = fetch(req).then((r) => { if (r.ok && FILES.includes(key)) c.put(key, r.clone()); return r; }).catch(() => null);
-    if (hit) { e.waitUntil(net); return hit; }
-    return (await net) || (req.mode === 'navigate' ? c.match('/') : new Response('Offline', { status: 503 }));
+    try { const r = await fetch(req, { cache: 'no-cache' }); if (r.ok && FILES.includes(key)) c.put(key, r.clone()); return r; }
+    catch (err) { return (await c.match(key)) || (req.mode === 'navigate' ? await c.match('/') : new Response('Offline', { status: 503 })); }
   })());
 });
 self.addEventListener('push', (e) => {

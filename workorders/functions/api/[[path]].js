@@ -561,7 +561,7 @@ on('GET', '/dashboard', async ({ env, user }) => {
   const month = t.slice(0, 8) + '01';
   const hoursSql = user.role === 'tech' ? ['SELECT COALESCE(SUM(hours),0) h FROM time_logs WHERE user_id=? AND date>=?', user.id, month] : ['SELECT COALESCE(SUM(hours),0) h FROM time_logs WHERE date>=?', month];
   const hours = (await one(env.DB, ...hoursSql)).h;
-  const out = { pm_created: made, wo: rows, hours_month: hours, today: t };
+  const out = { pm_created: made, wo: rows, hours_month: hours, today: t, workload: [], pm_due: [], clocked_on: [] }; // safe defaults for every role
   if (SUPERVISE.includes(user.role)) {
     out.workload = await all(env.DB, `SELECT u.id, u.name, u.trade,
       (SELECT COUNT(*) FROM work_orders w WHERE (w.lead_id=u.id OR EXISTS (SELECT 1 FROM wo_team t WHERE t.wo_id=w.id AND t.user_id=u.id)) AND w.status IN ('assigned','in_progress','on_hold')) AS jobs,
