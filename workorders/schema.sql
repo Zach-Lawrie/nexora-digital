@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   phone TEXT,
-  role TEXT NOT NULL CHECK (role IN ('admin','manager','foreman','tech','client')),
+  role TEXT NOT NULL CHECK (role IN ('admin','manager','foreman','tech','client','stores','dept')),
   trade TEXT,
   client_id INTEGER,
   pass_hash TEXT NOT NULL,
@@ -122,3 +122,9 @@ CREATE TABLE IF NOT EXISTS projects (id INTEGER PRIMARY KEY AUTOINCREMENT, numbe
 CREATE TABLE IF NOT EXISTS project_milestones (id INTEGER PRIMARY KEY AUTOINCREMENT, project_id INTEGER NOT NULL, name TEXT NOT NULL, due TEXT, weight REAL NOT NULL DEFAULT 1, done_at TEXT, sort INTEGER NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS project_costs (id INTEGER PRIMARY KEY AUTOINCREMENT, project_id INTEGER NOT NULL, date TEXT NOT NULL, kind TEXT, amount REAL NOT NULL, note TEXT, user_id INTEGER, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')));
 -- After creating these tables, also run migrations/v3-columns.sql (adds the v3 columns to older tables).
+CREATE TABLE IF NOT EXISTS requisitions (id INTEGER PRIMARY KEY AUTOINCREMENT, number TEXT NOT NULL UNIQUE, requested_by INTEGER, department TEXT, wo_id INTEGER, project_id INTEGER, store_id INTEGER, needed_by TEXT, priority TEXT NOT NULL DEFAULT 'Normal', status TEXT NOT NULL DEFAULT 'requested', note TEXT, reject_note TEXT, approved_by INTEGER, issued_by INTEGER, issued_at TEXT, collected_by TEXT, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')), updated_at TEXT);
+CREATE INDEX IF NOT EXISTS req_status ON requisitions(status);
+CREATE TABLE IF NOT EXISTS requisition_lines (id INTEGER PRIMARY KEY AUTOINCREMENT, req_id INTEGER NOT NULL, part_id INTEGER, item TEXT, qty REAL NOT NULL, qty_issued REAL NOT NULL DEFAULT 0, note TEXT);
+CREATE TABLE IF NOT EXISTS suppliers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, contact TEXT, phone TEXT, email TEXT, address TEXT, lead_days INTEGER, terms TEXT, notes TEXT, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')));
+CREATE TABLE IF NOT EXISTS purchase_orders (id INTEGER PRIMARY KEY AUTOINCREMENT, number TEXT NOT NULL UNIQUE, supplier_id INTEGER, status TEXT NOT NULL DEFAULT 'draft', expected TEXT, store_id INTEGER, note TEXT, total REAL NOT NULL DEFAULT 0, delivery_ref TEXT, created_by INTEGER, approved_by INTEGER, ordered_at TEXT, received_at TEXT, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')));
+CREATE TABLE IF NOT EXISTS po_lines (id INTEGER PRIMARY KEY AUTOINCREMENT, po_id INTEGER NOT NULL, part_id INTEGER NOT NULL, qty REAL NOT NULL, unit_cost REAL NOT NULL DEFAULT 0, qty_received REAL NOT NULL DEFAULT 0);

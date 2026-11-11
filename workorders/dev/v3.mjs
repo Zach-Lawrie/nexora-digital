@@ -16,6 +16,7 @@ async function login(email) {
 const pub = async (method, p, body) => { const res = await fetch(BASE + '/api' + p, { method, headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }); return { status: res.status, data: await res.json() }; };
 const admin = await login('admin@meazim.com'), mgr = await login('manager@meazim.com'), fe = await login('foreman.electrical@meazim.com');
 const kuda = await login('tech.kuda@meazim.com'), ruth = await login('tech.ruth@meazim.com'), cs = await login('client.shamva@meazim.com');
+await admin.post('/settings', { stores_control: '0' }); // v3 checks techs issuing directly; v4.mjs covers the stores department
 const L = (await mgr.get('/lookups')).data;
 const uid = (n) => L.staff.find((s) => s.name === n).id;
 ok(L.stores.length >= 2 && L.parts.length >= 10 && L.fail.component.length > 5, 'lookups carry stores, parts and failure lists');

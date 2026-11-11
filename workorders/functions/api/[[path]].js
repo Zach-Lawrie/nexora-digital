@@ -1,10 +1,13 @@
 // Basa work orders: Cloudflare Pages Function API. Routes under /api/. D1 bound as env.DB.
 const SESSION_DAYS = 14;
 const COOKIE = 'basa_s';
-const ROLES = ['admin', 'manager', 'foreman', 'tech', 'client'];
+const ROLES = ['admin', 'manager', 'foreman', 'tech', 'client', 'stores', 'dept'];
 const STAFF = ['admin', 'manager', 'foreman', 'tech'];
 const BOSS = ['admin', 'manager'];
 const SUPERVISE = ['admin', 'manager', 'foreman'];
+const STOREKEEP = ['admin', 'manager', 'stores']; // run the stores: catalogue, stock, issuing, purchasing
+const STORES_USERS = ['admin', 'manager', 'foreman', 'tech', 'stores', 'dept']; // can use the stores (look up parts, request items)
+const DEPARTMENTS = ['Electrical', 'Mechanical', 'Automation', 'Instrumentation', 'Workshop', 'Projects', 'Vehicles & fleet', 'Safety & PPE', 'Admin & office', 'Stores'];
 const DISCIPLINES = ['Electrical', 'Mechanical', 'Automation', 'Instrumentation'];
 const TYPE_GROUPS = [
   ['General', ['Preventive maintenance', 'Corrective maintenance', 'Breakdown', 'Condition-based maintenance', 'TPM / operator fault', 'Inspection', 'Installation', 'Modification / upgrade', 'Shutdown / overhaul', 'Project work', 'Commissioning', 'Testing & commissioning']],
@@ -24,6 +27,7 @@ const DEFAULT_SETTINGS = {
   report_footer: 'Thank you for choosing MEA. Please contact us about any of the recommendations in this report.',
   sms_provider: 'none', sms_user: '', sms_token: '', sms_from: '', sms_country: '263', reminder_hour: '6', tz: '120',
   separate_approval: '1', approval_limit: '0', shift_hours: '8', work_days: '5',
+  stores_control: '1', req_approval: '1', po_limit: '1000',
 };
 
 /* ---------- checklist templates ---------- */
@@ -300,7 +304,8 @@ async function audienceIds(env, aud, me) {
   const to = aud && aud.to;
   const q = async (where, ...b) => (await all(env.DB, `SELECT id FROM users WHERE status='active' AND ${where}`, ...b)).map((r) => r.id);
   if (to === 'everyone') return q('1=1');
-  if (to === 'staff') return q(`role IN ('admin','manager','foreman','tech')`);
+  if (to === 'staff') return q(`role IN ('admin','manager','foreman','tech','stores','dept')`);
+  if (to === 'stores') return q(`role IN ('stores')`);
   if (to === 'tech') return q(`role='tech'`);
   if (to === 'foreman') return q(`role='foreman'`);
   if (to === 'manager') return q(`role IN ('admin','manager')`);
@@ -309,9 +314,9 @@ async function audienceIds(env, aud, me) {
   if (to === 'client') return q(`role='client' AND client_id=?`, Number(aud.client_id) || -1);
   return [me.id];
 }
-const AUD_TO = ['everyone', 'staff', 'tech', 'foreman', 'manager', 'trade', 'clients', 'client', 'me'];
+const AUD_TO = ['everyone', 'staff', 'tech', 'foreman', 'manager', 'stores', 'trade', 'clients', 'client', 'me'];
 function audienceLabel(aud, names) {
-  const m = { everyone: 'Everyone', staff: 'All staff', tech: 'All technicians', foreman: 'Foremen', manager: 'Managers', clients: 'All clients', me: 'Just me' };
+  const m = { stores: 'Stores team', everyone: 'Everyone', staff: 'All staff', tech: 'All technicians', foreman: 'Foremen', manager: 'Managers', clients: 'All clients', me: 'Just me' };
   if (aud.to === 'trade') return (aud.trade || '') + ' team';
   if (aud.to === 'client') return (names && names[aud.client_id]) || 'One client';
   return m[aud.to] || 'Just me';
@@ -398,6 +403,7 @@ async function loadWO(env, id, user) {
   if (!wo) fail(404, 'Work order not found.');
   if (user.role === 'client' && wo.client_id !== user.client_id) fail(404, 'Work order not found.');
   if (user.role === 'tech' && !(await onTeam(env, wo, user))) fail(404, 'Work order not found.');
+  if (user.role === 'dept') fail(404, 'Work order not found.');
   return wo;
 }
 // Who may change the job record (checklist, time, materials, photos, notes)
@@ -420,6 +426,7 @@ const WO_LIST_SQL = `SELECT w.id, w.number, w.title, w.status, w.priority, w.dis
 function scopeSql(user) {
   if (user.role === 'client') return [' WHERE w.client_id = ?', [user.client_id || -1]];
   if (user.role === 'tech') return [' WHERE (w.lead_id = ? OR EXISTS (SELECT 1 FROM wo_team t WHERE t.wo_id=w.id AND t.user_id=?))', [user.id, user.id]];
+  if (user.role === 'dept') return [' WHERE 0', []];
   return [' WHERE 1=1', []];
 }
 async function nextNumber(env) {
@@ -521,7 +528,7 @@ on('POST', '/me/profile', async ({ env, user, body }) => {
 /* lookups for forms */
 on('GET', '/lookups', async ({ env, user }) => {
   need(user);
-  const out = { disciplines: DISCIPLINES, types: TYPES, type_groups: TYPE_GROUPS, sheets: sheetDefs(), priorities: PRIORITIES, statuses: STATUSES, labels: LABEL, fail: FAIL, unplanned: UNPLANNED, clock_kinds: CLOCK_KINDS, cm_kinds: CM_KINDS };
+  const out = { departments: DEPARTMENTS, disciplines: DISCIPLINES, types: TYPES, type_groups: TYPE_GROUPS, sheets: sheetDefs(), priorities: PRIORITIES, statuses: STATUSES, labels: LABEL, fail: FAIL, unplanned: UNPLANNED, clock_kinds: CLOCK_KINDS, cm_kinds: CM_KINDS };
   if (user.role === 'client') {
     out.clients = await all(env.DB, 'SELECT id, name FROM clients WHERE id=?', user.client_id || -1);
     out.sites = await all(env.DB, 'SELECT id, client_id, name, address FROM sites WHERE client_id=? ORDER BY name', user.client_id || -1);
@@ -644,6 +651,7 @@ async function fullWO(env, wo, user, pub) {
       out.spares = det.asset_id ? await all(env.DB, `SELECT ap.part_id, ap.qty, ap.on_pm, p.part_no, p.name, p.unit, p.cost, (SELECT COALESCE(SUM(qty),0) FROM stock s WHERE s.part_id=p.id) AS in_stock FROM asset_parts ap JOIN parts p ON p.id=ap.part_id WHERE ap.asset_id=? ORDER BY p.part_no`, det.asset_id) : [];
       out.reservations = await all(env.DB, `SELECT r.*, p.part_no, p.name, p.unit, s.name AS store FROM reservations r JOIN parts p ON p.id=r.part_id JOIN stores s ON s.id=r.store_id WHERE r.wo_id=? AND r.status='reserved'`, wo.id);
       out.fail_lists = FAIL; out.unplanned = UNPLANNED.includes(det.type);
+      out.requisitions = await all(env.DB, `SELECT q.id, q.number, q.status, (SELECT GROUP_CONCAT(COALESCE(p.part_no, l.item), ', ') FROM requisition_lines l LEFT JOIN parts p ON p.id=l.part_id WHERE l.req_id=q.id) AS summary FROM requisitions q WHERE q.wo_id=? ORDER BY q.id DESC`, wo.id);
       const st = await settings(env);
       out.approval = { separate: st.separate_approval === '1', limit: Number(st.approval_limit) || 0, cost: await jobCost(env, wo), reviewed_by: det.reviewed_by, reviewer: det.reviewer };
     }
@@ -1260,7 +1268,8 @@ on('POST', '/settings', async ({ env, user, body }) => {
     if (k === 'tz') v = String(Math.round(Number(v) || 0));
     if (k === 'logo' && v && !/^data:image\/(png|jpeg|webp);base64,/.test(v) && !/^https:\/\//.test(v) && !/^\/[\w/.-]+$/.test(v)) fail(400, 'The logo must be an uploaded image or a link.');
     if (k === 'color' && !/^#[0-9a-fA-F]{6}$/.test(v)) v = DEFAULT_SETTINGS.color;
-    if (k === 'separate_approval') v = v === '0' || v === 'false' ? '0' : '1';
+    if (['separate_approval', 'stores_control', 'req_approval'].includes(k)) v = v === '0' || v === 'false' ? '0' : '1';
+    if (k === 'po_limit') v = String(Math.max(0, Number(v) || 0));
     if (['approval_limit', 'shift_hours', 'work_days'].includes(k)) v = String(Math.max(0, Math.min(k === 'work_days' ? 7 : k === 'shift_hours' ? 24 : 1e9, Number(v) || 0)));
     stmts.push(env.DB.prepare('INSERT INTO settings (key, value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').bind(k, v));
   }
@@ -1329,7 +1338,7 @@ async function lowStockCheck(env, partId) {
   if (p.min_qty != null && p.total <= p.min_qty) {
     if (!p.alerted) {
       await run(env.DB, 'UPDATE parts SET alerted=1 WHERE id=?', p.id);
-      await notify(env, await roleIds(env, 'manager', 'admin', 'foreman'), null, `Low stock: ${p.part_no} ${p.name} (${p.total} ${p.unit} left, minimum ${p.min_qty}). Raise a purchase request.`, { kind: 'stock', url: '/#/stores/part/' + p.id, title: 'Low stock' });
+      await notify(env, await roleIds(env, 'manager', 'admin', 'stores'), null, `Low stock: ${p.part_no} ${p.name} (${p.total} ${p.unit} left, minimum ${p.min_qty}). Raise a purchase request.`, { kind: 'stock', url: '/#/stores/part/' + p.id, title: 'Low stock' });
     }
   } else if (p.alerted) await run(env.DB, 'UPDATE parts SET alerted=0 WHERE id=?', p.id);
 }
@@ -1345,7 +1354,7 @@ async function moveStock(env, user, m) {
     const before = Math.max(0, p.total - m.qty);
     await run(env.DB, 'UPDATE parts SET cost=? WHERE id=?', r2(((before * (p.cost || 0)) + m.qty * m.unit_cost) / Math.max(1e-9, before + m.qty)), m.part_id);
   }
-  await run(env.DB, 'INSERT INTO stock_moves (part_id, store_id, qty, kind, wo_id, unit_cost, ref, note, user_id) VALUES (?,?,?,?,?,?,?,?,?)', m.part_id, m.store_id, m.qty, m.kind, m.wo_id || null, m.unit_cost ?? null, m.ref || null, m.note || null, user ? user.id : null);
+  await run(env.DB, 'INSERT INTO stock_moves (part_id, store_id, qty, kind, wo_id, unit_cost, ref, note, user_id, department, req_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)', m.part_id, m.store_id, m.qty, m.kind, m.wo_id || null, m.unit_cost ?? null, m.ref || null, m.note || null, user ? user.id : null, m.department || null, m.req_id || null);
   await lowStockCheck(env, m.part_id);
 }
 async function closeClocks(env, woId, userId) {
@@ -1379,7 +1388,7 @@ async function reservePmParts(env, wo) {
   for (const ap of list) {
     const st = await one(env.DB, `SELECT st.store_id, st.qty - (SELECT COALESCE(SUM(qty),0) FROM reservations r WHERE r.part_id=st.part_id AND r.store_id=st.store_id AND r.status='reserved') AS free FROM stock st WHERE st.part_id=? ORDER BY free DESC LIMIT 1`, ap.part_id);
     if (st && st.free >= ap.qty) { await run(env.DB, 'INSERT INTO reservations (part_id, store_id, wo_id, qty, status) VALUES (?,?,?,?,?)', ap.part_id, st.store_id, wo.id, ap.qty, 'reserved'); n++; }
-    else { const p = await one(env.DB, 'SELECT part_no, name FROM parts WHERE id=?', ap.part_id); await notify(env, await roleIds(env, 'manager', 'admin', 'foreman'), wo.id, `${wo.number}: not enough ${p.part_no} ${p.name} in stock for the planned job. Order ${ap.qty}.`, { kind: 'stock' }); }
+    else { const p = await one(env.DB, 'SELECT part_no, name FROM parts WHERE id=?', ap.part_id); await notify(env, await roleIds(env, 'manager', 'admin', 'foreman', 'stores'), wo.id, `${wo.number}: not enough ${p.part_no} ${p.name} in stock for the planned job. Order ${ap.qty}.`, { kind: 'stock' }); }
   }
   return n;
 }
@@ -1408,7 +1417,7 @@ async function labourStats(env, from, to) {
 
 /* stores and spares */
 on('GET', '/stores', async ({ env, user }) => {
-  need(user, ...STAFF);
+  need(user, ...STORES_USERS);
   const stores = await all(env.DB, `SELECT s.*, si.name AS site, (SELECT COALESCE(SUM(st.qty * p.cost),0) FROM stock st JOIN parts p ON p.id=st.part_id WHERE st.store_id=s.id) AS value FROM stores s LEFT JOIN sites si ON si.id=s.site_id WHERE s.active=1 ORDER BY s.name`);
   const parts = await all(env.DB, `SELECT p.*, (SELECT COALESCE(SUM(qty),0) FROM stock s WHERE s.part_id=p.id) AS total,
     (SELECT COALESCE(SUM(qty),0) FROM reservations r WHERE r.part_id=p.id AND r.status='reserved') AS reserved,
@@ -1420,7 +1429,7 @@ on('GET', '/stores', async ({ env, user }) => {
   return json({ stores, parts: parts.map((p) => ({ ...p, low: p.min_qty != null && p.total <= p.min_qty, stock: stock.filter((s) => s.part_id === p.id) })), requests: prs });
 });
 on('GET', '/stores/part/:id', async ({ env, user, params }) => {
-  need(user, ...STAFF);
+  need(user, ...STORES_USERS);
   const p = await one(env.DB, 'SELECT * FROM parts WHERE id=?', Number(params.id) || 0);
   if (!p) fail(404, 'Part not found.');
   return json({ part: p, stock: await partStock(env, p.id),
@@ -1430,14 +1439,14 @@ on('GET', '/stores/part/:id', async ({ env, user, params }) => {
     requests: await all(env.DB, 'SELECT r.*, u.name AS by_name FROM purchase_requests r LEFT JOIN users u ON u.id=r.requested_by WHERE r.part_id=? ORDER BY r.id DESC LIMIT 20', p.id) });
 });
 on('POST', '/stores', async ({ env, user, body }) => {
-  need(user, ...SUPERVISE);
+  need(user, ...STOREKEEP);
   const name = str(body.name, 80); if (!name) fail(400, 'Name the store, e.g. Main store or Site container.');
   if (body.id) await run(env.DB, 'UPDATE stores SET name=?, site_id=?, notes=?, active=? WHERE id=?', name, numOr(body.site_id), str(body.notes, 300), body.active === false ? 0 : 1, Number(body.id));
   else await run(env.DB, 'INSERT INTO stores (name, site_id, notes) VALUES (?,?,?)', name, numOr(body.site_id), str(body.notes, 300));
   return json({ ok: true });
 });
 on('POST', '/parts', async ({ env, user, body }) => {
-  need(user, ...SUPERVISE);
+  need(user, ...STOREKEEP, 'foreman');
   if (body.link) { // link a part to an asset's spares list
     const a = numOr(body.link.asset_id), pid = numOr(body.link.part_id);
     if (body.link.remove) await run(env.DB, 'DELETE FROM asset_parts WHERE asset_id=? AND part_id=?', a, pid);
@@ -1458,7 +1467,7 @@ on('POST', '/parts', async ({ env, user, body }) => {
   } catch (e) { if (/UNIQUE/i.test(String(e.message))) fail(409, 'That part number already exists.'); throw e; }
 });
 on('POST', '/stock', async ({ env, user, body }) => {
-  need(user, ...SUPERVISE);
+  need(user, ...STOREKEEP);
   const pid = numOr(body.part_id), sid = numOr(body.store_id), qty = numOr(body.qty);
   if (!(await one(env.DB, 'SELECT id FROM parts WHERE id=?', pid)) || !(await one(env.DB, 'SELECT id FROM stores WHERE id=?', sid))) fail(400, 'Choose the part and store.');
   const kind = oneOf(body.kind, ['receive', 'adjust', 'transfer', 'count'], null);
@@ -1474,9 +1483,9 @@ on('POST', '/stock', async ({ env, user, body }) => {
   return json({ ok: true });
 });
 on('POST', '/purchase', async ({ env, user, body }) => {
-  need(user, ...STAFF);
+  need(user, ...STORES_USERS);
   if (body.id) {
-    need(user, ...SUPERVISE);
+    need(user, ...STOREKEEP);
     const r = await one(env.DB, 'SELECT * FROM purchase_requests WHERE id=?', Number(body.id));
     if (!r) fail(404, 'Request not found.');
     const to = oneOf(body.status, ['ordered', 'received', 'cancelled'], null); if (!to) fail(400, 'Unknown step.');
@@ -1494,7 +1503,7 @@ on('POST', '/purchase', async ({ env, user, body }) => {
   const p = await one(env.DB, 'SELECT * FROM parts WHERE id=?', pid);
   if (!p) fail(400, 'Choose the part.'); if (!(qty > 0)) fail(400, 'How many are needed?');
   const r = await run(env.DB, 'INSERT INTO purchase_requests (part_id, store_id, qty, supplier, unit_cost, note, requested_by, wo_id, status) VALUES (?,?,?,?,?,?,?,?,?)', pid, numOr(body.store_id), qty, str(body.supplier, 120) || p.supplier, p.cost, str(body.note, 300), user.id, numOr(body.wo_id), 'requested');
-  await notify(env, (await roleIds(env, 'manager', 'admin')).filter((x) => x !== user.id), numOr(body.wo_id), `Purchase request PR-${r.meta.last_row_id}: ${qty} ${p.unit} ${p.part_no} ${p.name} (${user.name})`, { kind: 'stock', url: '/#/stores' });
+  await notify(env, (await roleIds(env, 'manager', 'admin', 'stores')).filter((x) => x !== user.id), numOr(body.wo_id), `Purchase request PR-${r.meta.last_row_id}: ${qty} ${p.unit} ${p.part_no} ${p.name} (${user.name})`, { kind: 'stock', url: '/#/stores' });
   return json({ id: r.meta.last_row_id }, 201);
 });
 on('POST', '/wo/:id/issue', async ({ env, user, params, body }) => {
@@ -1502,6 +1511,7 @@ on('POST', '/wo/:id/issue', async ({ env, user, params, body }) => {
   const wo = await loadWO(env, params.id, user);
   await needWork(env, wo, user);
   if (['approved', 'sent', 'closed', 'cancelled'].includes(wo.status)) fail(400, 'This job is closed for changes.');
+  if ((await settings(env)).stores_control === '1' && !BOSS.includes(user.role)) fail(403, 'Parts are issued by the stores. Use "Request from stores" on this job.');
   const p = await one(env.DB, 'SELECT * FROM parts WHERE id=?', numOr(body.part_id));
   if (!p) fail(400, 'Choose the part.');
   const sid = numOr(body.store_id), qty = numOr(body.qty);
@@ -1528,6 +1538,7 @@ on('POST', '/wo/:id/return', async ({ env, user, params, body }) => {
   await moveStock(env, user, { part_id: m.part_id, store_id: m.store_id, qty, kind: 'return', wo_id: wo.id, unit_cost: m.unit_cost, ref: wo.number });
   if (qty >= m.qty) await run(env.DB, 'DELETE FROM materials WHERE id=?', m.id); else await run(env.DB, 'UPDATE materials SET qty=qty-? WHERE id=?', qty, m.id);
   await log(env, wo, user, 'material', `Returned ${qty} ${m.unit} ${m.item} to stores.`);
+  if (!STOREKEEP.includes(user.role)) await notify(env, await roleIds(env, 'stores'), wo.id, `${wo.number}: ${user.name} is returning ${qty} ${m.unit} ${m.item}. Put it back on the shelf.`, { kind: 'stock', url: '/#/stores' });
   return json({ ok: true });
 });
 on('POST', '/wo/:id/reserve', async ({ env, user, params, body }) => {
@@ -1838,6 +1849,322 @@ on('POST', '/projects/:id/cost', async ({ env, user, params, body }) => {
   const amount = numOr(body.amount); if (!(amount > 0)) fail(400, 'Enter the amount.');
   await run(env.DB, 'INSERT INTO project_costs (project_id, date, kind, amount, note, user_id) VALUES (?,?,?,?,?,?)', p.id, dateOr(body.date) || today(), oneOf(body.kind, ['Subcontractor', 'Equipment hire', 'Transport', 'Materials (bought direct)', 'Other'], 'Other'), amount, str(body.note, 300), user.id);
   return json({ ok: true }, 201);
+});
+
+/* =====================================================================
+   v4: the stores department. Requests to stores (requisitions) from every
+   department and from jobs, picking and issuing, suppliers, purchase orders
+   with receiving, stores home and issues by department.
+   ===================================================================== */
+const REQ_ST = { awaiting_approval: 'Waiting for approval', requested: 'Requested', ready: 'Ready to collect', part_issued: 'Part issued', issued: 'Issued', rejected: 'Rejected', cancelled: 'Cancelled' };
+const PO_ST = { draft: 'Draft', approval: 'Waiting for approval', ordered: 'Ordered', part_received: 'Part received', received: 'Received', cancelled: 'Cancelled' };
+async function nextNo(env, table, prefix) {
+  const ym = new Date().toISOString().slice(2, 7).replace('-', '');
+  const r = await one(env.DB, `SELECT number FROM ${table} WHERE number LIKE ? ORDER BY id DESC LIMIT 1`, `${prefix}-${ym}-%`);
+  return `${prefix}-${ym}-${String(r ? parseInt(r.number.split('-')[2], 10) + 1 : 1).padStart(3, '0')}`;
+}
+const freeQty = async (env, partId, storeId, woId) => {
+  const st = await one(env.DB, `SELECT st.qty, (SELECT COALESCE(SUM(qty),0) FROM reservations r WHERE r.part_id=st.part_id AND r.store_id=st.store_id AND r.status='reserved' AND r.wo_id<>?) AS held FROM stock st WHERE st.part_id=? AND st.store_id=?`, woId || 0, partId, storeId);
+  return st ? Math.max(0, r2(st.qty - st.held)) : 0;
+};
+async function reqFull(env, id) {
+  const r = await one(env.DB, `SELECT q.*, u.name AS requester, u.role AS requester_role, a.name AS approver, i.name AS issuer, s.name AS store, w.number AS wo_number, w.title AS wo_title, p.number AS project_number, p.name AS project_name
+    FROM requisitions q LEFT JOIN users u ON u.id=q.requested_by LEFT JOIN users a ON a.id=q.approved_by LEFT JOIN users i ON i.id=q.issued_by LEFT JOIN stores s ON s.id=q.store_id
+    LEFT JOIN work_orders w ON w.id=q.wo_id LEFT JOIN projects p ON p.id=q.project_id WHERE q.id=?`, id);
+  if (!r) return null;
+  r.lines = await all(env.DB, `SELECT l.*, p.part_no, p.name AS part_name, p.unit, p.cost, (SELECT COALESCE(SUM(qty),0) FROM stock s WHERE s.part_id=l.part_id) AS in_stock,
+    (SELECT bin FROM stock s WHERE s.part_id=l.part_id AND s.store_id=? ) AS bin FROM requisition_lines l LEFT JOIN parts p ON p.id=l.part_id WHERE l.req_id=? ORDER BY l.id`, r.store_id || 0, r.id);
+  for (const l of r.lines) l.free = l.part_id && r.store_id ? await freeQty(env, l.part_id, r.store_id, r.wo_id) : null;
+  r.value = r2(r.lines.reduce((a, l) => a + (l.qty_issued || 0) * (l.cost || 0), 0));
+  return r;
+}
+function reqVisible(user, r, team) {
+  if (STOREKEEP.includes(user.role) || user.role === 'foreman') return true;
+  return r.requested_by === user.id || (team && team.includes(user.id));
+}
+async function reqTeam(env, r) { if (!r.wo_id) return []; const w = await one(env.DB, 'SELECT lead_id FROM work_orders WHERE id=?', r.wo_id); return [w && w.lead_id, ...(await all(env.DB, 'SELECT user_id FROM wo_team WHERE wo_id=?', r.wo_id)).map((t) => t.user_id)].filter(Boolean); }
+
+on('GET', '/requisitions', async ({ env, user, url }) => {
+  need(user, ...STORES_USERS);
+  const st = url.searchParams.get('status'), wo = numOr(url.searchParams.get('wo'));
+  let w = ' WHERE 1=1', b = [];
+  if (!(STOREKEEP.includes(user.role) || user.role === 'foreman')) { w += ' AND (q.requested_by=? OR q.wo_id IN (SELECT id FROM work_orders WHERE lead_id=?) OR q.wo_id IN (SELECT wo_id FROM wo_team WHERE user_id=?))'; b.push(user.id, user.id, user.id); }
+  if (st === 'open') w += ` AND q.status IN ('awaiting_approval','requested','ready','part_issued')`;
+  else if (REQ_ST[st]) { w += ' AND q.status=?'; b.push(st); }
+  if (wo) { w += ' AND q.wo_id=?'; b.push(wo); }
+  const items = await all(env.DB, `SELECT q.*, u.name AS requester, s.name AS store, w.number AS wo_number, p.number AS project_number,
+    (SELECT COUNT(*) FROM requisition_lines l WHERE l.req_id=q.id) AS lines, (SELECT COALESCE(SUM(l.qty_issued * COALESCE(pt.cost,0)),0) FROM requisition_lines l LEFT JOIN parts pt ON pt.id=l.part_id WHERE l.req_id=q.id) AS value,
+    (SELECT GROUP_CONCAT(COALESCE(pt.part_no, l.item), ', ') FROM requisition_lines l LEFT JOIN parts pt ON pt.id=l.part_id WHERE l.req_id=q.id) AS summary
+    FROM requisitions q LEFT JOIN users u ON u.id=q.requested_by LEFT JOIN stores s ON s.id=q.store_id LEFT JOIN work_orders w ON w.id=q.wo_id LEFT JOIN projects p ON p.id=q.project_id${w}
+    ORDER BY CASE q.status WHEN 'awaiting_approval' THEN 0 WHEN 'requested' THEN 1 WHEN 'ready' THEN 2 WHEN 'part_issued' THEN 3 ELSE 4 END, q.id DESC LIMIT 300`, ...b);
+  return json({ items, labels: REQ_ST });
+});
+on('GET', '/requisitions/:id', async ({ env, user, params }) => {
+  need(user, ...STORES_USERS);
+  const r = await reqFull(env, Number(params.id) || 0);
+  if (!r || !reqVisible(user, r, await reqTeam(env, r))) fail(404, 'Request not found.');
+  return json({ item: r, labels: REQ_ST, can: { keep: STOREKEEP.includes(user.role), approve: SUPERVISE.includes(user.role) && r.requested_by !== user.id } });
+});
+on('POST', '/requisitions', async ({ env, user, body }) => {
+  need(user, ...STORES_USERS);
+  const s = await settings(env);
+  const woId = numOr(body.wo_id); let wo = null;
+  if (woId) { wo = await loadWO(env, woId, user); if (['approved', 'sent', 'closed', 'cancelled'].includes(wo.status)) fail(400, 'This job is closed.'); if (user.role === 'tech' && !(await onTeam(env, wo, user))) fail(403, 'You are not on this job.'); }
+  const projectId = numOr(body.project_id) || (wo && wo.project_id) || null;
+  if (projectId && !(await one(env.DB, 'SELECT id FROM projects WHERE id=?', projectId))) fail(400, 'Project not found.');
+  const store = numOr(body.store_id) || ((await one(env.DB, 'SELECT id FROM stores WHERE active=1 ORDER BY id LIMIT 1')) || {}).id;
+  if (!store) fail(400, 'No store has been set up yet.');
+  const dept = oneOf(body.department, DEPARTMENTS, null) || (wo ? wo.discipline : null) || oneOf(user.trade, DEPARTMENTS, null) || 'Workshop';
+  const lines = (Array.isArray(body.lines) ? body.lines : []).slice(0, 40).map((l) => ({ part_id: numOr(l.part_id), item: str(l.item, 160), qty: numOr(l.qty), note: str(l.note, 200) })).filter((l) => (l.part_id || l.item) && l.qty > 0);
+  if (!lines.length) fail(400, 'Add at least one item and how many you need.');
+  for (const l of lines) if (l.part_id && !(await one(env.DB, 'SELECT id FROM parts WHERE id=? AND active=1', l.part_id))) fail(400, 'One of the parts is not in the catalogue.');
+  const needApproval = s.req_approval === '1' && !woId && !SUPERVISE.includes(user.role) && !STOREKEEP.includes(user.role);
+  const status = needApproval ? 'awaiting_approval' : 'requested';
+  const number = await nextNo(env, 'requisitions', 'REQ');
+  const r = await run(env.DB, 'INSERT INTO requisitions (number, requested_by, department, wo_id, project_id, store_id, needed_by, priority, status, note, approved_by) VALUES (?,?,?,?,?,?,?,?,?,?,?)', number, user.id, dept, woId, projectId, store, dateOr(body.needed_by), oneOf(body.priority, ['Urgent', 'Normal'], 'Normal'), status, str(body.note, 500), needApproval ? null : (woId || SUPERVISE.includes(user.role) ? user.id : null));
+  const id = r.meta.last_row_id;
+  await env.DB.batch(lines.map((l) => env.DB.prepare('INSERT INTO requisition_lines (req_id, part_id, item, qty, note) VALUES (?,?,?,?,?)').bind(id, l.part_id, l.part_id ? null : l.item, l.qty, l.note)));
+  if (wo) await log(env, wo, user, 'material', `Requested from stores: ${number} (${lines.length} line${lines.length > 1 ? 's' : ''}).`);
+  const urgent = body.priority === 'Urgent';
+  if (needApproval) await notify(env, (await all(env.DB, `SELECT id FROM users WHERE status='active' AND (role IN ('manager','admin') OR (role='foreman' AND trade=?))`, dept)).map((x) => x.id).filter((x) => x !== user.id), null, `${number}: ${user.name} (${dept}) asks for stores items. Please approve.`, { kind: 'stock', url: '/#/stores/req/' + id, title: 'Stores request to approve' });
+  else await notify(env, (await roleIds(env, 'stores')).filter((x) => x !== user.id), woId, `${number}: ${urgent ? 'URGENT ' : ''}stores request from ${user.name} (${dept}${wo ? ', ' + wo.number : ''}), ${lines.length} line${lines.length > 1 ? 's' : ''}`, { kind: 'stock', url: '/#/stores/req/' + id, title: 'New stores request', urgent });
+  return json({ id, number, status }, 201);
+});
+on('POST', '/requisitions/:id', async ({ env, user, params, body }) => {
+  need(user, ...STORES_USERS);
+  const r = await reqFull(env, Number(params.id) || 0);
+  if (!r || !reqVisible(user, r, await reqTeam(env, r))) fail(404, 'Request not found.');
+  const act = body.action, note = str(body.note, 500), keep = STOREKEEP.includes(user.role);
+  const set = async (status, extra = '') => { await run(env.DB, `UPDATE requisitions SET status=?, updated_at=?${extra} WHERE id=?`, status, now(), r.id); };
+  const tell = (text, o = {}) => notify(env, [r.requested_by].filter((x) => x && x !== user.id), r.wo_id, `${r.number}: ${text}`, { kind: 'stock', url: '/#/stores/req/' + r.id, ...o });
+  if (act === 'approve') {
+    if (!SUPERVISE.includes(user.role) || r.requested_by === user.id) fail(403, 'A foreman or manager (not the requester) approves stores requests.');
+    if (r.status !== 'awaiting_approval') fail(400, 'This request is not waiting for approval.');
+    await run(env.DB, 'UPDATE requisitions SET status=?, approved_by=?, updated_at=? WHERE id=?', 'requested', user.id, now(), r.id);
+    await tell(`approved by ${user.name}. The stores will get it ready.`);
+    await notify(env, await roleIds(env, 'stores'), r.wo_id, `${r.number}: approved stores request from ${r.requester} (${r.department})`, { kind: 'stock', url: '/#/stores/req/' + r.id, title: 'New stores request' });
+    return json({ ok: true });
+  }
+  if (act === 'reject') {
+    if (!(keep || SUPERVISE.includes(user.role))) fail(403, 'Only the stores or a supervisor can reject a request.');
+    if (!['awaiting_approval', 'requested', 'ready'].includes(r.status)) fail(400, 'This request can no longer be rejected.');
+    if (!note) fail(400, 'Say why, so the requester knows what to do.');
+    await run(env.DB, 'UPDATE requisitions SET status=?, reject_note=?, updated_at=? WHERE id=?', 'rejected', note, now(), r.id);
+    await tell(`rejected by ${user.name}: ${note}`);
+    return json({ ok: true });
+  }
+  if (act === 'cancel') {
+    if (!(keep || r.requested_by === user.id)) fail(403, 'Only the requester or the stores can cancel.');
+    if (r.lines.some((l) => l.qty_issued > 0) || !['awaiting_approval', 'requested', 'ready'].includes(r.status)) fail(400, 'Items have already been issued on this request.');
+    await set('cancelled');
+    if (r.requested_by !== user.id) await tell(`cancelled by ${user.name}${note ? ': ' + note : ''}`);
+    return json({ ok: true });
+  }
+  if (!keep) fail(403, 'Only the stores can do that.');
+  if (act === 'link') { // put a free-text line on a catalogue part
+    const l = r.lines.find((x) => x.id === Number(body.line_id)); if (!l) fail(404, 'Line not found.');
+    if (!(await one(env.DB, 'SELECT id FROM parts WHERE id=?', numOr(body.part_id)))) fail(400, 'Choose the catalogue part.');
+    await run(env.DB, 'UPDATE requisition_lines SET part_id=?, item=NULL WHERE id=?', numOr(body.part_id), l.id);
+    return json({ ok: true });
+  }
+  if (act === 'store') { const sid = numOr(body.store_id); if (!(await one(env.DB, 'SELECT id FROM stores WHERE id=?', sid))) fail(400, 'Choose the store.'); await run(env.DB, 'UPDATE requisitions SET store_id=? WHERE id=?', sid, r.id); return json({ ok: true }); }
+  if (act === 'ready') {
+    if (r.status !== 'requested' && r.status !== 'part_issued') fail(400, 'Only a request waiting in stores can be marked ready.');
+    await set('ready'); await tell(`ready to collect at ${r.store}.`, { title: 'Ready at the stores' });
+    return json({ ok: true });
+  }
+  if (act === 'purchase') { // raise purchase requests for what is short
+    let n = 0;
+    for (const l of r.lines) {
+      if (!l.part_id) continue;
+      const short = r2(l.qty - (l.qty_issued || 0) - (l.free || 0));
+      if (short <= 0 || await one(env.DB, `SELECT id FROM purchase_requests WHERE req_line_id=? AND status IN ('requested','ordered')`, l.id)) continue;
+      const p = await one(env.DB, 'SELECT * FROM parts WHERE id=?', l.part_id);
+      await run(env.DB, 'INSERT INTO purchase_requests (part_id, store_id, qty, supplier, unit_cost, note, requested_by, wo_id, status, req_line_id) VALUES (?,?,?,?,?,?,?,?,?,?)', l.part_id, r.store_id, Math.max(short, p.reorder_qty || 0), p.supplier, p.cost, `For ${r.number} (${r.requester})`, user.id, r.wo_id, 'requested', l.id);
+      n++;
+    }
+    if (!n) fail(400, 'Nothing is short, or it has already been ordered. Free-text items must be linked to a catalogue part first.');
+    await tell(`${n} item${n > 1 ? 's are' : ' is'} out of stock and on order. You will be told when they arrive.`);
+    return json({ ordered: n });
+  }
+  if (act === 'issue') {
+    if (!['requested', 'ready', 'part_issued'].includes(r.status)) fail(400, r.status === 'awaiting_approval' ? 'This request still needs approval.' : 'This request is closed.');
+    const want = Array.isArray(body.lines) ? body.lines : r.lines.map((l) => ({ id: l.id, qty: l.qty - (l.qty_issued || 0) }));
+    const collected = str(body.collected_by, 100) || r.requester;
+    const wo = r.wo_id ? await one(env.DB, 'SELECT * FROM work_orders WHERE id=?', r.wo_id) : null;
+    let issued = 0, value = 0;
+    const plan = [];
+    for (const w of want) { // check every line before moving any stock
+      const l = r.lines.find((x) => x.id === Number(w.id)); const q = r2(numOr(w.qty, 0));
+      if (!l || !(q > 0)) continue;
+      if (!l.part_id) { if (Array.isArray(body.lines)) fail(400, `"${l.item}" is not a catalogue part. Link it to a part first.`); continue; }
+      if (q > r2(l.qty - (l.qty_issued || 0)) + 1e-9) fail(400, `${l.part_no}: more than was asked for.`);
+      const free = await freeQty(env, l.part_id, r.store_id, r.wo_id);
+      if (q > free + 1e-9) { if (Array.isArray(body.lines)) fail(400, `${l.part_no}: only ${free} ${l.unit} free in ${r.store}.`); if (free > 0) plan.push([l, r2(free)]); continue; }
+      plan.push([l, q]);
+    }
+    for (const [l, q] of plan) {
+      await moveStock(env, user, { part_id: l.part_id, store_id: r.store_id, qty: -q, kind: 'issue', wo_id: r.wo_id, unit_cost: l.cost, ref: r.number, note: `${r.department}${collected ? ' · collected by ' + collected : ''}`, department: r.department, req_id: r.id });
+      await run(env.DB, 'UPDATE requisition_lines SET qty_issued=qty_issued+? WHERE id=?', q, l.id);
+      if (wo) {
+        await run(env.DB, 'INSERT INTO materials (wo_id, item, qty, unit, unit_cost, added_by, part_id, store_id) VALUES (?,?,?,?,?,?,?,?)', wo.id, `${l.part_no} · ${l.part_name}`, q, l.unit, l.cost || 0, user.id, l.part_id, r.store_id);
+        const res = await one(env.DB, `SELECT id FROM reservations WHERE wo_id=? AND part_id=? AND status='reserved'`, wo.id, l.part_id); if (res) await run(env.DB, `UPDATE reservations SET status='issued' WHERE id=?`, res.id);
+      } else if (r.project_id) await run(env.DB, 'INSERT INTO project_costs (project_id, date, kind, amount, note, user_id) VALUES (?,?,?,?,?,?)', r.project_id, today(), 'Materials (from stores)', r2(q * (l.cost || 0)), `${r.number}: ${q} ${l.unit} ${l.part_no}`, user.id);
+      issued++; value += q * (l.cost || 0);
+    }
+    if (!issued) fail(400, 'Enter how many of each item you are handing over.');
+    const after = await all(env.DB, 'SELECT qty, qty_issued FROM requisition_lines WHERE req_id=?', r.id);
+    const full = after.every((l) => l.qty_issued >= l.qty - 1e-9);
+    await run(env.DB, 'UPDATE requisitions SET status=?, issued_by=?, issued_at=?, collected_by=?, updated_at=? WHERE id=?', full ? 'issued' : 'part_issued', user.id, now(), collected, now(), r.id);
+    if (wo) await log(env, wo, user, 'material', `Stores issued ${r.number}${full ? '' : ' (part)'} to ${collected}: ${money2(value)}.`);
+    await tell(full ? `issued to ${collected}.` : `part issued to ${collected}. The rest follows when it is in stock.`);
+    return json({ status: full ? 'issued' : 'part_issued', value: r2(value) });
+  }
+  fail(400, 'Unknown action.');
+});
+const money2 = (v) => '$' + (Number(v) || 0).toFixed(2);
+
+/* suppliers */
+on('GET', '/suppliers', async ({ env, user }) => {
+  need(user, ...STORES_USERS);
+  return json({ items: await all(env.DB, `SELECT s.*, (SELECT COUNT(*) FROM purchase_orders o WHERE o.supplier_id=s.id) AS orders, (SELECT COALESCE(SUM(total),0) FROM purchase_orders o WHERE o.supplier_id=s.id AND o.status<>'cancelled') AS spend FROM suppliers s WHERE s.active=1 ORDER BY s.name`) });
+});
+on('POST', '/suppliers', async ({ env, user, body }) => {
+  need(user, ...STOREKEEP);
+  const f = [str(body.name, 120), str(body.contact, 100), str(body.phone, 40), str(body.email, 200), str(body.address, 300), numOr(body.lead_days), str(body.terms, 120), str(body.notes, 500)];
+  if (!f[0]) fail(400, 'Enter the supplier name.');
+  if (body.id) await run(env.DB, 'UPDATE suppliers SET name=?, contact=?, phone=?, email=?, address=?, lead_days=?, terms=?, notes=?, active=? WHERE id=?', ...f, body.remove ? 0 : 1, Number(body.id));
+  else await run(env.DB, 'INSERT INTO suppliers (name, contact, phone, email, address, lead_days, terms, notes) VALUES (?,?,?,?,?,?,?,?)', ...f);
+  return json({ ok: true });
+});
+
+/* purchase orders */
+async function poFull(env, id) {
+  const o = await one(env.DB, `SELECT o.*, s.name AS supplier, s.contact AS supplier_contact, s.phone AS supplier_phone, s.email AS supplier_email, s.address AS supplier_address, s.terms AS supplier_terms, u.name AS created_name, a.name AS approver, st.name AS store
+    FROM purchase_orders o LEFT JOIN suppliers s ON s.id=o.supplier_id LEFT JOIN users u ON u.id=o.created_by LEFT JOIN users a ON a.id=o.approved_by LEFT JOIN stores st ON st.id=o.store_id WHERE o.id=?`, id);
+  if (!o) return null;
+  o.lines = await all(env.DB, 'SELECT l.*, p.part_no, p.name AS part_name, p.unit FROM po_lines l JOIN parts p ON p.id=l.part_id WHERE l.po_id=? ORDER BY l.id', o.id);
+  o.requests = await all(env.DB, `SELECT r.id, r.qty, p.part_no, u.name AS by_name, w.number FROM purchase_requests r JOIN parts p ON p.id=r.part_id LEFT JOIN users u ON u.id=r.requested_by LEFT JOIN work_orders w ON w.id=r.wo_id WHERE r.po_id=?`, o.id);
+  return o;
+}
+const poTotal = async (env, id) => { const t = (await one(env.DB, 'SELECT COALESCE(SUM(qty*unit_cost),0) t FROM po_lines WHERE po_id=?', id)).t; await run(env.DB, 'UPDATE purchase_orders SET total=? WHERE id=?', r2(t), id); return r2(t); };
+on('GET', '/po', async ({ env, user }) => {
+  need(user, ...STOREKEEP, 'foreman');
+  return json({ items: await all(env.DB, `SELECT o.*, s.name AS supplier, (SELECT COUNT(*) FROM po_lines l WHERE l.po_id=o.id) AS lines FROM purchase_orders o LEFT JOIN suppliers s ON s.id=o.supplier_id ORDER BY CASE o.status WHEN 'approval' THEN 0 WHEN 'draft' THEN 1 WHEN 'ordered' THEN 2 WHEN 'part_received' THEN 3 ELSE 4 END, o.id DESC LIMIT 200`), labels: PO_ST });
+});
+on('GET', '/po/:id', async ({ env, user, params }) => { need(user, ...STOREKEEP, 'foreman'); const o = await poFull(env, Number(params.id) || 0); if (!o) fail(404, 'Order not found.'); return json({ item: o, labels: PO_ST, settings: await publicSettings(env, null) }); });
+on('POST', '/po', async ({ env, user, body }) => {
+  need(user, ...STOREKEEP);
+  const sup = await one(env.DB, 'SELECT * FROM suppliers WHERE id=? AND active=1', numOr(body.supplier_id));
+  if (!sup) fail(400, 'Choose the supplier.');
+  let lines = (Array.isArray(body.lines) ? body.lines : []).map((l) => ({ part_id: numOr(l.part_id), qty: numOr(l.qty), unit_cost: numOr(l.unit_cost) })).filter((l) => l.part_id && l.qty > 0);
+  const reqIds = (Array.isArray(body.from_requests) ? body.from_requests : []).map(Number).filter(Boolean);
+  const prs = reqIds.length ? await all(env.DB, `SELECT * FROM purchase_requests WHERE id IN (${reqIds.map(() => '?').join(',')}) AND status='requested' AND po_id IS NULL`, ...reqIds) : [];
+  for (const pr of prs) { const ex = lines.find((l) => l.part_id === pr.part_id); if (ex) ex.qty += pr.qty; else lines.push({ part_id: pr.part_id, qty: pr.qty, unit_cost: pr.unit_cost }); }
+  if (!lines.length) fail(400, 'Add at least one part to order.');
+  for (const l of lines) { const p = await one(env.DB, 'SELECT cost FROM parts WHERE id=?', l.part_id); if (!p) fail(400, 'A part on the order is not in the catalogue.'); if (l.unit_cost == null) l.unit_cost = p.cost || 0; }
+  const number = await nextNo(env, 'purchase_orders', 'PO');
+  const store = numOr(body.store_id) || ((await one(env.DB, 'SELECT id FROM stores WHERE active=1 ORDER BY id LIMIT 1')) || {}).id;
+  const r = await run(env.DB, 'INSERT INTO purchase_orders (number, supplier_id, status, expected, store_id, note, created_by) VALUES (?,?,?,?,?,?,?)', number, sup.id, 'draft', dateOr(body.expected) || (sup.lead_days ? addDays(today(), sup.lead_days) : null), store, str(body.note, 500), user.id);
+  const id = r.meta.last_row_id;
+  await env.DB.batch(lines.map((l) => env.DB.prepare('INSERT INTO po_lines (po_id, part_id, qty, unit_cost) VALUES (?,?,?,?)').bind(id, l.part_id, l.qty, l.unit_cost)));
+  if (prs.length) await run(env.DB, `UPDATE purchase_requests SET po_id=? WHERE id IN (${prs.map(() => '?').join(',')})`, id, ...prs.map((p) => p.id));
+  const total = await poTotal(env, id);
+  return json({ id, number, total }, 201);
+});
+on('POST', '/po/:id', async ({ env, user, params, body }) => {
+  need(user, ...STOREKEEP);
+  const o = await poFull(env, Number(params.id) || 0); if (!o) fail(404, 'Order not found.');
+  const s = await settings(env), limit = Number(s.po_limit) || 0, act = body.action;
+  if (act === 'send') {
+    if (!['draft', 'approval'].includes(o.status)) fail(400, 'This order has already been sent.');
+    if (limit > 0 && o.total > limit && !o.approved_by && !BOSS.includes(user.role)) {
+      await run(env.DB, `UPDATE purchase_orders SET status='approval' WHERE id=?`, o.id);
+      await notify(env, await roleIds(env, 'manager', 'admin'), null, `${o.number}: purchase order to ${o.supplier} for ${s.currency} ${o.total.toFixed(2)} needs your approval (over ${s.currency} ${limit}).`, { kind: 'stock', url: '/#/stores/po/' + o.id, title: 'Purchase order to approve' });
+      return json({ status: 'approval' });
+    }
+    await run(env.DB, `UPDATE purchase_orders SET status='ordered', ordered_at=?, approved_by=COALESCE(approved_by, ?) WHERE id=?`, now(), BOSS.includes(user.role) ? user.id : null, o.id);
+    await run(env.DB, `UPDATE purchase_requests SET status='ordered', ordered_at=?, supplier=? WHERE po_id=? AND status='requested'`, now(), o.supplier, o.id);
+    return json({ status: 'ordered' });
+  }
+  if (act === 'approve') {
+    need(user, ...BOSS);
+    if (o.status !== 'approval' && o.status !== 'draft') fail(400, 'Nothing to approve.');
+    await run(env.DB, `UPDATE purchase_orders SET status='ordered', ordered_at=?, approved_by=? WHERE id=?`, now(), user.id, o.id);
+    await run(env.DB, `UPDATE purchase_requests SET status='ordered', ordered_at=?, supplier=? WHERE po_id=? AND status='requested'`, now(), o.supplier, o.id);
+    await notify(env, [o.created_by].filter((x) => x && x !== user.id), null, `${o.number}: approved by ${user.name}. Send it to ${o.supplier}.`, { kind: 'stock', url: '/#/stores/po/' + o.id });
+    return json({ status: 'ordered' });
+  }
+  if (act === 'cancel') {
+    if (o.lines.some((l) => l.qty_received > 0)) fail(400, 'Goods have been received on this order.');
+    await run(env.DB, `UPDATE purchase_orders SET status='cancelled' WHERE id=?`, o.id);
+    await run(env.DB, `UPDATE purchase_requests SET po_id=NULL, status='requested' WHERE po_id=?`, o.id);
+    return json({ ok: true });
+  }
+  if (act === 'lines') { // edit a draft
+    if (!['draft', 'approval'].includes(o.status)) fail(400, 'Only a draft order can be changed.');
+    for (const l of Array.isArray(body.lines) ? body.lines : []) {
+      if (l.remove) await run(env.DB, 'DELETE FROM po_lines WHERE id=? AND po_id=?', Number(l.id), o.id);
+      else if (l.id) await run(env.DB, 'UPDATE po_lines SET qty=?, unit_cost=? WHERE id=? AND po_id=?', Math.max(0, numOr(l.qty, 0)), Math.max(0, numOr(l.unit_cost, 0)), Number(l.id), o.id);
+      else if (numOr(l.part_id) && numOr(l.qty) > 0) await run(env.DB, 'INSERT INTO po_lines (po_id, part_id, qty, unit_cost) VALUES (?,?,?,?)', o.id, numOr(l.part_id), numOr(l.qty), Math.max(0, numOr(l.unit_cost, 0)));
+    }
+    if ('expected' in body) await run(env.DB, 'UPDATE purchase_orders SET expected=?, note=? WHERE id=?', dateOr(body.expected), str(body.note, 500), o.id);
+    await run(env.DB, `UPDATE purchase_orders SET status='draft', approved_by=NULL WHERE id=?`, o.id);
+    return json({ total: await poTotal(env, o.id) });
+  }
+  if (act === 'receive') {
+    if (!['ordered', 'part_received'].includes(o.status)) fail(400, o.status === 'approval' ? 'This order still needs approval.' : 'This order is not waiting for goods.');
+    const sid = numOr(body.store_id, o.store_id); if (!sid) fail(400, 'Choose the store.');
+    let n = 0;
+    const rec = (Array.isArray(body.lines) ? body.lines : []).map((w) => [o.lines.find((x) => x.id === Number(w.id)), r2(numOr(w.qty, 0)), w]).filter(([l, q]) => l && q > 0);
+    for (const [l, q] of rec) if (q > r2(l.qty - l.qty_received) + 1e-9) fail(400, `${l.part_no}: more than is outstanding on the order.`);
+    for (const [l, q, w] of rec) {
+      const cost = numOr(w.unit_cost, l.unit_cost);
+      await moveStock(env, user, { part_id: l.part_id, store_id: sid, qty: q, kind: 'receive', unit_cost: cost, ref: o.number + (str(body.ref, 60) ? ' ' + str(body.ref, 60) : ''), note: 'Delivery from ' + o.supplier });
+      await run(env.DB, 'UPDATE po_lines SET qty_received=qty_received+?, unit_cost=? WHERE id=?', q, cost, l.id);
+      n++;
+    }
+    if (!n) fail(400, 'Enter what was delivered.');
+    const left = (await all(env.DB, 'SELECT qty, qty_received FROM po_lines WHERE po_id=?', o.id)).some((l) => l.qty_received < l.qty - 1e-9);
+    await run(env.DB, 'UPDATE purchase_orders SET status=?, received_at=?, delivery_ref=COALESCE(?, delivery_ref) WHERE id=?', left ? 'part_received' : 'received', now(), str(body.ref, 60) || null, o.id);
+    await poTotal(env, o.id);
+    if (!left) {
+      for (const pr of await all(env.DB, `SELECT * FROM purchase_requests WHERE po_id=? AND status<>'received'`, o.id)) {
+        await run(env.DB, `UPDATE purchase_requests SET status='received', received_at=? WHERE id=?`, now(), pr.id);
+        if (pr.requested_by && pr.requested_by !== user.id) await notify(env, [pr.requested_by], pr.wo_id, `Parts you asked for have arrived at the stores (${o.number}).`, { kind: 'stock', url: pr.wo_id ? '/#/job/' + pr.wo_id + '/materials' : '/#/stores' });
+        if (pr.req_line_id) { const q = await one(env.DB, 'SELECT r.* FROM requisition_lines l JOIN requisitions r ON r.id=l.req_id WHERE l.id=?', pr.req_line_id); if (q && q.requested_by) await notify(env, [q.requested_by], q.wo_id, `${q.number}: the missing items have arrived. The stores will issue them.`, { kind: 'stock', url: '/#/stores/req/' + q.id }); }
+      }
+    }
+    return json({ status: left ? 'part_received' : 'received' });
+  }
+  fail(400, 'Unknown action.');
+});
+
+/* stores home and issues by department */
+on('GET', '/stores/home', async ({ env, user }) => {
+  need(user, ...STORES_USERS);
+  const c = async (sql, ...b) => (await one(env.DB, sql, ...b)).n;
+  const mine = STOREKEEP.includes(user.role) || user.role === 'foreman' ? '' : ' AND requested_by=' + Number(user.id);
+  return json({
+    req: { awaiting_approval: await c(`SELECT COUNT(*) n FROM requisitions WHERE status='awaiting_approval'${mine}`), requested: await c(`SELECT COUNT(*) n FROM requisitions WHERE status='requested'${mine}`), ready: await c(`SELECT COUNT(*) n FROM requisitions WHERE status='ready'${mine}`), part_issued: await c(`SELECT COUNT(*) n FROM requisitions WHERE status='part_issued'${mine}`), urgent: await c(`SELECT COUNT(*) n FROM requisitions WHERE status IN ('requested','ready') AND priority='Urgent'${mine}`) },
+    low: await c('SELECT COUNT(*) n FROM parts p WHERE p.active=1 AND p.min_qty IS NOT NULL AND (SELECT COALESCE(SUM(qty),0) FROM stock s WHERE s.part_id=p.id) <= p.min_qty'),
+    pr_open: await c(`SELECT COUNT(*) n FROM purchase_requests WHERE status='requested' AND po_id IS NULL`),
+    po_open: await c(`SELECT COUNT(*) n FROM purchase_orders WHERE status IN ('ordered','part_received')`),
+    po_approval: await c(`SELECT COUNT(*) n FROM purchase_orders WHERE status='approval'`),
+    po_late: await c(`SELECT COUNT(*) n FROM purchase_orders WHERE status IN ('ordered','part_received') AND expected < ?`, today()),
+    value: STOREKEEP.includes(user.role) ? (await one(env.DB, 'SELECT COALESCE(SUM(st.qty * p.cost),0) v FROM stock st JOIN parts p ON p.id=st.part_id')).v : null,
+    moves_today: STOREKEEP.includes(user.role) ? await all(env.DB, `SELECT m.*, p.part_no, p.name, p.unit, s.name AS store, u.name AS by_name FROM stock_moves m JOIN parts p ON p.id=m.part_id JOIN stores s ON s.id=m.store_id LEFT JOIN users u ON u.id=m.user_id WHERE m.created_at >= ? ORDER BY m.id DESC LIMIT 30`, today() + 'T00:00:00Z') : [],
+    reserved: await all(env.DB, `SELECT r.qty, p.part_no, p.name, p.unit, s.name AS store, w.id AS wo_id, w.number, w.due_date FROM reservations r JOIN parts p ON p.id=r.part_id JOIN stores s ON s.id=r.store_id JOIN work_orders w ON w.id=r.wo_id WHERE r.status='reserved' ORDER BY w.due_date LIMIT 20`),
+  });
+});
+on('GET', '/stores/usage', async ({ env, user, url }) => {
+  need(user, ...STOREKEEP, 'foreman');
+  const t = today(), from = dateOr(url.searchParams.get('from')) || t.slice(0, 8) + '01', to = dateOr(url.searchParams.get('to')) || t;
+  const rows = await all(env.DB, `SELECT COALESCE(m.department, w.discipline, 'Not recorded') AS dept, -SUM(m.qty * COALESCE(m.unit_cost,p.cost)) AS value, COUNT(*) AS lines FROM stock_moves m JOIN parts p ON p.id=m.part_id LEFT JOIN work_orders w ON w.id=m.wo_id WHERE m.kind='issue' AND substr(m.created_at,1,10) BETWEEN ? AND ? GROUP BY dept ORDER BY value DESC`, from, to);
+  const returns = (await one(env.DB, `SELECT COALESCE(SUM(m.qty * COALESCE(m.unit_cost,p.cost)),0) v FROM stock_moves m JOIN parts p ON p.id=m.part_id WHERE m.kind='return' AND substr(m.created_at,1,10) BETWEEN ? AND ?`, from, to)).v;
+  const received = (await one(env.DB, `SELECT COALESCE(SUM(m.qty * COALESCE(m.unit_cost,p.cost)),0) v FROM stock_moves m JOIN parts p ON p.id=m.part_id WHERE m.kind='receive' AND m.ref<>'OPENING' AND substr(m.created_at,1,10) BETWEEN ? AND ?`, from, to)).v;
+  const turnaround = await one(env.DB, `SELECT AVG((julianday(issued_at) - julianday(created_at)) * 24) h, COUNT(*) n FROM requisitions WHERE issued_at IS NOT NULL AND substr(created_at,1,10) BETWEEN ? AND ?`, from, to);
+  return json({ from, to, by_dept: rows.map((r) => ({ ...r, value: r2(r.value) })), returns: r2(returns), received: r2(received), turnaround_h: turnaround.h == null ? null : r1(turnaround.h), requests: turnaround.n });
 });
 
 /* ---------- entry ---------- */

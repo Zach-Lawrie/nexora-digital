@@ -11,7 +11,7 @@ const dbFile = process.argv[2] || path.join(ROOT, 'dev', 'local.db');
 const port = Number(process.argv[3] || 8788);
 const sqlite = new DatabaseSync(dbFile);
 sqlite.exec(fs.readFileSync(path.join(ROOT, 'schema.sql'), 'utf8'));
-for (const st of fs.readFileSync(path.join(ROOT, 'migrations', 'v3-columns.sql'), 'utf8').split(';').map((x) => x.trim()).filter(Boolean)) { try { sqlite.exec(st); } catch (e) { /* column already there */ } }
+for (const st of fs.readFileSync(path.join(ROOT, 'migrations', 'v3-columns.sql'), 'utf8').concat(fs.readFileSync(path.join(ROOT, 'migrations', 'v4-columns.sql'), 'utf8')).split(';').map((x) => x.trim()).filter(Boolean)) { try { sqlite.exec(st); } catch (e) { /* column already there */ } }
 
 const fix = (v) => (v === undefined ? null : typeof v === 'boolean' ? (v ? 1 : 0) : v);
 class Stmt {
