@@ -37,6 +37,7 @@ http.createServer(async (req, res) => {
     const h = {}; r.headers.forEach((v, k) => { h[k] = v; });
     res.writeHead(r.status, h); res.end(Buffer.from(await r.arrayBuffer())); return;
   }
+  if (url.pathname.startsWith('/dev-feed')) { const f = path.join(ROOT, 'dev', url.pathname.slice(1)); if (fs.existsSync(f)) { res.writeHead(200, { 'content-type': 'application/xml' }); res.end(fs.readFileSync(f)); return; } }
   let p = path.join(ROOT, 'public', decodeURIComponent(url.pathname));
   if (fs.existsSync(p) && fs.statSync(p).isDirectory()) p = path.join(p, 'index.html');
   if (!fs.existsSync(p)) { res.writeHead(404); res.end('Not found'); return; }

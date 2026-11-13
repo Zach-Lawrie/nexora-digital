@@ -19,10 +19,14 @@ with a fan app and a separate management portal.
 Goals and events (football, rugby, hockey, handball), periods (basketball, netball), cricket scorecard,
 sets (tennis, volleyball, badminton), bouts (boxing, MMA, judo, chess), races and field events (athletics, swimming, cycling).
 
+## Home slider and outside news
+- Platform owner: Management → Dashboard → **Home slider** (announcements, alerts, adverts with links, start and end dates, click counts) and **Outside news sources** (RSS or Atom feed addresses). Headlines are fetched by the server every 20 minutes and link to the full story on the outlet's site.
+- Organisers: Manage → competition → **Slides**, shown at the top of their competition page. Only the owner can put a slide on Home.
+
 ## Local testing
 ```
 OWNER_CODE=test node dev/server.mjs dev/local.db 8790   # local server with a SQLite stand-in for D1
-node dev/flow.mjs http://localhost:8790 test             # 70 permission and sign-in checks (fresh database)
+node dev/flow.mjs http://localhost:8790 test             # 87 permission, sign-in, slider and feed checks (fresh database)
 ```
 
 ## Not connected yet
