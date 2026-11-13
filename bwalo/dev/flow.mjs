@@ -120,7 +120,28 @@ ok('suspended login refused', (await new Client().call('login', 'POST', { email:
 // cross-site and cascade delete
 const x = await fetch(BASE + '/api/doc/leagues/L9', { method: 'PUT', headers: { 'content-type': 'application/json', cookie: org.cookie, origin: 'https://evil.example' }, body: '{"data":{"name":"x"}}' });
 ok('cross-site write refused', x.status === 403);
+// slides: organiser for own competition only, never on the home page; owner anywhere
+r = await org.put('slides/S1', { lid: 'L1', type: 'announcement', title: 'Kick-off moved', home: true, link: 'javascript:alert(1)' });
+ok('organiser adds slide, home and bad link refused', r.s === 200 && r.j.data.home === false && !r.j.data.link, JSON.stringify(r.j));
+ok('fan cannot add slide', (await fan.put('slides/S2', { lid: 'L1', type: 'advert', title: 'x' })).s === 401 || (await mgr.put('slides/S2', { lid: 'L1', type: 'advert', title: 'x' })).s === 403);
+ok('organiser cannot add home slide', (await org.put('slides/S3', { type: 'advert', title: 'x', home: true })).s === 403);
+ok('owner adds home slide', (await owner.put('slides/S4', { type: 'advert', title: 'Sponsor', home: true, link: 'https://example.com' })).j.data.home === true);
+ok('owner shows organiser slide on home', (await owner.put('slides/S1', { lid: 'L1', type: 'announcement', title: 'Kick-off moved', home: true })).j.data.home === true);
+ok('organiser edit keeps home choice', (await org.put('slides/S1', { lid: 'L1', type: 'announcement', title: 'Kick-off moved again', home: false })).j.data.home === true);
+ok('organiser cannot edit home slide', (await org.put('slides/S4', { type: 'advert', title: 'Mine' })).s === 403);
+for (let i = 0; i < 5; i++) await guest.call('click', 'POST', { id: 'S4' });
+ok('clicks counted, capped per visitor', (await owner.call('clicks')).j.clicks.S4 === 3);
+ok('organiser cannot see home slide clicks', (await org.call('clicks')).j.clicks.S4 === undefined);
+ok('fan cannot read clicks', (await new Client().call('clicks')).s === 401);
+ok('organiser cannot set news sources', (await org.put('config/feeds', { items: [] })).s === 403);
+ok('owner sets news sources', (await owner.put('config/feeds', { items: [{ name: 'Test RSS', url: BASE + '/dev-feed.xml' }, { name: 'Test Atom', url: BASE + '/dev-feed-atom.xml' }, { name: 'Broken', url: BASE + '/nope.xml' }] })).s === 200);
+const hl = (await guest.call('headlines')).j;
+ok('headlines parsed from RSS and Atom', hl.items.length === 4 && hl.items.some((i) => i.src === 'Test Atom') && hl.report.find((x) => x.name === 'Broken').ok === false, JSON.stringify(hl).slice(0, 400));
+ok('entities and CDATA cleaned', hl.items.some((i) => i.title === 'Warriors & Chipolopolo draw 1–1 in “thriller”'), JSON.stringify(hl.items.map((i) => i.title)));
+ok('html tags in titles removed', hl.items.some((i) => i.title === 'Athletics trials set'), JSON.stringify(hl.items.map((i) => i.title)));
+ok('newest first', hl.items[0].at >= hl.items[hl.items.length - 1].at);
 ok('organiser deletes league', (await org.del('leagues/L1')).s === 200);
+ok('competition slides removed with it', (await seen(guest, 'slides')) === 1);
 ok('everything under it is gone', (await seen(guest, 'teams')) === 0 && (await seen(guest, 'matches')) === 0 && (await seen(guest, 'leagues')) === 0);
 console.log(`${pass} passed, ${bad} failed`);
 process.exit(bad ? 1 : 0);

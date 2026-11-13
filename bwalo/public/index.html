@@ -126,6 +126,22 @@ body.mg .seg button[aria-pressed="true"]{background:var(--blue);color:#fff}
 .stepper{display:flex;align-items:center;gap:8px;justify-content:center}
 .stepper button{width:44px;height:44px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-size:22px}
 #ncount{position:absolute;top:-5px;right:-5px;background:var(--live);color:#fff;border-radius:9px;font:700 11px/1 var(--body);padding:3px 5px}#ncount:empty{display:none}
+/* slider */
+.slider{display:flex;flex-direction:column;gap:8px}
+.track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:18px;scrollbar-width:none}
+.track::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:start;position:relative;overflow:hidden;min-height:224px;padding:18px 16px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(150deg,var(--sg,#16245c),#070b1d 72%)}
+.slide img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slide.photo::before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(4,7,20,.95) 15%,rgba(4,7,20,.25) 75%);z-index:1}
+.slide>*:not(.bg){position:relative;z-index:2}
+.slide .st{font:400 32px/1 var(--display);letter-spacing:.03em;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.slide .sx{color:var(--muted);font-size:14px;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:60ch}
+.slide.alert{--sg:#5a1020}.slide.advert{--sg:#4a3a0c}.slide.announcement{--sg:#0f2f6b}.slide.ext{--sg:#1b2333}
+a.btn{text-decoration:none;display:inline-block}
+.dots{display:flex;gap:6px;justify-content:center}
+.dots button{width:8px;height:8px;border-radius:4px;border:0;padding:0;background:var(--line);transition:width .2s}
+.dots button[aria-current="true"]{width:22px;background:var(--gold)}
+.src{font:700 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:rgba(255,255,255,.12);padding:5px 8px;border-radius:6px}
 #q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:16px;width:100%}
 /* sheet */
 #sheet{position:fixed;inset:0;background:rgba(2,4,12,.76);display:flex;align-items:flex-end;justify-content:center;z-index:5}
@@ -198,8 +214,8 @@ const scol=l=>ENGCOL[sp(l).eng];
 const term=l=>{const e=sp(l).eng;return {m:e==='race'?'Events':e==='bout'?'Bouts':'Matches',t:sp(l).solo?'Athletes':'Teams',st:e==='race'?'Medals':e==='bout'?'Records':'Standings'};};
 
 /* ---------- state and store ---------- */
-const COLS=['leagues','teams','matches','transfers','news','requests','audit','config'];
-const S={mode:'loading',slow:false,leagues:[],teams:[],matches:[],transfers:[],news:[],requests:[],audit:[],config:[],
+const COLS=['leagues','teams','matches','transfers','news','requests','audit','config','slides'];
+const S={mode:'loading',slow:false,leagues:[],teams:[],matches:[],transfers:[],news:[],requests:[],audit:[],config:[],slides:[],heads:[],headRep:[],clicks:{},
   prefs:{leagues:[],teams:[],sports:[],countries:[],mute:[],seen:''},names:{},
   view:{page:'home'},stack:[],me:null,isOwner:false,canWrite:true,fan:false,user:null};
 let db=null,sheet=null,migrating=false;const L=new Map();
@@ -342,6 +358,40 @@ function banner(l,inner,img){const ok=imgOk(img);
 function vsBlock(m,l,big){const a=Tm(m.home),b=Tm(m.away),has=m.status!=='scheduled';
   return `<div class="vs"><button class="side" ${goBtn('team',m.home)}>${crest(a,big?72:60)}<div class="tn">${esc(nm(a))}</div></button><div class="score ${has&&sp(l).eng!=='bout'&&sp(l).eng!=='cricket'?'':'sm'}">${sc(m,l)}</div><button class="side" ${goBtn('team',m.away)}>${crest(b,big?72:60)}<div class="tn">${esc(nm(b))}</div></button></div>`;}
 
+/* ---------- slider ---------- */
+const STYPE={alert:['Alert','live'],announcement:['Announcement','blue'],news:['News','gold'],advert:['Sponsored','']};
+const nowISO=()=>new Date().toISOString();
+const slideOn=x=>(!x.from||x.from<=nowISO())&&(!x.until||x.until>=nowISO());
+function slideItems(lid){
+  const act=S.slides.filter(x=>(lid?x.lid===lid:x.home)&&slideOn(x)&&(!x.lid||Lg(x.lid)))
+    .sort((a,b)=>(b.type==='alert')-(a.type==='alert')||(+b.prio||0)-(+a.prio||0)||String(b.at).localeCompare(String(a.at)));
+  const out=act.map(x=>({k:'slide',x}));
+  const wk=new Date(Date.now()-14*864e5).toISOString();
+  pubNews().filter(n=>(lid?n.lid===lid:true)&&isoT(n.at)>wk).slice(0,lid?2:3).forEach(n=>out.push({k:'news',x:n}));
+  if(!lid)S.heads.slice(0,8).forEach(h=>out.push({k:'ext',x:h}));
+  return out;
+}
+const extA=(href,txt,id,ad)=>`<a class="btn sm" href="${esc(href)}" target="_blank" rel="noopener noreferrer${ad?' sponsored':''}"${id?` data-click="${esc(id)}"`:''}>${esc(txt)} ↗</a>`;
+function slideHtml(it){
+  if(it.k==='ext'){const h=it.x;
+    return `<article class="slide ext"><div class="row"><span class="src">${esc(h.src)}</span><span class="pp">${esc(h.at?shortDate(h.at):'')}</span></div><div class="st">${esc(h.title)}</div><div class="row">${extA(h.link,'Read on '+h.src)}</div></article>`;}
+  if(it.k==='news'){const n=it.x,ph=imgOk(n.img);
+    return `<article class="slide ${ph?'photo':''}">${ph?`<img class="bg" src="${n.img}" alt="">`:''}<div class="row"><span class="chip gold">${esc(n.cat||'News')}</span><span class="pp">${esc((Lg(n.lid)||{}).name||'')}</span></div><div class="st">${esc(n.title)}</div><div class="row"><button class="btn sm" ${goBtn('article',n.id)}>Read</button></div></article>`;}
+  const x=it.x,t=STYPE[x.type]||STYPE.news,ph=imgOk(x.img),l=Lg(x.lid);
+  const cta=x.link?extA(x.link,x.cta||(x.type==='advert'?'Find out more':'Read more'),x.id,x.type==='advert'):l?`<button class="btn sm" ${goBtn('comp',l.id)}>${esc(x.cta||'Open '+l.name)}</button>`:'';
+  return `<article class="slide ${esc(x.type||'news')} ${ph?'photo':''}">${ph?`<img class="bg" src="${x.img}" alt="">`:''}<div class="row"><span class="chip ${t[1]}">${t[0]}</span>${x.type==='advert'&&x.sponsor?`<span class="pp">${esc(x.sponsor)}</span>`:l?`<span class="pp">${esc(l.name)}</span>`:''}</div><div class="st">${esc(x.title)}</div>${x.text?`<p class="sx">${esc(x.text)}</p>`:''}${cta?`<div class="row">${cta}</div>`:''}</article>`;
+}
+function slider(lid){const its=slideItems(lid);if(!its.length)return '';
+  return `<section class="slider" aria-roledescription="carousel" aria-label="Headlines"><div class="track" data-keep="sl-${esc(lid||'home')}">${its.map(slideHtml).join('')}</div>${its.length>1?`<div class="dots">${its.map((_,i)=>`<button data-act="slide" data-id="${i}" aria-label="Show slide ${i+1}" aria-current="${i===0}"></button>`).join('')}</div>`:''}</section>`;}
+let touchAt=0;
+function updDots(t){const i=Math.round(t.scrollLeft/(t.clientWidth||1));t.parentElement.querySelectorAll('.dots button').forEach((b,k)=>b.setAttribute('aria-current',String(k===i)));}
+setInterval(()=>{if(sheet||document.hidden||Date.now()-touchAt<12000||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  document.querySelectorAll('.track').forEach(t=>{const n=t.children.length,w=t.clientWidth;if(n<2||!w)return;const i=Math.round(t.scrollLeft/w);t.scrollTo({left:((i+1)%n)*w,behavior:'smooth'});});},6500);
+document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('.slider'))touchAt=Date.now();},true);
+document.addEventListener('scroll',e=>{if(e.target.classList&&e.target.classList.contains('track'))updDots(e.target);},true);
+const loadHeads=()=>{if(API)api('headlines').then(r=>{S.heads=r.items||[];S.headRep=r.report||[];render();}).catch(()=>{});};
+const loadClicks=()=>{if(API&&S.me)api('clicks').then(r=>{S.clicks=r.clicks||{};render();}).catch(()=>{});};
+
 /* ---------- fan views ---------- */
 const V={};
 V.home=()=>{
@@ -350,7 +400,7 @@ V.home=()=>{
   const done=S.matches.filter(m=>m.status==='final').sort((a,b)=>byDate(b,a));
   const pick=arr=>arr.find(m=>isFav('leagues',m.lid))||arr[0];
   const f=pick(live)||pick(up),fl=f?Lg(f.lid):S.leagues[0];
-  let h='';
+  let h=slider();
   if(f&&fl){h+=banner(fl,`<div class="row"><span class="chip gold">${esc(fl.sport)}</span>${stChip(f,fl)||`<span class="chip">${esc(countdown(f))}</span>`}</div><h1>${esc(fl.name)}</h1>${sp(fl).eng==='race'?`<div class="name sm">${esc(f.name||'Event')}</div>`:vsBlock(f,fl)}<p class="sub">${esc(when(f))}${f.venue?' · '+esc(f.venue):''}</p><div class="row"><button class="btn" ${goBtn('comp',fl.id)}>View competition</button><button class="btn ghost" ${goBtn('match',f.id)}>Match centre</button>${favBtn('leagues',fl.id)}</div>`,fl.banner);}
   else if(fl){h+=banner(fl,`<div class="row"><span class="chip gold">${esc(fl.sport)}</span></div><h1>${esc(fl.name)}</h1><p class="sub">No fixtures scheduled yet.</p><div class="row"><button class="btn" ${goBtn('comp',fl.id)}>View competition</button>${favBtn('leagues',fl.id)}</div>`,fl.banner);}
   else h+=banner(null,`<h1>African sport,<br>one ground.</h1><p class="sub">Every sport, every country, from community leagues to continental championships.</p>`);
@@ -359,7 +409,7 @@ V.home=()=>{
   if(up.length)h+=sec('Upcoming',`<button class="btn sm ghost" data-act="nav" data-id="live">All fixtures</button>`)+`<div class="list">${up.slice(0,4).map(m=>mCard(m,1)).join('')}</div>`;
   if(S.leagues.length)h+=sec('Competitions',`<button class="btn sm ghost" data-act="nav" data-id="sports">All sports</button>`)+`<div class="scroller">${S.leagues.slice().sort((a,b)=>isFav('leagues',b.id)-isFav('leagues',a.id)||String(a.name).localeCompare(String(b.name))).map(compCard).join('')}</div>`;
   if(done.length)h+=sec('Latest results')+`<div class="list">${done.slice(0,4).map(m=>mCard(m,1)).join('')}</div>`;
-  const nw=pubNews();if(nw.length)h+=sec('News')+`<div class="list">${nw.slice(0,4).map(newsCard).join('')}</div>`;
+  const nw=pubNews();if(nw.length||S.heads.length)h+=sec('News',`<button class="btn sm ghost" ${goBtn('news','')}>All news</button>`)+(nw.length?`<div class="list">${nw.slice(0,4).map(newsCard).join('')}</div>`:'');
   const xs=S.transfers.filter(x=>Lg(x.lid)).sort((a,b)=>String(b.at).localeCompare(String(a.at)));
   if(xs.length)h+=sec('Transfer centre',`<button class="btn sm ghost" ${goBtn('transfers','')}>All moves</button>`)+`<div class="list">${xs.slice(0,2).map(x=>xCard(x,1)).join('')}</div>`;
   const cs=[...new Set(S.leagues.map(l=>l.country).filter(c=>flag(c)))];
@@ -466,6 +516,7 @@ V.comp=v=>{
   h+=`<div class="seg">${tabs.map(([k,t])=>`<button data-act="tab" data-id="${k}" aria-pressed="${tab===k}">${t}</button>`).join('')}</div>`;
   const up=ms.filter(m=>m.status!=='final').sort(byDate),done=ms.filter(m=>m.status==='final').sort((a,b)=>byDate(b,a));
   if(tab==='overview'){
+    h+=slider(l.id);
     if(l.about)h+=`<p style="margin:0;max-width:65ch">${esc(l.about)}</p>`;
     h+=`<dl class="kv">${l.body?`<dt>Organiser</dt><dd>${esc(l.body)}</dd>`:''}${l.format?`<dt>Format</dt><dd>${esc(l.format)}</dd>`:''}<dt>${T.t}</dt><dd>${ts.length}</dd><dt>${T.m}</dt><dd>${done.length} played, ${up.length} to come</dd></dl>`;
     if(up[0])h+=sec(isLive(up[0])?'Live now':'Next up')+mCard(up[0]);
@@ -595,6 +646,10 @@ V.transfers=v=>{const seg=['official','rumours','free'].includes(v.x)?v.x:'all';
     h+=listOr(X.filter(x=>x.type==='released'&&x.pid&&!inSq.has(x.pid)&&!seen.has(x.pid)&&seen.add(x.pid)),x=>xCard(x,1),'No free agents listed. Players released by a club appear here.');}
   else h+=listOr(X.filter(x=>seg==='all'||(seg==='rumours')===(x.type==='rumour')),x=>xCard(x,1),'Nothing here yet.');
   return h+`<p class="sub">Official moves are recorded by team and league managers. Rumours are posted by media officers and stay marked unverified.</p>`;};
+V.news=()=>{const nw=pubNews();
+  let h=`<h1>News</h1>`+sec('On Bwalo')+listOr(nw.slice(0,30),newsCard,'No news published on Bwalo yet.');
+  h+=sec('From around Africa')+listOr(S.heads,x=>`<a class="card" href="${esc(x.link)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><div class="row" style="margin-bottom:6px"><span class="src">${esc(x.src)}</span><span class="pp">${esc(x.at?shortDate(x.at):'')}</span></div><div class="name sm">${esc(x.title)}</div><p class="sub">Opens on ${esc(x.src)} ↗</p></a>`,'No outside headlines yet. The platform owner adds news sources in the management portal.');
+  return h+`<p class="sub">Headlines from other outlets link to the full story on their own site.</p>`;};
 V.notifs=v=>{const f=feed(),mute=S.prefs.mute||[],since=v.since||'';
   let h=`<h1>Notifications</h1><div class="row">${[['live','Live'],['results','Results'],['news','News'],['transfers','Transfers']].map(([k,t])=>`<button class="btn ghost sm" data-act="mute" data-id="${k}" aria-pressed="${!mute.includes(k)}">${t} ${mute.includes(k)?'off':'on'}</button>`).join('')}</div>`;
   h+=listOr(f,i=>`<button class="pl" data-act="go" data-p="${i.go[0]}" data-id="${esc(i.go[1])}"><span class="pn"><span class="pp">${esc(i.k)}${i.at>since?' · New':''} · ${esc(shortDate(i.at))}</span><br>${esc(i.t)}<br><span class="pp">${esc(i.s)}</span></span></button>`,'Follow competitions, teams, sports or countries to get updates here.');
@@ -617,6 +672,8 @@ V['m-dash']=()=>{
   if(plat){const bs={};S.leagues.forEach(l=>bs[sp(l).name]=(bs[sp(l).name]||0)+1);
     h+=sec('Competitions by sport')+(Object.keys(bs).length?`<div class="tw"><table><tbody>${Object.entries(bs).sort((a,b)=>b[1]-a[1]).map(([s,n])=>`<tr><td class="tm">${esc(s)}</td><td>${n}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No competitions yet.</div>');
     if(API)h+=`<button class="btn ghost" data-act="users">Accounts</button>`;
+    h+=sec('Home slider',`<button class="btn blue sm" data-act="new-slide">Add slide</button>`)+slideList(S.slides.filter(x=>x.home||!x.lid),'No slides yet. Add announcements, alerts or adverts to show at the top of Home.');
+    h+=sec('Outside news sources',`<button class="btn ghost sm" data-act="sources">Edit sources</button>`)+listOr(S.headRep,r=>`<div class="pl"><span class="pn">${esc(r.name)}<br><span class="pp" style="overflow-wrap:anywhere">${r.ok?r.n+' headlines':esc(r.error)}</span></span><span class="chip ${r.ok?'gold':'live'}">${r.ok?'Working':'Not working'}</span></div>`,'No sources added. Add news sites so their headlines show in the slider and on the News page.');
     h+=sec('Packages')+`<div class="list">${plans().map(p=>`<button class="pl" data-act="edit-plan" data-id="${esc(p.id)}"><span class="pn">${esc(p.name)}<br><span class="pp">${esc(p.price||'No price set')} · ${p.maxTeams||'Unlimited'} teams</span></span><span class="pp">Edit</span></button>`).join('')}</div>`;
     if(S.leagues.some(l=>l.example))h+=`<button class="btn danger" data-act="arm" data-id="unseed">Remove example competitions</button>`;}
   return h;
@@ -631,7 +688,7 @@ V['m-comps']=()=>{
 V['m-comp']=v=>{
   const l=Lg(v.id);if(!l||!(P.lg(l)||P.score(l)||P.news(l)))return `<div class="empty">You do not have access to manage this competition.</div>`;
   const adm=P.lg(l),T=term(l),e=sp(l).eng;
-  const tabs=[];if(adm)tabs.push(['setup','Setup'],['teams',T.t]);if(P.score(l))tabs.push(['fixtures',T.m]);if(P.news(l)&&planOf(l).news)tabs.push(['news','News']);if(P.news(l)&&!sp(l).solo)tabs.push(['transfers','Transfers']);if(adm)tabs.push(['staff','Staff'],['audit','Audit log']);
+  const tabs=[];if(adm)tabs.push(['setup','Setup'],['teams',T.t]);if(P.score(l))tabs.push(['fixtures',T.m]);if(P.news(l)&&planOf(l).news)tabs.push(['news','News']);if(P.news(l)&&!sp(l).solo)tabs.push(['transfers','Transfers']);if(adm)tabs.push(['slides','Slides'],['staff','Staff'],['audit','Audit log']);
   const tab=tabs.some(t=>t[0]===v.tab)?v.tab:tabs[0][0];
   let h=`<div><p class="sub">${esc(l.sport)} · ${esc(l.country||'Continental')} · ${esc(l.season||'')}</p><h1>${esc(l.name)}</h1></div><div class="seg">${tabs.map(([k,t])=>`<button data-act="tab" data-id="${k}" aria-pressed="${tab===k}">${t}</button>`).join('')}</div>`;
   if(tab==='setup'){
@@ -645,6 +702,8 @@ V['m-comp']=v=>{
     h+=ms.length?`<div class="tw"><table><thead><tr><th class="tm">${e==='race'?'Event':'Fixture'}</th><th>Score</th><th>Status</th></tr></thead><tbody>${ms.map(m=>`<tr><td class="tm"><button ${goBtn('m-match',m.id)}><span>${esc(m.name||nm(Tm(m.home))+' v '+nm(Tm(m.away)))}<br><span class="pp" style="font-weight:400">${esc((m.round?m.round+' · ':'')+when(m))}</span></span></button></td><td>${e==='race'?(m.entries||[]).length+' entered':sc(m,l)}</td><td>${{scheduled:'Not started',live:'Live',suspended:'Suspended',final:'Final'}[m.status]||''}</td></tr>`).join('')}</tbody></table></div><p class="sub">Tap a row to open its control room.</p>`:`<div class="empty">${teamsOf(l.id).length<2?'Add at least two '+T.t.toLowerCase()+' first.':'Nothing scheduled yet.'}</div>`;
   }else if(tab==='news'){
     h+=sec('Newsroom',`<button class="btn blue sm" data-act="new-news">Write article</button>`)+listOr(S.news.filter(n=>n.lid===l.id).sort((a,b)=>String(b.at).localeCompare(String(a.at))),n=>`<div class="card"><div class="row" style="margin-bottom:6px"><span class="chip ${n.pub?'gold':''}">${n.pub?'Published':'Draft'}</span><span class="chip">${esc(n.cat||'News')}</span><span class="pp">${esc(shortDate(n.at))}</span></div><div class="name sm">${esc(n.title)}</div><div class="row" style="margin-top:10px"><button class="btn ghost sm" data-act="edit-news" data-id="${esc(n.id)}">Edit</button><button class="btn ghost sm" ${goBtn('article',n.id)}>Preview</button></div></div>`,'No articles yet.');
+  }else if(tab==='slides'){
+    h+=sec('Slides',`<button class="btn blue sm" data-act="new-slide">Add slide</button>`)+slideList(S.slides.filter(x=>x.lid===l.id),'No slides yet. Announcements, alerts and sponsor adverts show at the top of this competition\'s page.')+`<p class="sub">${P.plat()?'Tick Also show on Home to put a slide in the main slider.':'The platform owner can also show your slides on the Home page.'}</p>`;
   }else if(tab==='transfers'){
     h+=sec('Transfers',`<button class="btn blue sm" data-act="rumour">Post rumour</button>`)+listOr(S.transfers.filter(x=>x.lid===l.id).sort((a,b)=>String(b.at).localeCompare(String(a.at))),x=>xCard(x,0,1),'No transfers recorded.')+`<p class="sub">Official transfers and loans are recorded from a player profile by the team manager. Rumours stay marked unverified.</p>`;
   }else if(tab==='staff'&&!planOf(l).staff){
@@ -691,6 +750,9 @@ V['m-approvals']=()=>{
   return `<h1>Approvals</h1>`+listOr(rs,r=>`<div class="card"><div class="name sm">${esc(nameOf(r.uid))}</div><p class="sub">Asks to be ${esc({admin:'league administrator',scorer:'scorekeeper',media:'media officer',manager:'team manager of '+nm(Tm(r.tid))}[r.role]||r.role)} · ${esc((Lg(r.lid)||{}).name||'')} · ${esc(shortDate(r.at))}</p><div class="row" style="margin-top:10px"><button class="btn blue sm" data-act="approve" data-id="${esc(r.id)}">Approve</button><button class="btn danger sm" data-act="decline" data-id="${esc(r.id)}">Decline</button></div></div>`,'No requests waiting.')+`<p class="sub">Approve only people you know. An approved role takes effect immediately.</p>`;
 };
 
+function slideList(arr,empty){const st=x=>x.until&&x.until<nowISO()?'Ended':x.from&&x.from>nowISO()?'Starts '+shortDate(x.from):'Showing';
+  return listOr(arr.slice().sort((a,b)=>String(b.at).localeCompare(String(a.at))),x=>`<button class="pl" data-act="edit-slide" data-id="${esc(x.id)}"><span class="pn">${esc(x.title)}<br><span class="pp">${esc([(STYPE[x.type]||STYPE.news)[0],st(x),x.home&&x.lid?'Also on Home':'',x.link?(S.clicks[x.id]||0)+' clicks':''].filter(Boolean).join(' · '))}</span></span><span class="pp">Edit</span></button>`,empty);}
+
 /* ---------- shell ---------- */
 const IC={home:'<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>',live:'<circle cx="12" cy="12" r="3"/><path d="M5.5 5.5a9 9 0 0 0 0 13M18.5 5.5a9 9 0 0 1 0 13"/>',sports:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',favs:'<path d="m12 4 2.5 5.2 5.7.8-4.1 4 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4.1-4 5.7-.8z"/>',profile:'<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.6 3.5-5.5 7-5.5s6.2 1.900 7 5.500"/>',
   'm-dash':'<path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/>','m-comps':'<path d="M7 4h10v5a5 5 0 0 1-10 0zM12 14v4M8 20h8M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/>','m-control':'<circle cx="12" cy="13" r="7"/><path d="M12 13V9M10 3h4"/>','m-approvals':'<path d="m5 12 4.500 4.500L19 7"/>',exit:'<path d="M14 5h5v14h-5M10 8l-4 4 4 4M6 12h9"/>'};
@@ -707,7 +769,9 @@ function render(){
   const root=S.stack.length?S.stack[0].page:v.page;
   $('#tabs').innerHTML=(mg?MNAV:NAV).map(([k,t])=>`<button data-act="nav" data-id="${k}" aria-current="${root===k}"><svg viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>${t}</button>`).join('');
   if(v.page==='search'&&document.activeElement&&document.activeElement.id==='q'){$('#results').innerHTML=results(v.q||'');return;}
+  const keep={};document.querySelectorAll('[data-keep]').forEach(e=>keep[e.dataset.keep]=e.scrollLeft);
   $('#main').innerHTML=(V[v.page]||V.home)(v);
+  document.querySelectorAll('[data-keep]').forEach(e=>{if(keep[e.dataset.keep]){e.scrollLeft=keep[e.dataset.keep];updDots(e);}});
 }
 function go(view){S.stack.push(S.view);S.view=view;render();$('#view').scrollTop=0;}
 function root(page){S.stack=[];S.view={page};render();$('#view').scrollTop=0;}
@@ -1017,6 +1081,37 @@ function compPlanForm(l){
   openForm({title:'Change package',submit:'Save',fields:[{id:'plan',label:'Package for '+l.name,type:'select',options:[['','Unrestricted'],...plans().map(p=>[p.id,p.name])],value:l.plan||''}],
     onSubmit:async v=>{await put('leagues/'+l.id,{...body(l),plan:v.plan});await log(l.id,'Changed the package');}});}
 
+function slideForm(x){
+  const lid=x?x.lid||'':(S.view.page==='m-comp'?S.view.id:''),own=P.plat(),d=x||{type:'announcement',home:!lid};
+  const loc=v=>v?localISO(new Date(v)):'';
+  openForm({title:x?'Edit slide':'Add slide',submit:'Save slide',
+    fields:[{id:'type',label:'Type',type:'select',options:[['announcement','Announcement'],['alert','Alert (shown first)'],['news','News'],['advert','Advert (marked Sponsored)']],value:d.type},
+      {id:'title',label:'Headline',value:d.title,required:true,max:90},
+      {id:'text',label:'Short text (optional)',type:'textarea',value:d.text},
+      {id:'img',label:x&&x.img?'Replace photo (optional)':'Photo (optional)',type:'file',img:[900,500,true,false]},
+      {id:'link',label:'Link (optional): a news article, sponsor website or form',type:'url',value:d.link,placeholder:'https://'},
+      [{id:'cta',label:'Button text',value:d.cta,max:24,placeholder:'Read more'},{id:'sponsor',label:'Sponsor name (adverts)',value:d.sponsor,max:40}],
+      [{id:'from',label:'Show from',type:'datetime-local',value:loc(d.from)},{id:'until',label:'Show until',type:'datetime-local',value:loc(d.until)}],
+      {id:'prio',label:'Order (higher shows first)',type:'number',value:d.prio},
+      ...(own&&lid?[{id:'home',type:'checkbox',label:'Also show on Home',value:d.home}]:[])],
+    hint:'Leave the dates empty to show the slide until you remove it. Links open in a new tab.',
+    check:v=>v.link&&!/^https?:\/\/\S+\.\S+/i.test(v.link)?'Enter the full link, starting with https://':v.from&&v.until&&v.until<v.from?'The end date is before the start date.':'',
+    danger:x?{label:'Delete slide',act:'del-slide'}:null,
+    onSubmit:async v=>{const iso=t=>t?new Date(t).toISOString():'';
+      const b={...(x?body(x):{at:new Date().toISOString()}),type:v.type,title:v.title,text:v.text.slice(0,240),link:v.link,cta:v.cta,sponsor:v.sponsor,from:iso(v.from),until:iso(v.until),prio:v.prio||0,lid,home:lid?(own?!!v.home:!!d.home):true};
+      if(v.img)b.img=v.img;
+      await put('slides/'+(x?x.id:uid()),b);if(lid)await log(lid,(x?'Edited':'Added')+' slide: '+v.title);}});
+  if(x)sheet.sid=x.id;
+}
+function sourcesForm(){const cur=((S.config.find(c=>c.id==='feeds')||{}).items||[]);
+  openForm({title:'Outside news sources',submit:'Save sources',
+    fields:[{id:'lines',label:'One per line: name | feed address',type:'textarea',value:cur.map(f=>f.name+' | '+f.url).join('\n'),placeholder:'The Herald Sport | https://www.herald.co.zw/category/sport/feed/'}],
+    hint:'Use the RSS or Atom feed address of a news site. Most sites list it as RSS, or add /feed/ to the end of a section address. Only headlines are shown, each linking to the full story on that site. Up to 15 sources.',
+    check:v=>{const bad=v.lines.split('\n').map(x=>x.trim()).filter(Boolean).find(x=>!/^https?:\/\/\S+$/i.test(x.split('|').pop().trim()));return bad?'This line has no feed address: '+bad.slice(0,60):'';},
+    onSubmit:async v=>{const items=v.lines.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,15).map(x=>{const i=x.lastIndexOf('|'),url=x.slice(i+1).trim();return {name:(i>0?x.slice(0,i).trim():'')||new URL(url).hostname.replace(/^www\./,''),url};});
+      await put('config/feeds',{items});toast('Sources saved. Checking them now.');loadHeads();}});
+}
+
 /* ---------- example data ---------- */
 function exampleDocs(){
   let s=7;const rnd=n=>{s=(s*1103515245+12345)%2147483648;return Math.floor(s/65536)%n;};
@@ -1036,6 +1131,8 @@ function exampleDocs(){
   out.push(['transfers/'+uid(),{lid:fb,pid:T[3].players[9].id,player:T[3].players[9].name,type:'transfer',from:'Matero United',to:'Woodlands Stars',at:new Date(Date.now()-8*864e5).toISOString()}]);
   out.push(['transfers/'+uid(),{lid:fb,type:'rumour',player:T[0].players[10].name,from:'Chilenje Rangers',to:'Kabwata Lions',source:'Example rumour',at:new Date(Date.now()-2*864e5).toISOString()}]);
   out.push(['news/'+uid(),{lid:fb,title:'Rangers go top after five-goal thriller',cat:'Match report',body:'Chilenje Rangers held off a late Matero United fightback to win 3-2 and move clear at the top of the table.\nThis is an example article. Organisers and media officers write real ones from the management portal.',pub:true,by:'',at:new Date(Date.now()-4*864e5).toISOString()}]);
+  out.push(['slides/'+uid(),{lid:fb,home:true,type:'announcement',title:'Round 3 kicks off this Sunday',text:'All matches start at 15:00. This is an example slide; replace it in the management portal.',cta:'See fixtures',at:new Date().toISOString(),prio:1}]);
+  out.push(['slides/'+uid(),{lid:fb,home:true,type:'advert',title:'Your brand here',text:'Example advert. Sponsors can reach every fan in the league.',sponsor:'Example sponsor',at:new Date().toISOString()}]);
   // basketball
   const bb=base('Harare City Hoops','Basketball','Zimbabwe','Harare','Amateur',{about:'Four-team city basketball league.',body:'Harare Basketball Association'});
   const B=mk(bb,[['Glen View Giants','GVG','#ff8a3d'],['Avondale Aces','AVA','#35c9ff'],['Mbare Hawks','MBH','#e63946'],['Borrowdale Bulls','BOB','#3ddc97']],['PG','SG','SF','PF','C','PG','SF','C'],'Zimbabwe');
@@ -1059,10 +1156,10 @@ const A={
   back(){if(S.stack.length){S.view=S.stack.pop();render();}},
   nav(id){if(id==='exit')root('home');else root(id);},
   go(id,el){if(el.dataset.close)closeSheet();const v={page:el.dataset.p,id};if(el.dataset.p==='match')v.side=el.dataset.x||'home';else if(el.dataset.x)v.x=el.dataset.x;go(v);},
-  tab(id){upd({tab:id});},x(id){upd({x:id});},side(id){upd({side:id});},
+  tab(id){upd({tab:id});if(id==='slides')loadClicks();},x(id){upd({x:id});},side(id){upd({side:id});},
   close(){closeSheet();},
   fav(id,el){const k=el.dataset.k,a=S.prefs[k]||[];S.prefs={...S.prefs,[k]:a.includes(id)?a.filter(x=>x!==id):[...a,id]};render();savePrefs();},
-  portal(){root('m-dash');},
+  portal(){root('m-dash');loadClicks();loadHeads();},
   signin(){openForm({title:'Sign in',submit:'Sign in',keep:true,
     fields:[{id:'email',label:'Email',type:'email',required:true},{id:'password',label:'Password',type:'password',required:true},{id:'code',label:'Authenticator code (only if two-step sign-in is on)',max:8}],
     onSubmit:async v=>{const r=await api('login','POST',v);setUser(r.user,r.prefs);await sync(true);render();toast('Signed in.');}});},
@@ -1095,7 +1192,10 @@ const A={
   ev(id,el){eventForm(curM(),id,el.dataset.x);},
   entry(id){const m=curM();const en=id&&(m.entries||[]).find(x=>x.id===id);entryForm(m,en);if(en)sheet.eid=en.id;},
   'add-players'(){playersForm(curT());},'add-staff'(){staffForm(curT());},
-  'new-news'(){newsForm();},'edit-news'(id){newsForm(S.news.find(n=>n.id===id));},
+  'new-news'(){newsForm();},
+  'new-slide'(){slideForm();},'edit-slide'(id){slideForm(S.slides.find(x=>x.id===id));},sources(){sourcesForm();},
+  'del-slide':safe(async()=>{const id=sheet.sid,x=S.slides.find(s=>s.id===id);closeSheet();await del('slides/'+id);if(x&&x.lid)await log(x.lid,'Deleted slide: '+x.title);}),
+  slide(id,el){const t=el.closest('.slider').querySelector('.track');touchAt=Date.now();t.scrollTo({left:+id*t.clientWidth,behavior:'smooth'});},'edit-news'(id){newsForm(S.news.find(n=>n.id===id));},
   req(id){reqForm(Lg(id));},
   player(id,el){sheet={kind:'player',pid:id,tid:el.dataset.team,title:''};renderSheet();},
   'edit-player'(){const t=Tm(sheet.tid),p=t.players.find(x=>x.id===sheet.pid);playerForm(t,p);},
@@ -1144,10 +1244,11 @@ const A={
 };
 async function wipe(lid){
   if(API){await del('leagues/'+lid);return;}
-  const paths=[...S.teams.filter(x=>x.lid===lid).map(x=>'teams/'+x.id),...S.matches.filter(x=>x.lid===lid).map(x=>'matches/'+x.id),...S.transfers.filter(x=>x.lid===lid).map(x=>'transfers/'+x.id),...S.news.filter(x=>x.lid===lid).map(x=>'news/'+x.id),...S.requests.filter(x=>x.lid===lid).map(x=>'requests/'+x.id),'audit/'+lid,'leagues/'+lid];
+  const paths=[...S.teams.filter(x=>x.lid===lid).map(x=>'teams/'+x.id),...S.matches.filter(x=>x.lid===lid).map(x=>'matches/'+x.id),...S.transfers.filter(x=>x.lid===lid).map(x=>'transfers/'+x.id),...S.news.filter(x=>x.lid===lid).map(x=>'news/'+x.id),...S.requests.filter(x=>x.lid===lid).map(x=>'requests/'+x.id),...S.slides.filter(x=>x.lid===lid).map(x=>'slides/'+x.id),'audit/'+lid,'leagues/'+lid];
   for(const p of paths)await del(p);
 }
 document.addEventListener('click',e=>{
+  const ck=e.target.closest('a[data-click]');if(ck&&API)fetch('/api/click',{method:'POST',keepalive:true,headers:{'content-type':'application/json'},body:JSON.stringify({id:ck.dataset.click})}).catch(()=>{});
   const el=e.target.closest('[data-act]');
   if(!el){if(e.target.id==='sheet')closeSheet();return;}
   const fn=A[el.dataset.act];if(fn)fn(el.dataset.id,el);
@@ -1177,6 +1278,7 @@ async function start(){
   }
   clearTimeout(timer);S.slow=false;S.mode='db';render();
   setInterval(poll,10000);document.addEventListener('visibilitychange',poll);
+  loadHeads();setInterval(loadHeads,15*6e4);
 }
 start();
 </script>

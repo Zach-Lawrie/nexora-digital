@@ -1,7 +1,7 @@
 // Bwalo API: accounts, sessions, two-step sign-in, and a document store where every write is checked
 // against the signed-in person's role. Runs as a Cloudflare Pages Function with a D1 database bound as DB.
 
-const COLS = ['leagues', 'teams', 'matches', 'transfers', 'news', 'requests', 'audit', 'config'];
+const COLS = ['leagues', 'teams', 'matches', 'transfers', 'news', 'requests', 'audit', 'config', 'slides'];
 const DEFPLANS = [
   { id: 'free', name: 'Free', price: '', maxTeams: 8, news: true, staff: false, stats: false },
   { id: 'pro', name: 'Pro', price: '', maxTeams: 24, news: true, staff: true, stats: true },
@@ -71,6 +71,15 @@ async function authorize(env, u, col, id, old, data, del) {
   const own = u.role === 'owner';
   if (col === 'config') { if (!own) throw fail(403, 'Only the platform owner can change this.'); return data; }
   if (col === 'audit') throw fail(403, 'The audit log is written by the server.');
+  if (col === 'slides') {
+    if (!del && data.link && !/^https?:\/\//i.test(String(data.link))) delete data.link;
+    if (own) return data;
+    const sl = old ? old.lid : data.lid, l = await getDoc(env, 'leagues', sl);
+    if (!l || !rights(u, l).adm) throw fail(403, 'Only the platform owner or this competition\'s organiser can manage these slides.');
+    if (!old && del) throw fail(404, 'Not found.');
+    if (!del) { data.lid = sl; data.home = old ? !!old.home : false; }
+    return data;
+  }
   if (col === 'leagues') {
     if (!old) { if (del) throw fail(404, 'Not found.'); data.createdBy = u.id; data.roles = {}; data.history = []; if (!own) { data.plan = 'free'; delete data.example; } return data; }
     if (!rights(u, old).adm) throw fail(403, 'Only the organiser or a league administrator can change this competition.');
@@ -123,6 +132,49 @@ async function authorize(env, u, col, id, old, data, del) {
     data.uid = u.id; data.at = new Date().toISOString(); return data;
   }
   throw fail(400, 'Unknown collection.');
+}
+
+// ---- headlines from other news sites (RSS and Atom) ----
+const ENT = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', hellip: '…', ndash: '–', mdash: '—', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”' };
+const cp = (n) => { try { return String.fromCodePoint(n); } catch (e) { return ''; } };
+const clean = (s) => String(s).replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/<[^>]+>/g, ' ')
+  .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e) => (e[0] === '#' ? cp(e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : +e.slice(1)) : ENT[e.toLowerCase()] ?? m))
+  .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+const isoOr = (d) => { const t = new Date(d); return isNaN(t) ? '' : t.toISOString(); };
+export function parseFeed(xml, src) {
+  const out = [], re = /<(item|entry)\b[\s\S]*?<\/\1>/gi; let m;
+  while ((m = re.exec(xml)) && out.length < 8) {
+    const x = m[0], tag = (t) => { const r = new RegExp('<' + t + '\\b[^>]*>([\\s\\S]*?)<\\/' + t + '>', 'i').exec(x); return r ? clean(r[1]) : ''; };
+    let link = tag('link');
+    if (!/^https?:\/\//i.test(link)) { const h = /<link\b[^>]*?href=["']([^"']+)["'][^>]*>/i.exec(x); link = h ? clean(h[1]) : ''; }
+    if (!/^https?:\/\//i.test(link)) link = tag('guid');
+    const title = tag('title'), at = isoOr(tag('pubDate') || tag('published') || tag('updated') || tag('dc:date'));
+    if (title && /^https?:\/\//i.test(link)) out.push({ src, title: title.slice(0, 200), link: link.slice(0, 500), at });
+  }
+  return out;
+}
+async function headlines(env) {
+  const cfg = await getDoc(env, 'config', 'feeds');
+  const feeds = ((cfg && cfg.items) || []).filter((f) => f && /^https?:\/\//i.test(f.url || '')).slice(0, 15);
+  const key = await sha(JSON.stringify(feeds));
+  const c = await env.DB.prepare("SELECT v FROM meta WHERE k='headlines'").first();
+  let cache = null; try { cache = c && JSON.parse(c.v); } catch (e) {}
+  if (cache && cache.key === key && Date.now() - cache.at < 20 * 6e4) return cache;
+  const res = await Promise.all(feeds.map(async (f) => {
+    const name = String(f.name || '').slice(0, 40) || new URL(f.url).hostname;
+    try {
+      const r = await fetch(f.url, { headers: { 'user-agent': 'BwaloNews/1.0 (+https://bwalo.pages.dev)', accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.5' }, signal: AbortSignal.timeout(8000), redirect: 'follow' });
+      if (!r.ok) return { f, name, err: 'The site answered ' + r.status };
+      const it = parseFeed((await r.text()).slice(0, 1500000), name);
+      return it.length ? { f, name, it } : { f, name, err: 'No headlines found at this address' };
+    } catch (e) { return { f, name, err: e && e.name === 'TimeoutError' ? 'The site took too long to answer' : 'The site could not be reached' }; }
+  }));
+  const seen = new Set();
+  let items = res.flatMap((x) => x.it || []).filter((i) => !seen.has(i.link) && seen.add(i.link)).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 40);
+  if (!items.length && cache && cache.key === key) items = cache.items;
+  const out = { key, at: Date.now(), items, report: res.map((x) => ({ name: x.name, url: x.f.url, ok: !x.err, n: (x.it || []).length, error: x.err || '' })) };
+  await env.DB.prepare("INSERT INTO meta(k,v) VALUES('headlines',?) ON CONFLICT(k) DO UPDATE SET v=excluded.v").bind(JSON.stringify(out)).run();
+  return out;
 }
 
 // ---- sessions ----
@@ -218,6 +270,26 @@ async function handle(request, env) {
     const ids = [...new Set((b.ids || []).filter((x) => typeof x === 'string'))].slice(0, 100); if (!ids.length) return J({ names: {} });
     const rows = await env.DB.prepare(`SELECT id,name FROM users WHERE id IN (${ids.map(() => '?').join(',')})`).bind(...ids).all();
     return J({ names: Object.fromEntries(rows.results.map((r) => [r.id, r.name])) });
+  }
+
+  if (a === 'headlines' && m === 'GET') { const h = await headlines(env); return J({ items: h.items, report: h.report, at: h.at }); }
+
+  if (a === 'click' && m === 'POST') {
+    const id = String(b.id || ''); if (!/^[A-Za-z0-9_-]{1,40}$/.test(id)) throw fail(400, 'Bad request.');
+    if (!(await getDoc(env, 'slides', id))) return J({ ok: true });
+    const k = 'clk:' + ip + ':' + id, n = await env.DB.prepare('SELECT COUNT(*) AS n FROM attempts WHERE k=? AND at>?').bind(k, Date.now() - 36e5).first();
+    if (n.n < 3) { await strike(env, k); await env.DB.prepare('INSERT INTO clicks(id,n) VALUES(?,1) ON CONFLICT(id) DO UPDATE SET n=n+1').bind(id).run(); }
+    return J({ ok: true });
+  }
+
+  if (a === 'clicks' && m === 'GET') {
+    need(); const rows = (await env.DB.prepare('SELECT id,n FROM clicks').all()).results, out = {}, L = {};
+    for (const r of rows) {
+      const s = await getDoc(env, 'slides', r.id); if (!s) continue;
+      if (u.role !== 'owner') { if (!s.lid) continue; if (!(s.lid in L)) L[s.lid] = await getDoc(env, 'leagues', s.lid); if (!rights(u, L[s.lid]).adm) continue; }
+      out[r.id] = r.n;
+    }
+    return J({ clicks: out });
   }
 
   if (a === 'sync' && m === 'GET') {
