@@ -3,11 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bwalo · African sports</title>
-<meta name="description" content="Fixtures, live scores, standings, squads and news for leagues and tournaments across Africa, in every sport.">
+<title>ALL · Africa Local Leagues</title>
+<meta name="description" content="ALL, Africa Local Leagues. African sports fixtures, live scores, standings, squads and news for leagues and tournaments across Africa, in every sport.">
 <meta name="theme-color" content="#060a18">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" href="/icon.svg">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:title" content="ALL · Africa Local Leagues">
+<meta property="og:description" content="African sports: fixtures, live scores, standings and news for local leagues in every sport.">
+<meta property="og:image" content="/logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -171,7 +175,7 @@ label.c input{width:20px;height:20px;margin-top:2px;accent-color:var(--gold)}
 <div id="app">
   <header class="top">
     <button class="ib" id="back" data-act="back" aria-label="Back" hidden>&#8249;</button>
-    <div><div class="word">Bwa<b>lo</b></div><div class="badge" id="badge"></div></div>
+    <img src="/icon-192.png" width="40" height="40" alt="" style="border-radius:10px;flex:none"><div><div class="word">ALL</div><div class="badge" id="badge"></div></div>
     <div class="mode" id="mode"></div>
     <button class="ib" data-act="notifs" aria-label="Notifications" id="nbtn" style="position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></svg><span id="ncount"></span></button>
     <button class="ib" data-act="go" data-p="search" aria-label="Search" id="sbtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
@@ -395,7 +399,7 @@ const loadClicks=()=>{if(API&&S.me)api('clicks').then(r=>{S.clicks=r.clicks||{};
 /* ---------- fan views ---------- */
 const V={};
 V.home=()=>{
-  if(S.mode==='loading')return banner(null,`<h1>African sport,<br>one ground.</h1><p class="sub">${S.slow?'Saved competitions cannot be reached yet. Still trying.':'Loading competitions…'}</p>`);
+  if(S.mode==='loading')return banner(null,`<h1>Every league.<br>Every sport.</h1><p class="sub">${S.slow?'Saved competitions cannot be reached yet. Still trying.':'Loading competitions…'}</p>`);
   const now=Date.now(),live=S.matches.filter(isLive),up=S.matches.filter(m=>m.status==='scheduled'&&dOf(m)&&dOf(m)>now-108e5).sort(byDate);
   const done=S.matches.filter(m=>m.status==='final').sort((a,b)=>byDate(b,a));
   const pick=arr=>arr.find(m=>isFav('leagues',m.lid))||arr[0];
@@ -403,7 +407,7 @@ V.home=()=>{
   let h=slider();
   if(f&&fl){h+=banner(fl,`<div class="row"><span class="chip gold">${esc(fl.sport)}</span>${stChip(f,fl)||`<span class="chip">${esc(countdown(f))}</span>`}</div><h1>${esc(fl.name)}</h1>${sp(fl).eng==='race'?`<div class="name sm">${esc(f.name||'Event')}</div>`:vsBlock(f,fl)}<p class="sub">${esc(when(f))}${f.venue?' · '+esc(f.venue):''}</p><div class="row"><button class="btn" ${goBtn('comp',fl.id)}>View competition</button><button class="btn ghost" ${goBtn('match',f.id)}>Match centre</button>${favBtn('leagues',fl.id)}</div>`,fl.banner);}
   else if(fl){h+=banner(fl,`<div class="row"><span class="chip gold">${esc(fl.sport)}</span></div><h1>${esc(fl.name)}</h1><p class="sub">No fixtures scheduled yet.</p><div class="row"><button class="btn" ${goBtn('comp',fl.id)}>View competition</button>${favBtn('leagues',fl.id)}</div>`,fl.banner);}
-  else h+=banner(null,`<h1>African sport,<br>one ground.</h1><p class="sub">Every sport, every country, from community leagues to continental championships.</p>`);
+  else h+=banner(null,`<h1>Every league.<br>Every sport.</h1><p class="sub">Every sport, every country, from community leagues to continental championships.</p>`);
   if(P.plat()&&!S.leagues.some(l=>l.example)&&S.mode==='db')h+=`<div class="note">Want to see every screen filled in? Add three example competitions (football, basketball, athletics). You can remove them later from the management portal.<div class="row"><button class="btn sm" data-act="seed">Add example competitions</button>${S.leagues.length?'':'<button class="btn sm ghost" data-act="new-comp">Create a competition</button>'}</div></div>`;
   if(live.length)h+=sec('Live now')+`<div class="list">${live.map(m=>mCard(m,1)).join('')}</div>`;
   if(up.length)h+=sec('Upcoming',`<button class="btn sm ghost" data-act="nav" data-id="live">All fixtures</button>`)+`<div class="list">${up.slice(0,4).map(m=>mCard(m,1)).join('')}</div>`;
@@ -647,7 +651,7 @@ V.transfers=v=>{const seg=['official','rumours','free'].includes(v.x)?v.x:'all';
   else h+=listOr(X.filter(x=>seg==='all'||(seg==='rumours')===(x.type==='rumour')),x=>xCard(x,1),'Nothing here yet.');
   return h+`<p class="sub">Official moves are recorded by team and league managers. Rumours are posted by media officers and stay marked unverified.</p>`;};
 V.news=()=>{const nw=pubNews();
-  let h=`<h1>News</h1>`+sec('On Bwalo')+listOr(nw.slice(0,30),newsCard,'No news published on Bwalo yet.');
+  let h=`<h1>News</h1>`+sec('On ALL')+listOr(nw.slice(0,30),newsCard,'No news published on ALL yet.');
   h+=sec('From around Africa')+listOr(S.heads,x=>`<a class="card" href="${esc(x.link)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><div class="row" style="margin-bottom:6px"><span class="src">${esc(x.src)}</span><span class="pp">${esc(x.at?shortDate(x.at):'')}</span></div><div class="name sm">${esc(x.title)}</div><p class="sub">Opens on ${esc(x.src)} ↗</p></a>`,'No outside headlines yet. The platform owner adds news sources in the management portal.');
   return h+`<p class="sub">Headlines from other outlets link to the full story on their own site.</p>`;};
 V.notifs=v=>{const f=feed(),mute=S.prefs.mute||[],since=v.since||'';
@@ -762,7 +766,7 @@ function render(){
   const v=S.view,mg=v.page.startsWith('m-');
   document.body.classList.toggle('mg',mg);
   $('#back').hidden=!S.stack.length;
-  $('#badge').textContent=mg?'Management':'';
+  $('#badge').textContent=mg?'Management':'Africa Local Leagues';
   $('#sbtn').hidden=mg||v.page==='search';$('#nbtn').hidden=mg;
   const un=feed().filter(i=>i.at>(S.prefs.seen||'')).length;$('#ncount').textContent=un&&v.page!=='notifs'?(un>9?'9+':un):'';
   $('#mode').textContent=S.mode==='local'?'Example mode · not saved':S.mode==='loading'?'Loading…':S.fan?'Fan preview':'';
@@ -1165,7 +1169,7 @@ const A={
     onSubmit:async v=>{const r=await api('login','POST',v);setUser(r.user,r.prefs);await sync(true);render();toast('Signed in.');}});},
   signup(){openForm({title:'Create account',submit:'Create account',keep:true,
     fields:[{id:'name',label:'Your name',required:true,max:40},{id:'email',label:'Email',type:'email',required:true},{id:'password',label:'Password (8 characters or more)',type:'password',required:true},{id:'code',label:'Setup code (platform owner only, otherwise leave empty)',max:40}],
-    onSubmit:async v=>{const r=await api('register','POST',v);setUser(r.user,null);savePrefs();await sync(true);render();toast('Account created. Welcome to Bwalo.');}});},
+    onSubmit:async v=>{const r=await api('register','POST',v);setUser(r.user,null);savePrefs();await sync(true);render();toast('Account created. Welcome to ALL.');}});},
   signout:safe(async()=>{await api('logout','POST',{});setUser(null);S.fan=false;S.stack=[];S.view={page:'profile'};await sync(true);render();}),
   chpass(){openForm({title:'Change password',submit:'Change password',keep:true,
     fields:[{id:'old',label:'Current password',type:'password',required:true},{id:'new',label:'New password (8 characters or more)',type:'password',required:true}],

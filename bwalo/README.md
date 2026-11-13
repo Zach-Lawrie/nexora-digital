@@ -1,4 +1,4 @@
-# Bwalo: African sports platform
+# ALL (Africa Local Leagues): African sports platform
 
 Fixtures, live scores, standings, squads, transfers and news for leagues and tournaments in any sport,
 with a fan app and a separate management portal.
