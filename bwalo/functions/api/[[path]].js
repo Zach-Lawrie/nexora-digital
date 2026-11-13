@@ -1,4 +1,4 @@
-// Bwalo API: accounts, sessions, two-step sign-in, and a document store where every write is checked
+// ALL (Africa Local Leagues) API: accounts, sessions, two-step sign-in, and a document store where every write is checked
 // against the signed-in person's role. Runs as a Cloudflare Pages Function with a D1 database bound as DB.
 
 const COLS = ['leagues', 'teams', 'matches', 'transfers', 'news', 'requests', 'audit', 'config', 'slides'];
@@ -163,7 +163,7 @@ async function headlines(env) {
   const res = await Promise.all(feeds.map(async (f) => {
     const name = String(f.name || '').slice(0, 40) || new URL(f.url).hostname;
     try {
-      const r = await fetch(f.url, { headers: { 'user-agent': 'BwaloNews/1.0 (+https://bwalo.pages.dev)', accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.5' }, signal: AbortSignal.timeout(8000), redirect: 'follow' });
+      const r = await fetch(f.url, { headers: { 'user-agent': 'ALLNews/1.0 (+https://bwalo.pages.dev)', accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.5' }, signal: AbortSignal.timeout(8000), redirect: 'follow' });
       if (!r.ok) return { f, name, err: 'The site answered ' + r.status };
       const it = parseFeed((await r.text()).slice(0, 1500000), name);
       return it.length ? { f, name, it } : { f, name, err: 'No headlines found at this address' };
@@ -259,7 +259,7 @@ async function handle(request, env) {
 
   if (a === '2fa' && m === 'POST') {
     need();
-    if (seg[1] === 'setup') { const secret = b32enc(crypto.getRandomValues(new Uint8Array(20))); await env.DB.prepare('UPDATE users SET totp=? WHERE id=?').bind('pending:' + secret, u.id).run(); return J({ secret, uri: `otpauth://totp/Bwalo:${encodeURIComponent(u.email)}?secret=${secret}&issuer=Bwalo` }); }
+    if (seg[1] === 'setup') { const secret = b32enc(crypto.getRandomValues(new Uint8Array(20))); await env.DB.prepare('UPDATE users SET totp=? WHERE id=?').bind('pending:' + secret, u.id).run(); return J({ secret, uri: `otpauth://totp/ALL:${encodeURIComponent(u.email)}?secret=${secret}&issuer=ALL%20Africa%20Local%20Leagues` }); }
     if (seg[1] === 'enable') { if (!u.totp || !u.totp.startsWith('pending:')) throw fail(400, 'Start the setup again.'); const secret = u.totp.slice(8); if (!(await totpOk(secret, b.code))) throw fail(400, 'That code is not right. Check the time on your phone and try the newest code.'); await env.DB.prepare('UPDATE users SET totp=? WHERE id=?').bind(secret, u.id).run(); return J({ ok: true }); }
     if (seg[1] === 'disable') { const row = await env.DB.prepare('SELECT * FROM users WHERE id=?').bind(u.id).first(); if (!same(await pbk(String(b.password || ''), row.salt), row.pass)) throw fail(401, 'Your password is not right.'); await env.DB.prepare('UPDATE users SET totp=NULL WHERE id=?').bind(u.id).run(); return J({ ok: true }); }
   }
