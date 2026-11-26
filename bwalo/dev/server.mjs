@@ -26,7 +26,7 @@ const tmp = path.join(ROOT, 'dev', '.fn.mjs');
 fs.copyFileSync(path.join(ROOT, 'functions', 'api', '[[path]].js'), tmp);
 const { onRequest } = await import(pathToFileURL(tmp).href + '?v=' + Date.now());
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${port}`);
   if (url.pathname.startsWith('/api/')) {

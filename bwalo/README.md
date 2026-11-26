@@ -23,10 +23,20 @@ sets (tennis, volleyball, badminton), bouts (boxing, MMA, judo, chess), races an
 - Platform owner: Management → Dashboard → **Home slider** (announcements, alerts, adverts with links, start and end dates, click counts) and **Outside news sources** (RSS or Atom feed addresses). Headlines are fetched by the server every 20 minutes and link to the full story on the outlet's site.
 - Organisers: Manage → competition → **Slides**, shown at the top of their competition page. Only the owner can put a slide on Home.
 
+## Across Africa (professional scores) and news
+- `GET /api/scores`: live scores, fixtures and results from 14 competitions (CAF club and national, Zimbabwe, South Africa, Nigeria, Ghana, Kenya, Uganda, Zambia, Currie Cup, URC) from ESPN's public scoreboards. Cached in D1 `meta` for 60 s while games are live, 5 min otherwise.
+- Default news sources (BBC Sport Africa, AllAfrica, NewsDay, The Herald, MyJoyOnline) are always included; owner-added sources come first. Headlines carry photos where the feed has them.
+
+## Links, sharing, calendars, install
+- Every screen has an address (`/#/comp/<id>`, `/#/match/<id>?side=away`, `/#/africa`), and the phone's back button works.
+- Share links `/s/<match|comp|team|article>/<id>` (`functions/s/`) give WhatsApp and Facebook a preview card, then open the screen.
+- Fixtures download as calendar files (.ics) with a 30-minute reminder. `sw.js` makes the app installable.
+- Design layer and add-ons live in `public/plus.css` and `public/plus.js`; stock photos in `public/img/` (Unsplash licence).
+
 ## Local testing
 ```
 OWNER_CODE=test node dev/server.mjs dev/local.db 8790   # local server with a SQLite stand-in for D1
-node dev/flow.mjs http://localhost:8790 test             # 87 permission, sign-in, slider and feed checks (fresh database)
+node dev/flow.mjs http://localhost:8790 test             # 89 permission, sign-in, slider and feed checks (fresh database)
 ```
 
 ## Not connected yet

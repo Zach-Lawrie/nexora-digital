@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:title" content="ALL · Africa Local Leagues">
 <meta property="og:description" content="African sports: fixtures, live scores, standings and news for local leagues in every sport.">
-<meta property="og:image" content="/logo.jpg">
+<meta property="og:image" content="https://www.afrolocalsports.com/img/hero.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -170,6 +170,7 @@ label.c input{width:20px;height:20px;margin-top:2px;accent-color:var(--gold)}
 @media (prefers-reduced-motion:no-preference){.card,.pl,.tile{transition:border-color .15s}.chip.live::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.2s infinite}@keyframes pulse{50%{opacity:.25}}}
 @media (max-width:380px){h1{font-size:38px}.score{font-size:46px}}
 </style>
+<link rel="stylesheet" href="/plus.css">
 </head>
 <body>
 <div id="app">
@@ -291,7 +292,8 @@ const shortDate=s=>{const d=new Date(s);return isNaN(d)?'':d.toLocaleDateString(
 const localISO=d=>new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);
 function countdown(m){const d=dOf(m);if(!d)return '';const ms=d-Date.now();if(ms<=0)return 'Starting';
   const dd=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),mi=Math.floor(ms%36e5/6e4);return 'Starts in '+(dd?dd+'d '+h+'h':h?h+'h '+mi+'m':mi+'m');}
-const isLive=m=>m.status==='live'||m.status==='suspended';
+const STALE=6*36e5,isStale=m=>{const d=dOf(m),t=m.liveAt?new Date(m.liveAt):d;return !!t&&Date.now()-t>STALE;};
+const isLive=m=>(m.status==='live'||m.status==='suspended')&&!isStale(m);
 const byDate=(a,b)=>String(a.date||'9').localeCompare(String(b.date||'9'));
 const pm=s=>{s=String(s??'').trim();if(!s)return null;const p=s.split(':').map(Number);if(p.some(isNaN))return null;return p.reduce((a,x)=>a*60+x,0);};
 function raceRank(m){return (m.entries||[]).map(e=>({...e,v:pm(e.mark)})).filter(e=>e.v!=null).sort((a,b)=>m.better==='high'?b.v-a.v:a.v-b.v).map((e,i)=>({...e,pos:i+1}));}
@@ -308,7 +310,7 @@ function sc(m,l){const e=sp(l).eng;if(m.status==='scheduled')return 'VS';
   if(e==='cricket'){const c=m.cr||{},f=x=>x?`${+x.r||0}/${+x.w||0}`:'0/0';return f(c.h)+' · '+f(c.a);}
   return `${+m.hs||0} – ${+m.as||0}`;}
 function liveMin(m){if(m.status!=='live'||!m.liveAt)return '';const n=Math.floor((Date.now()-new Date(m.liveAt))/6e4)+1;return n>0&&n<200?n+"'":'';}
-function stChip(m,l){if(m.status==='live')return `<span class="chip live">Live${sp(l).eng==='score'&&liveMin(m)?' '+liveMin(m):''}</span>`;
+function stChip(m,l){if((m.status==='live'||m.status==='suspended')&&isStale(m))return '<span class="chip">Result due</span>';if(m.status==='live')return `<span class="chip live">Live${sp(l).eng==='score'&&liveMin(m)?' '+liveMin(m):''}</span>`;
   if(m.status==='suspended')return '<span class="chip live">Suspended</span>';return '';}
 function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,3600);}
 function standings(l){
@@ -357,8 +359,10 @@ function newsCard(n){const l=Lg(n.lid);
 const pubNews=()=>S.news.filter(n=>n.pub&&Lg(n.lid)).sort((a,b)=>String(b.at).localeCompare(String(a.at)));
 const sec=(t,x)=>`<div class="spread"><h2>${t}</h2>${x||''}</div>`;
 const listOr=(arr,fn,empty)=>arr.length?`<div class="list">${arr.map(fn).join('')}</div>`:`<div class="empty">${empty}</div>`;
-function banner(l,inner,img){const ok=imgOk(img);
-  return `<section class="banner ${ok?'photo':''}">${ok?`<img class="bg" src="${img}" alt="">`:''}<i class="accent" style="background:${l?scol(l):'var(--gold)'}"></i>${inner}</section>`;}
+const PHOTO={Football:'football',Futsal:'street',Basketball:'basketball',Netball:'basketball',Athletics:'athletics',Cycling:'cycling',Swimming:'swimming',Cricket:'cricket','Table Tennis':'tennis',Tennis:'tennis',Badminton:'tennis',Volleyball:'volleyball','Beach Volleyball':'volleyball','Rugby Union':'crowd','Rugby League':'crowd'};
+const photoOf=l=>'/img/'+(l?(PHOTO[sp(l).name]||PHOTO[l.sport]||'crowd'):'hero')+'.jpg';
+function banner(l,inner,img){const own=imgOk(img),src=own?img:photoOf(l);
+  return `<section class="banner photo">${`<img class="bg" src="${src}" alt="" ${own?'':'loading="lazy" decoding="async"'}>`}<i class="accent" style="background:${l?scol(l):'var(--gold)'}"></i>${inner}</section>`;}
 function vsBlock(m,l,big){const a=Tm(m.home),b=Tm(m.away),has=m.status!=='scheduled';
   return `<div class="vs"><button class="side" ${goBtn('team',m.home)}>${crest(a,big?72:60)}<div class="tn">${esc(nm(a))}</div></button><div class="score ${has&&sp(l).eng!=='bout'&&sp(l).eng!=='cricket'?'':'sm'}">${sc(m,l)}</div><button class="side" ${goBtn('team',m.away)}>${crest(b,big?72:60)}<div class="tn">${esc(nm(b))}</div></button></div>`;}
 
@@ -804,6 +808,7 @@ function renderSheet(){
   let bd='';
   if(s.kind==='form'){
     bd=`<form id="form" class="bd" novalidate>${s.fields.map(f=>Array.isArray(f)?`<div class="grid2">${f.map(field).join('')}</div>`:field(f)).join('')}${s.hint?`<p class="sub">${esc(s.hint)}</p>`:''}<div class="err" id="ferr" role="alert"></div><div class="row"><button class="btn blue" type="submit">${esc(s.submit||'Save')}</button>${s.danger?`<button class="btn danger" type="button" data-act="arm" data-id="${esc(s.danger.act)}">${esc(s.danger.label)}</button>`:''}</div></form>`;
+  }else if(s.kind==='html'){bd=`<div class="bd">${s.html}</div>`;
   }else if(s.kind==='player'){
     const t=Tm(s.tid),p=t&&(t.players||[]).find(x=>x.id===s.pid),l=t&&Lg(t.lid);
     if(!p){closeSheet();return;}
@@ -1286,5 +1291,6 @@ async function start(){
 }
 start();
 </script>
+<script src="/plus.js" defer></script>
 </body>
 </html>

@@ -143,19 +143,23 @@ const clean = (s) => String(s).replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').repl
 const isoOr = (d) => { const t = new Date(d); return isNaN(t) ? '' : t.toISOString(); };
 export function parseFeed(xml, src) {
   const out = [], re = /<(item|entry)\b[\s\S]*?<\/\1>/gi; let m;
-  while ((m = re.exec(xml)) && out.length < 8) {
+  while ((m = re.exec(xml)) && out.length < 12) {
     const x = m[0], tag = (t) => { const r = new RegExp('<' + t + '\\b[^>]*>([\\s\\S]*?)<\\/' + t + '>', 'i').exec(x); return r ? clean(r[1]) : ''; };
     let link = tag('link');
     if (!/^https?:\/\//i.test(link)) { const h = /<link\b[^>]*?href=["']([^"']+)["'][^>]*>/i.exec(x); link = h ? clean(h[1]) : ''; }
     if (!/^https?:\/\//i.test(link)) link = tag('guid');
     const title = tag('title'), at = isoOr(tag('pubDate') || tag('published') || tag('updated') || tag('dc:date'));
-    if (title && /^https?:\/\//i.test(link)) out.push({ src, title: title.slice(0, 200), link: link.slice(0, 500), at });
+    const im = /<(?:media:thumbnail|media:content)\b[^>]*?url=["']([^"']+)["']/i.exec(x) || /<enclosure\b[^>]*?url=["']([^"']+\.(?:jpe?g|png|webp)[^"']*)["']/i.exec(x) || /<img\b[^>]*?src=["']([^"']+)["']/i.exec(x.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"'));
+    const img = im && /^https:\/\//i.test(im[1]) ? im[1].replace(/&amp;/g, '&').replace(/(ichef\.bbci\.co\.uk\/ace\/standard\/)\d+\//, '$1976/').slice(0, 500) : '';
+    const sum = clean(tag('description') || tag('summary')).slice(0, 220);
+    if (title && /^https?:\/\//i.test(link)) out.push({ src, title: title.slice(0, 200), link: link.slice(0, 500), at, img, sum });
   }
   return out;
 }
 async function headlines(env) {
   const cfg = await getDoc(env, 'config', 'feeds');
-  const feeds = ((cfg && cfg.items) || []).filter((f) => f && /^https?:\/\//i.test(f.url || '')).slice(0, 15);
+  const own = ((cfg && cfg.items) || []).filter((f) => f && /^https?:\/\//i.test(f.url || ''));
+  const feeds = [...own, ...DEFFEEDS.filter((d) => !own.some((f) => f.url === d.url))].slice(0, 15);
   const key = await sha(JSON.stringify(feeds));
   const c = await env.DB.prepare("SELECT v FROM meta WHERE k='headlines'").first();
   let cache = null; try { cache = c && JSON.parse(c.v); } catch (e) {}
@@ -170,10 +174,57 @@ async function headlines(env) {
     } catch (e) { return { f, name, err: e && e.name === 'TimeoutError' ? 'The site took too long to answer' : 'The site could not be reached' }; }
   }));
   const seen = new Set();
-  let items = res.flatMap((x) => x.it || []).filter((i) => !seen.has(i.link) && seen.add(i.link)).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 40);
+  let items = res.flatMap((x) => x.it || []).filter((i) => !seen.has(i.link) && seen.add(i.link)).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 60);
   if (!items.length && cache && cache.key === key) items = cache.items;
   const out = { key, at: Date.now(), items, report: res.map((x) => ({ name: x.name, url: x.f.url, ok: !x.err, n: (x.it || []).length, error: x.err || '' })) };
   await env.DB.prepare("INSERT INTO meta(k,v) VALUES('headlines',?) ON CONFLICT(k) DO UPDATE SET v=excluded.v").bind(JSON.stringify(out)).run();
+  return out;
+}
+
+
+// Default outside news: African sports desks. The platform owner can add more in Management.
+const DEFFEEDS = [
+  { name: 'BBC Sport Africa', url: 'https://feeds.bbci.co.uk/sport/africa/rss.xml' },
+  { name: 'AllAfrica Sport', url: 'https://allafrica.com/tools/headlines/rdf/sport/headlines.rdf' },
+  { name: 'NewsDay Sport', url: 'https://www.newsday.co.zw/category/sport/feed' },
+  { name: 'The Herald Sport', url: 'https://www.herald.co.zw/category/sport/feed/' },
+  { name: 'MyJoyOnline Sports', url: 'https://www.myjoyonline.com/sports/feed/' },
+];
+
+// ---- live scores and results from professional competitions across Africa (ESPN public scoreboards) ----
+const PRO = [
+  ['soccer', 'caf.champions', 'CAF Champions League', 'Africa'], ['soccer', 'caf.confed', 'CAF Confederation Cup', 'Africa'],
+  ['soccer', 'caf.nations', 'Africa Cup of Nations', 'Africa'], ['soccer', 'fifa.worldq.caf', 'World Cup Qualifying (CAF)', 'Africa'],
+  ['soccer', 'zim.1', 'Zimbabwe Premier Soccer League', 'Zimbabwe'], ['soccer', 'rsa.1', 'South African Premiership', 'South Africa'],
+  ['soccer', 'rsa.2', 'South African First Division', 'South Africa'], ['soccer', 'nga.1', 'Nigeria Premier Football League', 'Nigeria'],
+  ['soccer', 'gha.1', 'Ghana Premier League', 'Ghana'], ['soccer', 'ken.1', 'Kenyan Premier League', 'Kenya'],
+  ['soccer', 'uga.1', 'Uganda Premier League', 'Uganda'], ['soccer', 'zam.1', 'Zambia Super League', 'Zambia'],
+  ['rugby', '270555', 'Currie Cup', 'South Africa'], ['rugby', '270557', 'United Rugby Championship', 'Africa & Europe'],
+];
+const SPORTNAME = { soccer: 'Football', rugby: 'Rugby Union' };
+function proEvents(d, [sport, code, name, country]) {
+  return (d.events || []).slice(0, 30).map((e) => {
+    const c = (e.competitions || [])[0] || {}, st = (e.status || c.status || {}), ty = st.type || {};
+    const side = (h) => { const t = (c.competitors || []).find((x) => x.homeAway === h) || {}; const tm = t.team || {};
+      return { name: String(tm.displayName || tm.name || '').slice(0, 60), short: String(tm.abbreviation || tm.shortDisplayName || '').slice(0, 8), logo: /^https:\/\//.test(tm.logo || '') ? tm.logo : '', score: t.score ?? null, win: !!t.winner }; };
+    const link = ((e.links || []).find((l) => /gamecast|summary|boxscore/.test((l.rel || []).join(' '))) || (e.links || [])[0] || {}).href || '';
+    return { id: code + ':' + e.id, comp: name, code, sport: SPORTNAME[sport], country, date: e.date || '', state: ty.state || 'pre', detail: String(ty.shortDetail || ty.detail || '').slice(0, 40),
+      clock: st.displayClock || '', home: side('home'), away: side('away'), venue: String((c.venue || {}).fullName || '').slice(0, 80), link: /^https:\/\//.test(link) ? link : '' };
+  });
+}
+async function proScores(env) {
+  const c = await env.DB.prepare("SELECT v FROM meta WHERE k='proscores'").first();
+  let cache = null; try { cache = c && JSON.parse(c.v); } catch (e) {}
+  const live = cache && cache.items.some((x) => x.state === 'in');
+  if (cache && Date.now() - cache.at < (live ? 60e3 : 300e3)) return cache;
+  const res = await Promise.all(PRO.map(async (p) => {
+    try { const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${p[0]}/${p[1]}/scoreboard`, { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(7000), cf: { cacheTtl: 45 } });
+      return r.ok ? proEvents(await r.json(), p) : null; } catch (e) { return null; }
+  }));
+  let items = res.flatMap((x) => x || []);
+  if (!items.length && cache) items = cache.items;
+  const out = { at: Date.now(), items };
+  await env.DB.prepare("INSERT INTO meta(k,v) VALUES('proscores',?) ON CONFLICT(k) DO UPDATE SET v=excluded.v").bind(JSON.stringify(out)).run();
   return out;
 }
 
@@ -272,6 +323,7 @@ async function handle(request, env) {
     return J({ names: Object.fromEntries(rows.results.map((r) => [r.id, r.name])) });
   }
 
+  if (a === 'scores' && m === 'GET') { const p = await proScores(env); return J({ items: p.items, at: p.at, comps: PRO.map((x) => ({ code: x[1], name: x[2], sport: SPORTNAME[x[0]], country: x[3] })) }); }
   if (a === 'headlines' && m === 'GET') { const h = await headlines(env); return J({ items: h.items, report: h.report, at: h.at }); }
 
   if (a === 'click' && m === 'POST') {
