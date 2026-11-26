@@ -70,6 +70,7 @@
     const now = Date.now();
     const live = arr.filter((x) => x.state === 'in');
     const off = (x) => /postp|cancel|abandon|suspend|delay/i.test(x.detail);
+    arr = arr.filter((x) => { const t = +new Date(x.date); return t > now - 14 * 864e5 && t < now + 31 * 864e5; });
     const next = arr.filter((x) => (x.state === 'pre' && new Date(x.date) > now - 3 * 36e5) || (off(x) && new Date(x.date) > now - 864e5)).sort((a, b) => a.date.localeCompare(b.date));
     const done = arr.filter((x) => x.state === 'post' && !off(x)).sort((a, b) => b.date.localeCompare(a.date));
     return { live, next, done };
@@ -87,7 +88,8 @@
       <div class="ngrid">${hs.map((h, i) => `<a class="ncard ${i === 0 ? 'lead' : ''}" href="${esc(h.link)}" target="_blank" rel="noopener noreferrer"><img src="${esc(h.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"><span class="nc-body"><span class="src">${esc(h.src)}</span><span class="nc-t">${esc(h.title)}</span>${i === 0 && h.sum ? `<span class="nc-s">${esc(h.sum)}</span>` : ''}<span class="pp">${esc(h.at ? shortDate(h.at) : '')} · Read ↗</span></span></a>`).join('')}</div></section>`;
   }
   V.africa = (v) => {
-    const comps = S.proComps.filter((c) => S.pro.some((x) => x.code === c.code));
+    const fresh = order(S.pro), all = [...fresh.live, ...fresh.next, ...fresh.done];
+    const comps = S.proComps.filter((c) => all.some((x) => x.code === c.code));
     const c = comps.some((x) => x.code === v.c) ? v.c : '';
     const items = S.pro.filter((x) => !c || x.code === c), o = order(items);
     const seg = ['live', 'fixtures', 'results'].includes(v.x) ? v.x : o.live.length ? 'live' : 'results';
