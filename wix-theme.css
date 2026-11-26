@@ -1,0 +1,110 @@
+/* Wix design layer for Nexora Digital: loaded after styles.css on every page */
+:root{
+  --navy:#0E1C2B;--navy-2:#16293D;--blue:#1E9BE9;--blue-d:#1584CC;--lime:#B6EE3A;
+  --paper:#F7F9FB;--ink:#0E1C2B;--ink-soft:#526377;--line:#E3E9F0;
+  --radius-lg:18px;--radius-md:14px;--radius-sm:10px;
+  --shadow:0 14px 34px rgba(14,28,43,.10);
+}
+body{font-family:"Inter",system-ui,-apple-system,sans-serif;background:var(--paper);color:var(--ink)}
+h1,h2,h3{font-family:"Playfair Display",Georgia,serif;font-weight:600;letter-spacing:0;line-height:1.12}
+h1{font-weight:700}
+h3{font-family:"Inter",system-ui,sans-serif;font-weight:700;letter-spacing:-.01em}
+.lede{color:var(--ink-soft)}
+
+/* buttons: Wix pill style */
+.btn{font-family:"Inter",sans-serif;font-weight:600;padding:.9em 1.6em}
+.btn-main{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-main:hover{background:var(--blue-d);border-color:var(--blue-d)}
+.btn-ghost{border-color:currentColor}
+
+/* header: dark brand bar */
+header.top{background:rgba(14,28,43,.97);border-bottom:0;color:#fff}
+header.top .brand b,header.top .brand span{color:#fff}
+header.top .brand span span{color:var(--lime)}
+header.top .nav ul a{color:rgba(255,255,255,.86);white-space:nowrap;font-size:15px}
+@media (min-width:861px){header.top .nav ul{gap:18px}}
+@media (min-width:861px) and (max-width:1180px){header.top .nav ul a{font-size:14px}header.top .nav ul{gap:12px}}
+header.top .nav ul a:hover,header.top .nav ul a[aria-current="page"]{color:var(--lime)}
+header.top .menu-btn{color:#fff}
+@media (max-width:860px){header.top .nav ul.open{background:var(--navy)}}
+
+/* home hero: full-bleed dark band with soft glow */
+.hero{background:radial-gradient(900px 520px at 85% 0%,rgba(30,155,233,.35),transparent 60%),linear-gradient(160deg,var(--navy) 0%,var(--navy-2) 100%);color:#fff;padding:84px 0 104px}
+.hero::before{display:none}
+.hero .lede,.hero .hint{color:rgba(255,255,255,.82)}
+.hero .hello{background:rgba(255,255,255,.1);color:#fff;border-color:transparent}
+.hero .facts strong{color:var(--lime)}
+.hero .facts div{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.18)}
+.hero .namebox{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+.hero .namebox label{color:var(--ink-soft)}
+.sample .browser{box-shadow:0 30px 70px rgba(0,0,0,.35);border-radius:16px}
+.hero .pickers button{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)}
+.hero .pickers button[aria-pressed="true"]{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+
+/* inner page headers: Wix page-head band */
+.page-hero{background:linear-gradient(160deg,var(--navy),var(--navy-2));color:#fff;padding:76px 0 60px}
+.page-hero::before{display:none}
+.page-hero .lede{color:rgba(255,255,255,.82)}
+.page-hero .btn-ghost{color:#fff}
+
+/* sections alternate */
+main > section:nth-of-type(even){background:#fff}
+.head h2{margin-bottom:.25em}
+.head p{color:var(--ink-soft)}
+
+/* cards: white, rounded, lift on hover */
+.price-card,.plan,.free-card,.included > div,.paths > *,.work-card,.way,.faq details,.local-list > div,.custom,.earn,.calc{background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);box-shadow:none;transition:transform .2s ease,box-shadow .2s ease}
+.work-card:hover,.paths > a:hover,.plan:hover,.way:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.plan.pick{border:2px solid var(--blue);box-shadow:var(--shadow)}
+.plan .badge{background:var(--blue);color:#fff}
+.steps li::before{background:var(--blue)!important;color:#fff!important}
+
+/* footer: dark */
+footer{background:var(--navy)!important;color:rgba(255,255,255,.72)!important;margin-top:0}
+footer .brand b,footer .brand span{color:#fff}
+footer nav a{color:rgba(255,255,255,.8)}footer nav a:hover{color:var(--lime)}
+footer .copy{color:rgba(255,255,255,.55)}
+
+/* Wix-powered blocks (work, bookings) */
+.wx-grid{display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.wx-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);overflow:hidden;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;transition:transform .2s ease,box-shadow .2s ease}
+.wx-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.wx-card .img{aspect-ratio:16/10;background:#DCE6F0 center top/cover}
+.wx-card .body{padding:18px 20px 22px;display:flex;flex-direction:column;gap:6px;flex:1}
+.wx-card .kind{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-d)}
+.wx-card h3{font-size:1.2rem;margin:0}.wx-card p{color:var(--ink-soft);font-size:15px}
+.wx-card .meta{margin-top:auto;padding-top:10px;display:flex;justify-content:space-between;color:var(--ink-soft);font-size:14px}
+.wx-card .go{color:var(--blue-d);font-weight:600}
+.wx-status{color:var(--ink-soft);padding:14px 0}
+.wx-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.wx-chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 16px;font:500 14px "Inter",sans-serif;cursor:pointer;color:var(--ink)}
+.wx-chip[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.wx-details{display:flex;gap:28px;flex-wrap:wrap;margin:4px 0 28px;color:var(--ink-soft)}
+.wx-details b{display:block;color:var(--ink)}.wx-details a{color:var(--blue-d)}
+.wx-gallery{columns:2 320px;column-gap:18px}
+.wx-gallery figure{margin:0 0 18px;break-inside:avoid}
+.wx-gallery img{width:100%;border-radius:12px;border:1px solid var(--line)}
+.wx-gallery figcaption{font-size:13px;color:var(--ink-soft);padding-top:4px}
+/* booking surface */
+.svc{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;padding:48px 0 90px}
+.svc .hero-img{border-radius:var(--radius-md);aspect-ratio:3/2;object-fit:cover;width:100%;max-height:400px}
+.svc h1{font-size:clamp(2rem,4.5vw,3rem);margin:18px 0 8px}
+.svc .desc{color:var(--ink-soft)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);padding:24px}
+.panel h3{font-size:1.25rem;margin-bottom:10px}
+.days{display:flex;gap:6px;align-items:center;overflow-x:auto;padding-bottom:6px}
+.day{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;font:500 13px "Inter",sans-serif;cursor:pointer;min-width:68px;color:var(--ink)}
+.day[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}.day.empty{opacity:.45}
+.wk{border:0;background:none;font-size:22px;cursor:pointer;color:var(--navy);padding:4px 8px}
+.slots{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.slot{border:1.5px solid var(--blue);background:#fff;color:var(--blue-d);border-radius:8px;padding:8px 14px;cursor:pointer;font:600 14px "Inter",sans-serif}
+.slot[aria-pressed="true"]{background:var(--blue);color:#fff}.slot:disabled{opacity:.35;cursor:not-allowed}
+.form-grid{display:grid;gap:12px;margin:16px 0}
+.form-grid label{font-size:14px;font-weight:600;display:grid;gap:4px}
+.form-grid input,.form-grid select{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.opt{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.err{color:#b3261e;font-size:14px;min-height:1em}.ok{background:#eef8ef;border:1px solid #bfe3c3;padding:16px;border-radius:10px}
+.note{font-size:13px;color:var(--ink-soft)}
+.ghost{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 16px;font:500 14px "Inter",sans-serif;cursor:pointer;color:var(--ink)}
+.ghost[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+@media (max-width:860px){.svc{grid-template-columns:1fr;gap:24px}.svc .hero-img{max-height:220px}}

@@ -97,7 +97,7 @@ document.body.appendChild(wrap);
 /* ================= knowledge ================= */
 const WA_NUM="61433427505";
 const BIZ={name:"Nexora Digital",whatsapp:"+61 433 427 505",currency:"USD",
-  parent:"A SENATOR INVST company, led by Lawrence Mumba",
+  parent:"A SNT Investments company, led by Lawrence Mumba",
   sample:"Every client gets a free sample website first and only pays when happy.",
   timing:"Most samples are ready within a few days. Starter sites go live in about 5 days, Business about 10 days, Pro about 2 weeks.",
   noLogo:"No logo or good photos is fine: phone photos work, and we can help make a simple logo.",
