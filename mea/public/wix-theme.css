@@ -90,3 +90,4 @@ footer{background:#161513!important}
 .ghost{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 16px;font:500 14px var(--body);cursor:pointer;color:var(--ink)}
 .ghost[aria-pressed="true"]{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
 @media (max-width:860px){.svc{grid-template-columns:1fr;gap:22px}.svc .hero-img{max-height:220px}.hero{min-height:0}}
+.svc>*{min-width:0}.svc form{padding:0;background:none;border:0;box-shadow:none}

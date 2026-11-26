@@ -108,3 +108,4 @@ footer .copy{color:rgba(255,255,255,.55)}
 .ghost{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 16px;font:500 14px "Inter",sans-serif;cursor:pointer;color:var(--ink)}
 .ghost[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
 @media (max-width:860px){.svc{grid-template-columns:1fr;gap:24px}.svc .hero-img{max-height:220px}}
+.svc>*{min-width:0}.svc form{padding:0;background:none;border:0;box-shadow:none}
