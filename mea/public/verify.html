@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check an MEA certificate</title><meta name="description" content="Check that an MEA Automation Academy certificate is genuine.">
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"><link rel="stylesheet" href="/portal-theme.css">
+</head><body>
+<header class="top"><div class="wrap"><a class="brand" href="/"><img src="/logo.png" alt="MEA"><div><b>MEA Automation Academy</b><span>Certificate check</span></div></a><nav class="topnav" id="topnav"><a href="/">Website</a><a href="/portal">Portal</a></nav></div></header>
+<main class="wrap" style="padding-block:28px"><div class="authbox"><div class="card stack">
+  <h1>Check a certificate</h1><p class="muted">Enter the certificate number printed on an MEA certificate, for example MEA-2027-0001.</p>
+  <form class="form" id="f"><label>Certificate number<input name="no" id="no" required autocomplete="off"></label><button class="btn" type="submit">Check</button></form>
+  <div id="out" aria-live="polite"></div></div></div></main>
+<footer class="foot"><div class="wrap">MEA · Mechanical, Electrical &amp; Automation · Australia | Zimbabwe</div></footer>
+<script>
+(function () {
+  var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var out = document.getElementById('out'), no = document.getElementById('no');
+  function check(n) {
+    out.innerHTML = '<p class="muted">Checking…</p>';
+    fetch('/api/verify/' + encodeURIComponent(n.trim())).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
+      if (!x.ok) { out.innerHTML = '<div class="card" style="border-color:var(--bad)"><b>Not found.</b><p class="small">' + esc(x.d.error || 'No certificate has that number.') + ' Contact MEA on +263 783 017 505 if you think this is wrong.</p></div>'; return; }
+      var c = x.d.certificate;
+      out.innerHTML = '<div class="card stack" style="border-color:var(--ok)"><b style="color:var(--ok)">✓ Genuine MEA certificate</b><p><b>' + esc(c.student) + '</b> completed <b>' + esc(c.title) + '</b> (' + esc(c.code) + ')' + (c.venue ? ', ' + esc(c.venue) : '') + '.</p><p class="small muted">Certificate ' + esc(c.cert_no) + ' · issued ' + new Date(c.issued_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) + '</p></div>';
+    }).catch(function () { out.innerHTML = '<p class="err">Could not reach MEA. Try again.</p>'; });
+  }
+  document.getElementById('f').addEventListener('submit', function (e) { e.preventDefault(); check(no.value); history.replaceState(null, '', '/verify?no=' + encodeURIComponent(no.value.trim())); });
+  var q = new URLSearchParams(location.search).get('no'); if (q) { no.value = q; check(q); }
+})();
+</script></body></html>

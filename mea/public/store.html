@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@600;700&display=swap">
 <link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap">
+<link rel="stylesheet" href="/portal-theme.css">
 <style>
 .shop{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
 @media (max-width:920px){.shop{grid-template-columns:1fr}}
@@ -53,6 +55,8 @@
   const { $, $$, esc, api, toast, dialog, formData, submit, money } = MEA;
   let products = [], cat = 'All', cart = {};
   try { cart = JSON.parse(localStorage.getItem('mea-cart') || '{}') || {}; } catch (e) { cart = {}; }
+  const addParam = new URLSearchParams(location.search).get('add');
+  if (addParam) { addParam.split(',').forEach((x) => { const [id, q] = x.split(':').map(Number); if (id > 0 && q > 0) cart[id] = Math.max(cart[id] || 0, q); }); try { localStorage.setItem('mea-cart', JSON.stringify(cart)); } catch (e) {} history.replaceState(null, '', '/store'); }
   const save = () => { try { localStorage.setItem('mea-cart', JSON.stringify(cart)); } catch (e) {} };
 
   api('/me').then((r) => MEA.header(r.user, 'store')).catch(() => MEA.header(null));

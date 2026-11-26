@@ -644,7 +644,13 @@ tr:last-child td{border-bottom:0}
 
   /* ---------- data loading ---------- */
   function loadPublic() {
-    if (!db) return Promise.resolve();
+    var fromApi = fetch('/api/articles', { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (!d || !d.articles || !d.articles.length) return;
+      var map = {}; d.articles.forEach(function (a) { map[a.id] = a; });
+      SEED.articles = SEED.articles.filter(function (a) { return !map[a.id] || !map[a.id].hidden; }).map(function (a) { return map[a.id] ? Object.assign({}, a, map[a.id]) : a; });
+      d.articles.forEach(function (a) { if (!a.hidden && !SEED.articles.some(function (x) { return x.id === a.id; })) SEED.articles.push(a); });
+    }).catch(function () { });
+    if (!db) return fromApi;
     return Promise.all([db.collection('articles').get(), db.collection('courses').get(), db.collection('announcements').get()]).then(function (r) {
       store.articles = docs(r[0]); store.courses = docs(r[1]); store.announcements = docs(r[2]);
     }, function () { });
@@ -1152,7 +1158,7 @@ tr:last-child td{border-bottom:0}
   (function init() {
     var timer = setTimeout(function () { if (!ready) { ready = true; rerender(); } }, 12000);
     var c = window.claude;
-    if (!c || !c.use) { clearTimeout(timer); ready = true; rerender(); return; }
+    if (!c || !c.use) { clearTimeout(timer); loadPublic().then(function () { ready = true; rerender(); }); return; }
     Promise.all([c.use('user'), c.use('db'), c.use('assets')]).then(function (r) {
       user = r[0]; db = r[1]; assets = r[2];
       if (!user) return null;
@@ -1160,7 +1166,7 @@ tr:last-child td{border-bottom:0}
         me = x[0]; uid = me.id; isOwner = x[1]; canEdit = x[2]; canWrite = x[3];
       });
     }).then(function () {
-      return db ? Promise.all([loadPublic(), loadMine()]) : null;
+      return db ? Promise.all([loadPublic(), loadMine()]) : loadPublic();
     }).catch(function () { }).then(function () { clearTimeout(timer); ready = true; mine.loaded = true; rerender(); });
   })();
 })();
