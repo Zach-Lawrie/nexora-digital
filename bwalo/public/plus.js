@@ -204,6 +204,11 @@
   A.install = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) {} installEvt = null; render(); };
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js').catch(() => {});
 
+  /* ---------- Nexora credit at the end of Home and Profile ---------- */
+  const CREDIT = '<p class="nx-credit">Website by <a href="https://wa.me/61402600743?text=Hi%20Nexora%20Digital%2C%20I%20saw%20the%20ALL%20Africa%20Local%20Leagues%20website%20and%20I%27d%20like%20a%20website%20for%20my%20business." target="_blank" rel="noopener">Nexora Digital</a></p>';
+  wrap('home', (h) => h + CREDIT);
+  wrap('profile', (h) => h + CREDIT);
+
   /* ---------- finishing touches after each screen is drawn ---------- */
   function decorate() {
     document.querySelectorAll('#main .tile[data-p="sport"]:not(.ph)').forEach((t) => {

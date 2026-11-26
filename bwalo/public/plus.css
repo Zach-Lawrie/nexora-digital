@@ -81,3 +81,4 @@ section{display:flex;flex-direction:column;gap:12px}
 @media (min-width:1400px){#main{max-width:1120px}}
 .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.chips .btn{flex:none}
 @media (min-width:1000px){.chips{flex-wrap:wrap;overflow:visible}}
+.nx-credit{opacity:.7;font-size:13px;text-align:center;color:var(--muted);margin:8px 0 0}.nx-credit a{color:inherit;text-decoration:underline}

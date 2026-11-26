@@ -115,7 +115,7 @@
         <div class="logo">${SET.logo ? `<img src="${esc(SET.logo)}" alt="">` : ''}<div><b>${esc(SET.short || 'Basa')} Work Orders</b><span>${esc(SET.tagline || 'Maintenance, installations and inspections')}</span></div></div>
         <div style="display:grid;gap:18px"><h1>Every job, from request to signed report.</h1>
         <ul><li>${ic('check')}Clients request work and track it live</li><li>${ic('check')}Foremen assign technicians, technicians build their team</li><li>${ic('check')}Safety checks, checklists, hours, parts and photos from the phone</li><li>${ic('check')}Managers approve and send a signed PDF report to the client</li></ul></div>
-        <p class="foot">Electrical · Mechanical · Automation · Instrumentation<br>Powered by Basa · built by Nexora Digital</p>
+        <p class="foot">Electrical · Mechanical · Automation · Instrumentation<br>Powered by Basa · built by <a href="https://wa.me/61402600743?text=Hi%20Nexora%20Digital%2C%20I%20saw%20the%20Basa%20Work%20Orders%20system%20and%20I%27d%20like%20a%20system%20for%20my%20business." target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Nexora Digital</a></p>
       </section>
       <section class="login-form"><form id="lf" novalidate>
         <h2>Sign in</h2><p class="muted">Use the email and password your manager gave you.</p>
