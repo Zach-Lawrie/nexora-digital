@@ -2,7 +2,7 @@
 'use strict';
 const STOCKERS = () => ['admin', 'store', 'nic', 'accounts', 'dept'].includes(APP.me.role);
 const NAV = [
-  ['Overview', [['dashboard', 'Dashboard', '◧', () => true], ['search', 'Search', '⌕', () => true]]],
+  ['Overview', [['dashboard', 'Dashboard', '◧', () => true], ['overview', 'Departments overview', '▦', () => APP.can('patients') && DEPT_ALL.includes(APP.me.role)], ['search', 'Search', '⌕', () => true]]],
   ['Stock', [['medical', 'Drugs & sundries', '✚', STOCKERS], ['requests', 'Department requests', '⇄', () => APP.can('requests')], ['deptuse', 'Department usage', '▤', () => APP.can('deptuse')], ['misuse', 'Misuse check', '⚑', () => APP.can('counts') && APP.me.role !== 'kiosk'], ['closing', 'Monthly closing', '▥', () => APP.can('counts') && APP.me.role !== 'kiosk'], ['orders', 'Procurement', '⎘', () => APP.can('orders')], ['suppliers', 'Suppliers', '☏', () => APP.can('suppliers') && APP.me.role !== 'kiosk'], ['stationery', 'Stationery', '✎', STOCKERS], ['registers', 'Books, cards & registers', '▣', STOCKERS], ['groceries', 'Groceries', '◍', STOCKERS]]],
   ['Kiosk', [['kiosk', 'Kiosk refreshments', '☕', () => APP.can('moves') && ['admin', 'kiosk', 'accounts', 'store'].includes(APP.me.role)]]],
   ['Money', [['theatres', 'Theatres', '✂', () => APP.can('theatres')], ['claims', 'Claims', '⧉', () => APP.can('claims')], ['cash', 'Cash book', '$', () => APP.can('cash')]]],
@@ -22,7 +22,7 @@ const PAGES = {
   licences: { t: 'Licences & compliance', r: (el) => crud(el, LICENCES) }, assets: { t: 'Assets', r: (el) => crud(el, ASSETS) }, repairs: { t: 'Maintenance & repairs', r: (el) => crud(el, REPAIRS) }, vehicles: { t: 'Vehicles', r: (el) => crud(el, VEHICLES) },
   attendance: { t: 'Attendance register', r: attendancePage }, employees: { t: 'Employees', r: (el) => crud(el, EMPLOYEES) }, leave: { t: 'Leave', r: (el) => crud(el, LEAVE) },
   meetings: { t: 'Meetings & minutes', r: (el) => crud(el, MEETINGS) }, goals: { t: 'Strategic plan', r: (el) => crud(el, GOALS) },
-  patients: { t: 'Patients seen / admitted', r: (el) => crud(el, PATIENTS) }, births: { t: 'Deliveries', r: (el) => crud(el, BIRTHS) }, epi: { t: 'Disease patterns', r: epiPage }, dept: { t: 'Department', r: deptPage },
+  patients: { t: 'Patients seen / admitted', r: (el) => crud(el, PATIENTS) }, births: { t: 'Deliveries', r: (el) => crud(el, BIRTHS) }, epi: { t: 'Disease patterns', r: epiPage }, dept: { t: 'Department', r: deptPage }, overview: { t: 'Departments overview', r: overviewPage },
   reports: { t: 'Monthly report', r: reportsPage }, settings: { t: 'Settings', r: settingsPage }, users: { t: 'Users & logins', r: usersPage }, backup: { t: 'Backup & restore', r: backupPage }, audit: { t: 'Activity log', r: auditPage }, account: { t: 'My account', r: accountPage },
 };
 let ROUTE = 'dashboard';
