@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>CarePoint Owner Console · Nexora Digital</title>
+<link rel="icon" href="/icon.svg">
+<style>
+:root{--ink:#14231f;--muted:#5d6f6a;--line:#dfe7e4;--bg:#f3f6f5;--brand:#0f5c5c;--brand2:#0b4646;--ok:#1d7a4a;--bad:#b3261e;--warn:#9a6400}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:var(--brand);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px}
+header svg{width:34px;height:34px;flex:none}header b{display:block;font-size:16px}header span{font-size:12px;opacity:.75;letter-spacing:.05em;text-transform:uppercase}
+header .sp{flex:1}
+main{max-width:1000px;margin:0 auto;padding:18px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:18px;margin:0 0 10px}
+.muted{color:var(--muted)}.sm{font-size:13px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+.btn{appearance:none;border:1px solid var(--brand);background:var(--brand);color:#fff;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--brand2)}.btn.ghost{background:#fff;color:var(--brand)}.btn.light{background:transparent;border-color:rgba(255,255,255,.45);color:#fff}
+.btn.sm{padding:6px 11px;font-size:13px}.btn.danger{background:#fff;color:var(--bad);border-color:#e6b8b5}
+label{display:block;font-size:13px;font-weight:600;margin:0 0 4px}
+input{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+input:focus{outline:2px solid #9cd3cf;border-color:var(--brand)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+.err{color:var(--bad);min-height:1.2em;margin:8px 0}
+.auth{max-width:420px;margin:8vh auto}
+.hosp{display:flex;gap:14px;align-items:flex-start}
+.hosp .logo{width:56px;height:56px;border-radius:12px;object-fit:contain;background:#f3f6f5;border:1px solid var(--line);flex:none}
+.hosp .body{flex:1;min-width:0}.hosp h3{margin:0;font-size:17px}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:#e4f3ec;color:var(--ok);margin-left:6px;vertical-align:2px}
+.tag.off{background:#fbeae9;color:var(--bad)}
+.stats{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin:6px 0}
+.link{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#f3f6f5;border:1px solid var(--line);border-radius:8px;padding:6px 9px;word-break:break-all}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.mt{margin-top:10px}
+.pick{display:flex;gap:12px;align-items:center}.pick img{width:64px;height:64px;border-radius:12px;object-fit:contain;border:1px solid var(--line);background:#f3f6f5}
+.drop{position:fixed;inset:0;background:rgba(10,30,28,.45);display:flex;align-items:flex-end;justify-content:center;z-index:9}
+.sheet{background:#fff;width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:20px}
+@media(min-width:700px){.drop{align-items:center}.sheet{border-radius:18px}}
+.sheet .x{float:right;border:0;background:none;font-size:26px;line-height:1;cursor:pointer;color:var(--muted)}
+.secret{background:#fff8e6;border:1px solid #f0d58c;border-radius:10px;padding:12px;margin:10px 0}
+.secret b{font-family:ui-monospace,Menlo,monospace;font-size:15px}
+.admins{font-size:13px;margin:4px 0 0;padding:0;list-style:none}.admins li{display:flex;gap:8px;align-items:center;padding:3px 0}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:.2s;pointer-events:none;z-index:20}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#fff"/><path d="M17 9h6v8h8v6h-8v8h-6v-8H9v-6h8z" fill="#0f5c5c"/></svg><div><b>CarePoint Owner Console</b><span>Nexora Digital</span></div><div class="sp"></div><div id="hdr"></div></header>
+<main id="app"><p class="muted">Loading…</p></main>
+<div class="toast" id="toast"></div>
+<script src="/js/owner.js"></script>
+</body>
+</html>

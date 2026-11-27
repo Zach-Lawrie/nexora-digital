@@ -99,7 +99,7 @@ async function makeUser(env, b, by) {
 }
 
 /* ---------------- routes ---------------- */
-async function handle(req, env) {
+async function handle(req, env, H) {
   const url = new URL(req.url), p = url.pathname.replace(/^\/api\/?/, '').replace(/\/$/, ''), m = req.method;
   if (m !== 'GET' && m !== 'HEAD') {
     const o = req.headers.get('origin'); if (o && new URL(o).host !== url.host) return E('Cross-site request blocked.', 403);
@@ -139,7 +139,7 @@ async function handle(req, env) {
   if (p === 'logout' && m === 'POST') { if (u) await env.DB.prepare('DELETE FROM sessions WHERE token=?').bind(u.token).run(); return J({ ok: true }, 200, { 'set-cookie': cookie('', 0) }); }
   if (!u) return E('Please sign in.', 401);
 
-  if (p === 'me' && m === 'GET') return J({ user: pubUser(u), roles: ROLES, perms: PERMS, money: MONEY.includes(u.role), stockcost: STOCKCOST.includes(u.role), now: now() });
+  if (p === 'me' && m === 'GET') return J({ hospital: H, user: pubUser(u), roles: ROLES, perms: PERMS, money: MONEY.includes(u.role), stockcost: STOCKCOST.includes(u.role), now: now() });
   if (p === 'password' && m === 'POST') {
     const b = await body(req); if (!b) return E('Bad request.');
     if ((await hashPw(String(b.old || ''), u.salt)) !== u.pass) return E('Your current password is wrong.', 403);
@@ -306,7 +306,149 @@ async function handle(req, env) {
   return E('Not found.', 404);
 }
 
+/* ================= many hospitals =================
+   Each hospital has its own set of tables (h_<code>_users, h_<code>_docs, ...), so records never mix.
+   The first hospital (code "main") keeps the original tables. The owner (Nexora Digital) manages hospitals. */
+const TBL = /\b(users|sessions|docs|audit|meta|files|file_chunks|docs_seq|audit_at|files_doc)\b/g;
+const scoped = (DB, prefix) => (prefix ? { prepare: (sql) => DB.prepare(sql.replace(TBL, prefix + '$1')) } : DB);
+const SCHEMA = [
+  "CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, name TEXT NOT NULL, username TEXT NOT NULL UNIQUE COLLATE NOCASE, pass TEXT NOT NULL, salt TEXT NOT NULL, role TEXT NOT NULL, dept TEXT, emp TEXT, active INTEGER NOT NULL DEFAULT 1, must_change INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')), last_login TEXT)",
+  'CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires INTEGER NOT NULL)',
+  'CREATE TABLE IF NOT EXISTS docs (col TEXT NOT NULL, id TEXT NOT NULL, data TEXT NOT NULL, seq INTEGER NOT NULL, deleted INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL, updated_by TEXT, PRIMARY KEY (col, id))',
+  'CREATE INDEX IF NOT EXISTS docs_seq ON docs(seq)',
+  "CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')), user_id TEXT, user_name TEXT, action TEXT NOT NULL, col TEXT, doc_id TEXT, detail TEXT)",
+  'CREATE INDEX IF NOT EXISTS audit_at ON audit(at)',
+  'CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)',
+  "CREATE TABLE IF NOT EXISTS files (id TEXT PRIMARY KEY, col TEXT NOT NULL, doc_id TEXT NOT NULL, name TEXT NOT NULL, mime TEXT NOT NULL, size INTEGER NOT NULL, chunks INTEGER NOT NULL DEFAULT 0, complete INTEGER NOT NULL DEFAULT 0, by_name TEXT, at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')))",
+  'CREATE INDEX IF NOT EXISTS files_doc ON files(col, doc_id)',
+  'CREATE TABLE IF NOT EXISTS file_chunks (file_id TEXT NOT NULL, n INTEGER NOT NULL, data BLOB NOT NULL, PRIMARY KEY (file_id, n))',
+];
+let READY = false;
+async function ensureGlobal(DB) {
+  if (READY) return;
+  await DB.prepare("CREATE TABLE IF NOT EXISTS cp_tenants (code TEXT PRIMARY KEY, name TEXT NOT NULL, logo TEXT, prefix TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')))").run();
+  await DB.prepare('CREATE TABLE IF NOT EXISTS cp_owner (id INTEGER PRIMARY KEY, pass TEXT NOT NULL, salt TEXT NOT NULL, fails INTEGER NOT NULL DEFAULT 0, fail_t INTEGER NOT NULL DEFAULT 0)').run();
+  await DB.prepare('CREATE TABLE IF NOT EXISTS cp_osess (token TEXT PRIMARY KEY, expires INTEGER NOT NULL)').run();
+  await DB.prepare("INSERT OR IGNORE INTO cp_tenants(code,name,prefix) VALUES('main','Main hospital','')").run();
+  READY = true;
+}
+const brandOf = (t) => ({ code: t.code, name: t.name, logo: t.logo || '', active: !!t.active });
+const getCookie = (req, k) => { const m = new RegExp('(?:^|;\\s*)' + k + '=([^;]+)').exec(req.headers.get('cookie') || ''); return m ? decodeURIComponent(m[1]) : ''; };
+const validLogo = (l) => !l || (typeof l === 'string' && l.length < 400000 && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(l));
+
+async function ownerHandle(req, env, p, m) {
+  const DB = env.DB;
+  const own = await DB.prepare('SELECT * FROM cp_owner WHERE id=1').first();
+  const tok = getCookie(req, 'cp_o');
+  const signed = !!(own && /^[a-f0-9]{64}$/.test(tok) && (await DB.prepare('SELECT 1 FROM cp_osess WHERE token=? AND expires>?').bind(tok, Date.now()).first()));
+  const ocookie = (t, age) => `cp_o=${t}; Path=/api/owner; HttpOnly; Secure; SameSite=Strict; Max-Age=${age}`;
+  if (p === 'owner/state') return J({ setup: !own, signed });
+  if (p === 'owner/setup' && m === 'POST') {
+    if (own) return E('Already set up.', 409);
+    const b = await body(req); if (!b) return E('Bad request.');
+    if (!env.SETUP_CODE || b.code !== env.SETUP_CODE) return E('Wrong setup code.', 403);
+    if (String(b.password || '').length < 10) return E('Owner password must be at least 10 characters.');
+    const salt = rid(8); await DB.prepare('INSERT INTO cp_owner(id,pass,salt) VALUES(1,?,?)').bind(await hashPw(b.password, salt), salt).run();
+    return J({ ok: true });
+  }
+  if (p === 'owner/login' && m === 'POST') {
+    if (!own) return E('Set up the owner password first.', 409);
+    if (own.fails >= 6 && Date.now() - own.fail_t < 30 * 60e3) return E('Too many wrong passwords. Wait 30 minutes.', 429);
+    const b = await body(req); if (!b) return E('Bad request.');
+    if ((await hashPw(String(b.password || ''), own.salt)) !== own.pass) {
+      await DB.prepare('UPDATE cp_owner SET fails=?, fail_t=? WHERE id=1').bind((Date.now() - own.fail_t < 30 * 60e3 ? own.fails : 0) + 1, Date.now()).run();
+      return E('Wrong password.', 401);
+    }
+    await DB.prepare('UPDATE cp_owner SET fails=0 WHERE id=1').run();
+    const t = rid(32); await DB.prepare('INSERT INTO cp_osess(token,expires) VALUES(?,?)').bind(t, Date.now() + 12 * 3600e3).run();
+    await DB.prepare('DELETE FROM cp_osess WHERE expires<?').bind(Date.now()).run();
+    return J({ ok: true }, 200, { 'set-cookie': ocookie(t, 12 * 3600) });
+  }
+  if (p === 'owner/logout' && m === 'POST') { if (tok) await DB.prepare('DELETE FROM cp_osess WHERE token=?').bind(tok).run(); return J({ ok: true }, 200, { 'set-cookie': ocookie('', 0) }); }
+  if (!signed) return E('Please sign in as the owner.', 401);
+
+  if (p === 'owner/password' && m === 'POST') {
+    const b = await body(req); if (!b) return E('Bad request.');
+    if ((await hashPw(String(b.old || ''), own.salt)) !== own.pass) return E('Current password is wrong.', 403);
+    if (String(b.password || '').length < 10) return E('New password must be at least 10 characters.');
+    const salt = rid(8); await DB.prepare('UPDATE cp_owner SET pass=?, salt=? WHERE id=1').bind(await hashPw(b.password, salt), salt).run();
+    await DB.prepare('DELETE FROM cp_osess WHERE token<>?').bind(tok).run(); return J({ ok: true });
+  }
+  if (p === 'owner/hospitals' && m === 'GET') {
+    const ts = (await DB.prepare('SELECT * FROM cp_tenants ORDER BY created_at').all()).results, out = [];
+    for (const t of ts) {
+      const d = scoped(DB, t.prefix);
+      const c = await d.prepare('SELECT (SELECT COUNT(*) FROM users WHERE active=1) users, (SELECT COUNT(*) FROM docs WHERE deleted=0) records, (SELECT MAX(updated_at) FROM docs) last, (SELECT COUNT(*) FROM files) files').first();
+      const admins = (await d.prepare("SELECT id,name,username,last_login FROM users WHERE role='admin' ORDER BY created_at").all()).results;
+      out.push({ ...brandOf(t), created_at: t.created_at, ...c, admins });
+    }
+    return J({ hospitals: out });
+  }
+  if (p === 'owner/hospitals' && m === 'POST') {
+    const b = await body(req); if (!b) return E('Bad request.');
+    const code = clean(b.code, 24).toLowerCase();
+    if (b.action === 'create') {
+      if (!/^[a-z][a-z0-9]{1,19}$/.test(code)) return E('Hospital code: 2 to 20 letters and numbers, starting with a letter (for example "parirenyatwa").');
+      if (await DB.prepare('SELECT 1 FROM cp_tenants WHERE code=?').bind(code).first()) return E('That hospital code is already used.');
+      const name = clean(b.name, 90); if (!name) return E('Enter the hospital name.');
+      if (!validLogo(b.logo)) return E('Logo must be a PNG, JPG or WebP picture.');
+      const prefix = 'h_' + code + '_', d = scoped(DB, prefix);
+      for (const q of SCHEMA) await d.prepare(q).run();
+      let r; try { r = await makeUser({ DB: d }, { name: b.admin_name, username: b.admin_username, role: 'admin' }, null); }
+      catch (e) { return E(/UNIQUE/.test(e.message) ? 'That username is taken.' : e.message); }
+      await DB.prepare('INSERT INTO cp_tenants(code,name,logo,prefix) VALUES(?,?,?,?)').bind(code, name, b.logo || null, prefix).run();
+      await audit({ DB: d }, null, 'hospital.create', null, null, `Created by Nexora Digital: ${name}`);
+      return J({ ok: true, code, username: clean(b.admin_username, 40).toLowerCase(), password: r.password });
+    }
+    const t = await DB.prepare('SELECT * FROM cp_tenants WHERE code=?').bind(code).first(); if (!t) return E('No such hospital.', 404);
+    const d = scoped(DB, t.prefix);
+    if (b.action === 'edit') {
+      const name = clean(b.name, 90) || t.name; if (!validLogo(b.logo)) return E('Logo must be a PNG, JPG or WebP picture.');
+      await DB.prepare('UPDATE cp_tenants SET name=?, logo=? WHERE code=?').bind(name, b.logo === undefined ? t.logo : b.logo || null, code).run();
+      return J({ ok: true });
+    }
+    if (b.action === 'pause' || b.action === 'resume') {
+      await DB.prepare('UPDATE cp_tenants SET active=? WHERE code=?').bind(b.action === 'resume' ? 1 : 0, code).run();
+      if (b.action === 'pause') await d.prepare('DELETE FROM sessions').run();
+      return J({ ok: true });
+    }
+    if (b.action === 'reset') {
+      const a = await d.prepare("SELECT * FROM users WHERE id=? AND role='admin'").bind(String(b.user || '')).first(); if (!a) return E('No such administrator.', 404);
+      const pw = rid(4), salt = rid(8);
+      await d.prepare('UPDATE users SET pass=?, salt=?, must_change=1, active=1 WHERE id=?').bind(await hashPw(pw, salt), salt, a.id).run();
+      await d.prepare('DELETE FROM sessions WHERE user_id=?').bind(a.id).run();
+      await d.prepare("DELETE FROM meta WHERE k=?").bind('fail:' + a.username).run();
+      await audit({ DB: d }, null, 'user.reset', 'users', a.id, 'by Nexora Digital: ' + a.username);
+      return J({ ok: true, username: a.username, password: pw });
+    }
+    if (b.action === 'add_admin') {
+      try { const r = await makeUser({ DB: d }, { name: b.admin_name, username: b.admin_username, role: 'admin' }, null); return J({ ok: true, username: clean(b.admin_username, 40).toLowerCase(), password: r.password }); }
+      catch (e) { return E(/UNIQUE/.test(e.message) ? 'That username is taken.' : e.message); }
+    }
+    return E('Unknown action.');
+  }
+  return E('Not found.', 404);
+}
+
+async function route(req, env) {
+  const url = new URL(req.url), p = url.pathname.replace(/^\/api\/?/, '').replace(/\/$/, ''), m = req.method;
+  if (m !== 'GET' && m !== 'HEAD') {
+    const o = req.headers.get('origin'); if (o && new URL(o).host !== url.host) return E('Cross-site request blocked.', 403);
+    if (!/application\/json/.test(req.headers.get('content-type') || '')) return E('Send JSON.', 415);
+  }
+  await ensureGlobal(env.DB);
+  if (p.startsWith('owner/')) return ownerHandle(req, env, p, m);
+  const code = (req.headers.get('x-cp-h') || url.searchParams.get('h') || getCookie(req, 'cp_h') || 'main').toLowerCase().slice(0, 24);
+  const t = await env.DB.prepare('SELECT * FROM cp_tenants WHERE code=?').bind(code).first();
+  if (p === 'brand') return t ? J(brandOf(t)) : E('No hospital with that code.', 404);
+  if (!t) return E('No hospital with that code. Check the link you were given.', 404);
+  if (!t.active) return E('This hospital’s CarePoint account is paused. Please contact Nexora Digital.', 423);
+  const r = await handle(req, { ...env, DB: scoped(env.DB, t.prefix), SETUP_CODE: t.prefix ? '' : env.SETUP_CODE }, brandOf(t));
+  if (p === 'login' && r.ok) { const r2 = new Response(r.body, r); r2.headers.append('set-cookie', `cp_h=${t.code}; Path=/; Secure; SameSite=Lax; Max-Age=${30 * 86400}`); return r2; }
+  return r;
+}
+
 export async function onRequest({ request, env }) {
-  try { return await handle(request, env); }
+  try { return await route(request, env); }
   catch (e) { console.error(e); return E('Something went wrong on the server. Try again.', 500); }
 }

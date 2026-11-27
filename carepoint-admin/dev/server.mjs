@@ -34,7 +34,7 @@ http.createServer(async (req, res) => {
     const headers = new Headers(); for (const [k, v] of Object.entries(req.headers)) headers.set(k, Array.isArray(v) ? v.join(', ') : v);
     const request = new Request(url, { method: req.method, headers, body: ['GET', 'HEAD'].includes(req.method) ? undefined : Buffer.concat(chunks) });
     const r = await onRequest({ request, env: { DB, SETUP_CODE: process.env.SETUP_CODE || '' } });
-    const h = {}; r.headers.forEach((v, k) => { h[k] = v; });
+    const h = {}; r.headers.forEach((v, k) => { if (k !== 'set-cookie') h[k] = v; }); const sc = r.headers.getSetCookie(); if (sc.length) h['set-cookie'] = sc;
     res.writeHead(r.status, h); res.end(Buffer.from(await r.arrayBuffer())); return;
   }
   let p = path.join(ROOT, 'public', decodeURIComponent(url.pathname));

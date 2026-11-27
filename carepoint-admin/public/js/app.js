@@ -43,7 +43,7 @@ addEventListener('hashchange', () => APP.me && route());
 function shell() {
   const s = APP.settings();
   document.title = s.hospital + ' · CarePoint Admin';
-  $('#app').innerHTML = `<aside id="side"><div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#0f5c5c"/><path d="M17 9h6v8h8v6h-8v8h-6v-8H9v-6h8z" fill="#fff"/></svg><div><b>${esc(s.hospital)}</b><span>CarePoint Admin</span></div></div>
+  $('#app').innerHTML = `<aside id="side"><div class="brand">${brandMark()}<div><b>${esc(s.hospital)}</b><span>CarePoint Admin</span></div></div>
     <nav id="nav">${NAV.map(([g, items]) => { const vis = items.filter((i) => i[3]()); return vis.length ? `<div class="ng"><span>${esc(g)}</span>${vis.map(([k, t, ic]) => `<a href="#/${k}" data-k="${k}"><i>${ic}</i>${esc(t)}<em data-badge="${k}"></em></a>`).join('')}</div>` : ''; }).join('')}</nav>
     <div class="me-i">${installBtn('sm ghost light')}</div><div class="me"><a href="#/account"><b>${esc(APP.me.name)}</b><span>${esc(APP.roles[APP.me.role])}${APP.me.dept ? ' · ' + esc(APP.me.dept) : ''}</span></a><button class="btn sm ghost" id="logout">Sign out</button></div></aside>
     <div id="shade"></div>
@@ -173,14 +173,14 @@ function reportsPage(el) {
 function settingsPage(el) {
   const s = APP.settings();
   const list = (k, lab, help) => `<div class="fld full"><label>${lab}</label><textarea name="${k}" rows="4">${esc((s[k] || []).join('\n'))}</textarea><small>${help || 'One per line.'}</small></div>`;
-  el.innerHTML = `<form class="form card" id="setF"><div class="fld half"><label>Hospital name</label><input name="hospital" value="${esc(s.hospital)}" required></div><div class="fld half"><label>Currency symbol</label><input name="currency_symbol" value="${esc(s.currency_symbol)}"></div>
+  el.innerHTML = `<form class="form card" id="setF"><div class="fld half"><label>Hospital name and logo</label><div class="row gap" style="align-items:center">${brandMark()}<b>${esc(s.hospital)}</b></div><small class="muted">Set by Nexora Digital. Ask them to change the name or logo.</small></div><div class="fld half"><label>Currency symbol</label><input name="currency_symbol" value="${esc(s.currency_symbol)}"></div>
     ${list('departments', 'Departments')}${list('aids', 'Medical aid societies')}${list('diagnoses', 'Diagnosis list', 'One per line. Staff can still type others.')}${list('areas', 'Areas / villages / suburbs patients come from')}${list('disciplines', 'Theatre disciplines')}${list('claim_errors', 'Claim error types')}${list('kiosk_reasons', 'Kiosk reasons (keep “Sold” first)')}
     <div class="fld third"><label>Urgent repair too long after (days)</label><input type="number" name="repair_days_urgent" value="${s.repair_days_urgent}"></div><div class="fld third"><label>Normal repair too long after (days)</label><input type="number" name="repair_days_normal" value="${s.repair_days_normal}"></div><div class="fld third"><label>Warn about expiry (days before)</label><input type="number" name="expiry_warn_days" value="${s.expiry_warn_days}"></div>
     <div class="fld half"><label>Warn before licence / insurance expiry (days)</label><input type="number" name="vehicle_warn_days" value="${s.vehicle_warn_days}"></div><div class="fld half"><label>Warn before service (days)</label><input type="number" name="service_warn_days" value="${s.service_warn_days}"></div>
     <div class="actions"><span class="sp"></span><button class="btn">Save settings</button></div></form>`;
   $('#setF').onsubmit = (e) => {
     e.preventDefault(); const f = e.target, d = { id: 'main' };
-    ['hospital', 'currency_symbol'].forEach((k) => (d[k] = f.elements[k].value.trim()));
+    d.currency_symbol = f.elements.currency_symbol.value.trim();
     ['departments', 'aids', 'diagnoses', 'areas', 'disciplines', 'claim_errors', 'kiosk_reasons'].forEach((k) => (d[k] = f.elements[k].value.split('\n').map((x) => x.trim()).filter(Boolean)));
     ['repair_days_urgent', 'repair_days_normal', 'expiry_warn_days', 'vehicle_warn_days', 'service_warn_days'].forEach((k) => (d[k] = num(f.elements[k].value)));
     if (!d.kiosk_reasons.includes('Sold')) d.kiosk_reasons.unshift('Sold');
@@ -254,20 +254,29 @@ document.addEventListener('click', async (e) => {
 /* ---------------- sign in and start ---------------- */
 async function start() {
   const app = $('#app');
+  const bk = 'cp_brand_' + HCODE;
+  try { APP.brand = await api('brand'); localStorage.setItem(bk, JSON.stringify(APP.brand)); }
+  catch (e) {
+    if (e.status === 404) return codeView(app, 'We could not find a hospital with the code “' + HCODE + '”. Check the link you were given.');
+    APP.brand = JSON.parse(localStorage.getItem(bk) || 'null') || { code: HCODE, name: 'CarePoint Admin', logo: '', active: true };
+  }
+  if (!APP.brand.active) return pausedView(app);
   let me;
   try { me = await api('me'); }
   catch (e) {
+    if (e.status === 423) return pausedView(app);
     if (e.status === 401 || e.status === 403) {
       let setup = false; try { setup = (await api('setup')).needed; } catch (x) {}
       return setup ? setupView(app) : loginView(app);
     }
     // offline: use the last session cached on this device
-    const cached = JSON.parse(localStorage.getItem('cp_me') || 'null');
+    const cached = JSON.parse(localStorage.getItem('cp_me_' + HCODE) || 'null');
     if (!cached) { app.innerHTML = `<div class="auth"><div class="card"><h1>No network</h1><p>Connect once to sign in. After that the system works offline.</p><button class="btn" onclick="location.reload()">Try again</button></div></div>`; return; }
     me = cached; APP.online = false;
   }
   if (me.user.must_change) { app.innerHTML = '<div class="auth"><div class="card" id="pwc"></div></div>'; passwordForm($('#pwc'), true); return; }
-  localStorage.setItem('cp_me', JSON.stringify(me));
+  localStorage.setItem('cp_me_' + HCODE, JSON.stringify(me));
+  if (me.hospital) { APP.brand = me.hospital; localStorage.setItem(bk, JSON.stringify(me.hospital)); }
   Object.assign(APP, { me: me.user, roles: me.roles, perms: me.perms, moneyOK: me.money, costOK: me.stockcost });
   await IDB.open('cp-' + APP.me.id);
   APP.data = (await IDB.get('data')) || {};
@@ -278,10 +287,19 @@ async function start() {
   if (APP.me.role === 'admin' && !APP.all('items').length && !APP.get('settings', 'main')) setTimeout(() => sheet('Welcome to CarePoint Admin', `<p>Start by setting your hospital name and lists under <b>Settings</b>, then add your stock items, employees and vehicles.</p><p>Want to look around first? Load sample data, and remove it later under Backup & restore.</p><div class="actions"><button class="btn ghost" data-close>Start empty</button><button class="btn" id="wS">Load sample data</button></div>`), 300) && setTimeout(() => { const b = $('#wS'); if (b) b.onclick = () => { loadSample(); closeSheet(); toast('Sample data loaded'); }; }, 400);
 }
 function loginView(app) {
-  app.innerHTML = `<div class="auth"><div class="card"><div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#0f5c5c"/><path d="M17 9h6v8h8v6h-8v8h-6v-8H9v-6h8z" fill="#fff"/></svg><div><b>CarePoint Admin</b><span>Hospital administration</span></div></div>
+  app.innerHTML = `<div class="auth"><div class="card"><div class="brand">${brandMark()}<div><b>${esc(APP.brand.name)}</b><span>CarePoint Admin</span></div></div>
     <form class="form" id="lf"><div class="fld full"><label>Username</label><input name="username" autocomplete="username" autocapitalize="none" required></div><div class="fld full"><label>Password</label><input type="password" name="password" autocomplete="current-password" required></div><p class="err"></p><button class="btn full">Sign in</button></form>
-    <p class="muted sm">Forgot your password? Ask the administrator to reset it.</p><div class="row gap" style="margin-top:10px">${installBtn()}</div></div></div>`;
+    <p class="muted sm">Forgot your password? Ask the administrator to reset it.</p><p class="muted sm">Not ${esc(APP.brand.name)}? <a href="#" id="chH">Change hospital</a></p><div class="row gap" style="margin-top:10px">${installBtn()}</div></div></div>`;
+  $('#chH').onclick = (e) => { e.preventDefault(); codeView(app); };
   $('#lf').onsubmit = async (e) => { e.preventDefault(); const f = e.target; try { await api('login', { username: f.elements.username.value, password: f.elements.password.value }); location.reload(); } catch (x) { $('.err', f).textContent = x.message; } };
+}
+function codeView(app, msg) {
+  app.innerHTML = `<div class="auth"><div class="card"><div class="brand">${CROSS}<div><b>CarePoint Admin</b><span>Hospital administration</span></div></div>${msg ? `<p class="err">${esc(msg)}</p>` : ''}<form class="form" id="hf"><div class="fld full"><label>Hospital code</label><input name="h" autocapitalize="none" placeholder="for example: parirenyatwa" value="${esc(HCODE === 'main' ? '' : HCODE)}" required></div><p class="muted sm">Your administrator or Nexora Digital gives you this code. It is also in your sign-in link.</p><button class="btn full">Continue</button></form></div></div>`;
+  $('#hf').onsubmit = (e) => { e.preventDefault(); const v = e.target.elements.h.value.toLowerCase().replace(/[^a-z0-9]/g, ''); if (!v) return; try { localStorage.setItem('cp_h', v); } catch (x) {} location.href = '/?h=' + v; };
+}
+function pausedView(app) {
+  app.innerHTML = `<div class="auth"><div class="card"><div class="brand">${brandMark()}<div><b>${esc(APP.brand.name)}</b><span>CarePoint Admin</span></div></div><h2>Account paused</h2><p>This hospital’s CarePoint account is paused. Please contact Nexora Digital.</p><p class="muted sm"><a href="#" id="chH">Use a different hospital</a></p></div></div>`;
+  $('#chH').onclick = (e) => { e.preventDefault(); codeView(app); };
 }
 function setupView(app) {
   app.innerHTML = `<div class="auth"><div class="card"><h1>Set up CarePoint Admin</h1><p>Create the administrator login. You need the setup code from Nexora Digital.</p><form class="form" id="sf"><div class="fld full"><label>Setup code</label><input name="code" required></div><div class="fld full"><label>Your full name</label><input name="name" required></div><div class="fld half"><label>Username</label><input name="username" autocapitalize="none" required></div><div class="fld half"><label>Password (8+)</label><input type="password" name="password" minlength="8" required></div><p class="err"></p><button class="btn full">Create administrator</button></form></div></div>`;

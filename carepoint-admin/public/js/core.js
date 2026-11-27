@@ -24,8 +24,10 @@ const pct = (a, b) => (b ? Math.round((a * 100) / b) : 0);
 const label = (s) => String(s || '').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
 
 /* ---------------- API ---------------- */
+// which hospital this device is using: from the link (?h=code), then the last one used
+const HCODE = (() => { let q = ''; try { q = (new URLSearchParams(location.search).get('h') || '').toLowerCase().replace(/[^a-z0-9]/g, ''); if (q) localStorage.setItem('cp_h', q); return q || localStorage.getItem('cp_h') || 'main'; } catch (e) { return q || 'main'; } })();
 async function api(path, data, method) {
-  const r = await fetch('/api/' + path, { method: method || (data ? 'POST' : 'GET'), credentials: 'same-origin', headers: data ? { 'content-type': 'application/json' } : {}, body: data ? JSON.stringify(data) : undefined });
+  const r = await fetch('/api/' + path, { method: method || (data ? 'POST' : 'GET'), credentials: 'same-origin', headers: data ? { 'content-type': 'application/json', 'x-cp-h': HCODE } : { 'x-cp-h': HCODE }, body: data ? JSON.stringify(data) : undefined });
   let j = {}; try { j = await r.json(); } catch (e) {}
   if (!r.ok) { const e = new Error(j.error || 'Could not reach the server.'); e.status = r.status; throw e; }
   return j;
@@ -53,7 +55,7 @@ const APP = {
   can(col, w) { const p = this.perms[col]; return !!p && (w ? p.w : p.r).includes(this.me.role); },
   all(col) { return Object.values(this.data[col] || {}).filter((d) => !d._deleted); },
   get(col, id) { const d = (this.data[col] || {})[id]; return d && !d._deleted ? d : null; },
-  settings() { return Object.assign({}, DEFAULT_SETTINGS, this.get('settings', 'main') || {}); },
+  settings() { return Object.assign({}, DEFAULT_SETTINGS, this.get('settings', 'main') || {}, this.brand && this.brand.name ? { hospital: this.brand.name } : {}); },
   async persist() { await IDB.set('data', this.data); await IDB.set('meta', { last: this.last, outbox: this.outbox, lastSync: this.lastSync }); },
   save(col, doc, note) {
     if (!this.can(col, true)) throw new Error('Your login is not allowed to change this.');
@@ -124,6 +126,8 @@ function syncBadge() {
 }
 
 /* ---------------- defaults ---------------- */
+const CROSS = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#0f5c5c"/><path d="M17 9h6v8h8v6h-8v8h-6v-8H9v-6h8z" fill="#fff"/></svg>';
+const brandMark = () => (APP.brand && APP.brand.logo ? `<img class="logo" src="${esc(APP.brand.logo)}" alt="${esc(APP.brand.name)} logo">` : CROSS);
 const DEFAULT_SETTINGS = {
   hospital: 'Our Hospital', currency_symbol: '$',
   departments: ['OPD', 'Theatre', 'Maternity Ward', 'Male Ward', 'Female Ward', 'Paediatric Ward', 'Casualty', 'Pharmacy', 'Administration', 'Kitchen'],
@@ -299,6 +303,6 @@ function downloadXlsx(name, sheets) { // sheets: [[sheetName, aoa]]
 }
 function downloadFile(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: type || 'application/json' })); a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 function printArea(title, html) {
-  const w = $('#print'); w.innerHTML = `<div class="phead"><b>${esc(APP.settings().hospital)}</b><span>${esc(title)} · printed ${new Date().toLocaleString('en-GB')} by ${esc(APP.me.name)}</span></div>${html}`;
+  const w = $('#print'); w.innerHTML = `<div class="phead">${APP.brand && APP.brand.logo ? `<img src="${esc(APP.brand.logo)}" alt="" style="height:38px;margin-right:10px;vertical-align:middle">` : ''}<b>${esc(APP.settings().hospital)}</b><span>${esc(title)} · printed ${new Date().toLocaleString('en-GB')} by ${esc(APP.me.name)}</span></div>${html}`;
   document.body.classList.add('printing'); setTimeout(() => { window.print(); document.body.classList.remove('printing'); }, 60);
 }
