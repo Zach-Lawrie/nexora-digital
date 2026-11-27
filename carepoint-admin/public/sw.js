@@ -1,5 +1,5 @@
 /* CarePoint Admin: keeps the app itself on the device so it opens with no network. Data sync is handled by the app. */
-const CACHE = 'cp-shell-v2';
+const CACHE = 'cp-shell-v3';
 const SHELL = ['/', '/index.html', '/js/core.js', '/js/stock.js', '/js/modules.js', '/js/sample.js', '/js/app.js', '/vendor/xlsx.mini.min.js', '/icon.svg', '/icon-192.png', '/manifest.webmanifest'];
 self.addEventListener('install', (e) => e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener('activate', (e) => e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())));

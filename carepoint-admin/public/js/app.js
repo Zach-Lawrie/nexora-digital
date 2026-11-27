@@ -45,7 +45,7 @@ function shell() {
   document.title = s.hospital + ' · CarePoint Admin';
   $('#app').innerHTML = `<aside id="side"><div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#0f5c5c"/><path d="M17 9h6v8h8v6h-8v8h-6v-8H9v-6h8z" fill="#fff"/></svg><div><b>${esc(s.hospital)}</b><span>CarePoint Admin</span></div></div>
     <nav id="nav">${NAV.map(([g, items]) => { const vis = items.filter((i) => i[3]()); return vis.length ? `<div class="ng"><span>${esc(g)}</span>${vis.map(([k, t, ic]) => `<a href="#/${k}" data-k="${k}"><i>${ic}</i>${esc(t)}<em data-badge="${k}"></em></a>`).join('')}</div>` : ''; }).join('')}</nav>
-    <div class="me"><a href="#/account"><b>${esc(APP.me.name)}</b><span>${esc(APP.roles[APP.me.role])}${APP.me.dept ? ' · ' + esc(APP.me.dept) : ''}</span></a><button class="btn sm ghost" id="logout">Sign out</button></div></aside>
+    <div class="me-i">${installBtn('sm ghost light')}</div><div class="me"><a href="#/account"><b>${esc(APP.me.name)}</b><span>${esc(APP.roles[APP.me.role])}${APP.me.dept ? ' · ' + esc(APP.me.dept) : ''}</span></a><button class="btn sm ghost" id="logout">Sign out</button></div></aside>
     <div id="shade"></div>
     <section id="page"><header id="top"><button id="menu" aria-label="Menu">☰</button><h1 id="title"></h1><span class="sp"></span><input id="gsearch" type="search" placeholder="Search item, patient, vehicle, staff" aria-label="Search"><span id="sync" class="sync"></span></header><main id="main"></main></section>`;
   $('#menu').onclick = () => document.body.classList.toggle('navopen');
@@ -226,7 +226,7 @@ async function auditPage(el) {
 }
 function accountPage(el) {
   el.innerHTML = `<div class="card"><h3>${esc(APP.me.name)}</h3><p>${esc(APP.roles[APP.me.role])}${APP.me.dept ? ' · ' + esc(APP.me.dept) : ''} · username <b>${esc(APP.me.username)}</b></p></div><div class="card" id="pwc"></div>
-    <div class="card"><h3>Install on your phone or computer</h3><p class="muted">In Chrome, open the menu and choose <b>Install app</b> or <b>Add to Home screen</b>. On iPhone, tap Share then <b>Add to Home Screen</b>. It then opens like an app and works without network.</p></div>`;
+    <div class="card"><h3>Install on your phone or computer</h3><p class="muted">Chrome or Edge (Android, Windows, Mac): press Install below, or open the browser menu and choose <b>Install app</b> / <b>Add to Home screen</b>. iPhone: open in Safari, tap Share, then <b>Add to Home Screen</b>. It then opens like an app and works without network.</p>${installBtn('')}</div>`;
   passwordForm($('#pwc'), false);
 }
 function passwordForm(box, forced) {
@@ -237,6 +237,19 @@ function passwordForm(box, forced) {
     try { await api('password', { old: f.elements.old.value, password: f.elements.password.value }); toast('Password changed'); if (forced) location.reload(); else f.reset(); } catch (x) { err.textContent = x.message; }
   };
 }
+
+
+/* ---------------- install as an app ---------------- */
+let INSTALL = null;
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); INSTALL = e; $$('[data-install]').forEach((b) => (b.hidden = false)); });
+addEventListener('appinstalled', () => { INSTALL = null; $$('[data-install]').forEach((b) => (b.hidden = true)); toast('CarePoint Admin is installed. Open it from your home screen or apps.'); });
+function installBtn(cls) { return isStandalone() ? '' : `<button type="button" class="btn ${cls || 'ghost'}" data-install ${INSTALL || /iphone|ipad|ipod/i.test(navigator.userAgent) ? '' : 'hidden'}>Install app</button>`; }
+document.addEventListener('click', async (e) => {
+  if (!e.target.closest('[data-install]')) return;
+  if (INSTALL) { INSTALL.prompt(); try { await INSTALL.userChoice; } catch (x) {} INSTALL = null; return; }
+  sheet('Install CarePoint Admin', '<ol class="list"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button (square with an arrow).</li><li>Choose <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol><p class="muted">It then opens full screen like an app and works without network.</p>');
+});
 
 /* ---------------- sign in and start ---------------- */
 async function start() {
@@ -267,7 +280,7 @@ async function start() {
 function loginView(app) {
   app.innerHTML = `<div class="auth"><div class="card"><div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#0f5c5c"/><path d="M17 9h6v8h8v6h-8v8h-6v-8H9v-6h8z" fill="#fff"/></svg><div><b>CarePoint Admin</b><span>Hospital administration</span></div></div>
     <form class="form" id="lf"><div class="fld full"><label>Username</label><input name="username" autocomplete="username" autocapitalize="none" required></div><div class="fld full"><label>Password</label><input type="password" name="password" autocomplete="current-password" required></div><p class="err"></p><button class="btn full">Sign in</button></form>
-    <p class="muted sm">Forgot your password? Ask the administrator to reset it.</p></div></div>`;
+    <p class="muted sm">Forgot your password? Ask the administrator to reset it.</p><div class="row gap" style="margin-top:10px">${installBtn()}</div></div></div>`;
   $('#lf').onsubmit = async (e) => { e.preventDefault(); const f = e.target; try { await api('login', { username: f.elements.username.value, password: f.elements.password.value }); location.reload(); } catch (x) { $('.err', f).textContent = x.message; } };
 }
 function setupView(app) {
