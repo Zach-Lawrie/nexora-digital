@@ -49,6 +49,7 @@ const COLS = {
   goals: { r: ['admin', 'nic'], w: ['admin'] },
   patients: { r: ['admin', 'nic', 'records', 'accounts', 'dept'], w: ['admin', 'nic', 'records', 'dept'], scope: { dept: ownDept }, wscope: { dept: ownDept } },
   births: { r: ['admin', 'nic', 'records', 'dept'], w: ['admin', 'nic', 'records', 'dept'] },
+  licences: { r: ['admin', 'nic', 'store', 'accounts'], w: ['admin'], strip: { cost: MONEY } },
 };
 const canR = (col, u, d) => { const c = COLS[col]; if (!c || !c.r.includes(u.role)) return false; const f = c.scope && c.scope[u.role]; return !f || !d || f(d, u); };
 const canW = (col, u, d) => { const c = COLS[col]; if (!c || !c.w.includes(u.role)) return false; const f = (c.wscope && c.wscope[u.role]) || (c.scope && c.scope[u.role]); return !f || f(d, u); };
@@ -195,6 +196,59 @@ async function handle(req, env) {
       results.push({ id, col, ok: true, seq, data: op.deleted ? null : strip(col, u, data) });
     }
     return J({ results });
+  }
+
+
+  /* ---- file attachments (scans and photos of licences), stored in D1 in pieces ---- */
+  let fm;
+  if (p === 'files/start' && m === 'POST') {
+    const b = await body(req); if (!b) return E('Bad request.');
+    const col = String(b.col || ''), docId = String(b.doc_id || '');
+    if (!COLS[col]) return E('Unknown record type.');
+    const d = await env.DB.prepare('SELECT data FROM docs WHERE col=? AND id=? AND deleted=0').bind(col, docId).first();
+    if (!d) return E('Save the record first (it must reach the server before you attach files).', 409);
+    if (!canW(col, u, JSON.parse(d.data))) return E('You are not allowed to attach files here.', 403);
+    const size = Number(b.size) || 0; if (size <= 0 || size > 15 * 1048576) return E('Files must be smaller than 15 MB.');
+    const id = 'f' + rid(8);
+    await env.DB.prepare('INSERT INTO files(id,col,doc_id,name,mime,size,chunks,complete,by_name) VALUES(?,?,?,?,?,?,0,0,?)').bind(id, col, docId, clean(b.name, 140) || 'file', clean(b.mime, 80) || 'application/octet-stream', size, u.name).run();
+    return J({ id });
+  }
+  if ((fm = /^files\/(f[a-f0-9]{16})\/(chunk|finish|delete)$/.exec(p)) && m === 'POST') {
+    const fr = await env.DB.prepare('SELECT * FROM files WHERE id=?').bind(fm[1]).first(); if (!fr) return E('File not found.', 404);
+    const d = await env.DB.prepare('SELECT data FROM docs WHERE col=? AND id=?').bind(fr.col, fr.doc_id).first();
+    if (!d || !canW(fr.col, u, JSON.parse(d.data))) return E('Not allowed.', 403);
+    if (fm[2] === 'chunk') {
+      const b = await body(req); if (!b || typeof b.b64 !== 'string') return E('Bad request.');
+      const n = Number(b.n); if (!(n >= 0 && n < 40)) return E('Bad piece number.');
+      const bin = Uint8Array.from(atob(b.b64), (c) => c.charCodeAt(0)); if (bin.length > 800000) return E('Piece too large.');
+      await env.DB.prepare('INSERT OR REPLACE INTO file_chunks(file_id,n,data) VALUES(?,?,?)').bind(fr.id, n, bin).run();
+      return J({ ok: true });
+    }
+    if (fm[2] === 'finish') {
+      const c = await env.DB.prepare('SELECT COUNT(*) n, COALESCE(SUM(LENGTH(data)),0) s FROM file_chunks WHERE file_id=?').bind(fr.id).first();
+      if (c.s !== fr.size) return E('Upload incomplete. Try again.');
+      await env.DB.prepare('UPDATE files SET chunks=?, complete=1 WHERE id=?').bind(c.n, fr.id).run();
+      await audit(env, u, 'file.upload', fr.col, fr.doc_id, fr.name);
+      return J({ ok: true, file: { id: fr.id, name: fr.name, mime: fr.mime, size: fr.size, at: fr.at, by: fr.by_name } });
+    }
+    await env.DB.prepare('DELETE FROM file_chunks WHERE file_id=?').bind(fr.id).run();
+    await env.DB.prepare('DELETE FROM files WHERE id=?').bind(fr.id).run();
+    await audit(env, u, 'file.delete', fr.col, fr.doc_id, fr.name); return J({ ok: true });
+  }
+  if ((fm = /^files\/(f[a-f0-9]{16})$/.exec(p)) && m === 'GET') {
+    const fr = await env.DB.prepare('SELECT * FROM files WHERE id=? AND complete=1').bind(fm[1]).first(); if (!fr) return E('File not found.', 404);
+    const d = await env.DB.prepare('SELECT data FROM docs WHERE col=? AND id=?').bind(fr.col, fr.doc_id).first();
+    if (!d || !canR(fr.col, u, JSON.parse(d.data))) return E('File not found.', 404);
+    const rows = (await env.DB.prepare('SELECT data FROM file_chunks WHERE file_id=? ORDER BY n').bind(fr.id).all()).results;
+    const parts = rows.map((r) => new Uint8Array(r.data)); const out = new Uint8Array(parts.reduce((s, x) => s + x.length, 0)); let o = 0; parts.forEach((x) => { out.set(x, o); o += x.length; });
+    const safe = /^(application\/pdf|image\/(jpeg|png|webp|gif))$/.test(fr.mime);
+    return new Response(out, { headers: { 'content-type': safe ? fr.mime : 'application/octet-stream', 'content-disposition': `${safe ? 'inline' : 'attachment'}; filename="${fr.name.replace(/[^\w. ()-]/g, '_')}"`, 'cache-control': 'private, max-age=3600', 'x-content-type-options': 'nosniff', 'content-security-policy': "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox" } });
+  }
+  if (p === 'files' && m === 'GET') {
+    const col = String(url.searchParams.get('col') || ''), docId = String(url.searchParams.get('doc') || '');
+    if (!COLS[col] || !canR(col, u, null)) return E('Not allowed.', 403);
+    const rows = (await env.DB.prepare('SELECT id,name,mime,size,at,by_name FROM files WHERE col=? AND doc_id=? AND complete=1 ORDER BY at').bind(col, docId).all()).results;
+    return J({ files: rows });
   }
 
   /* ---- users (admin) ---- */

@@ -1,6 +1,6 @@
 # CarePoint Admin
 
-Hospital administration system for one hospital: stock (drugs, sundries, stationery, registers, groceries), department requests and usage, misuse checks, procurement, kiosk, theatres, medical aid claims, cash book, assets, repairs, vehicles, employees, attendance, leave, meetings, strategic plan, patients seen, deliveries, disease patterns and monthly reports.
+Hospital administration system for one hospital: licences & compliance (with scanned copies and expiry warnings), stock (drugs, sundries, stationery, registers, groceries), department requests and usage, misuse checks, procurement, kiosk, theatres, medical aid claims, cash book, assets, repairs, vehicles, employees, attendance, leave, meetings, strategic plan, patients seen, deliveries, disease patterns and monthly reports.
 
 ## How it works
 - `public/`: the app (no build step). `js/core.js` offline store and sync, `js/stock.js` stock engine, `js/modules.js` other modules, `js/app.js` shell, dashboard, reports, settings, `js/sample.js` sample data.

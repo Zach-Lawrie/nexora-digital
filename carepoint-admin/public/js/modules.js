@@ -64,7 +64,7 @@ function editDoc(c, r) {
 }
 function viewDoc(c, r) {
   const fields = (typeof c.fields === 'function' ? c.fields(r) : c.fields).filter((f) => !f.hide && r[f.k] !== undefined && r[f.k] !== '');
-  sheet(c.titleOf ? c.titleOf(r) : label(c.one || 'record'), `<dl class="dl">${fields.map((f) => `<dt>${esc(f.label)}</dt><dd>${Array.isArray(r[f.k]) ? r[f.k].map((x) => esc(Object.values(x).join(' · '))).join('<br>') : esc(f.type === 'date' ? fdate(r[f.k]) : f.type === 'check' ? (r[f.k] ? 'Yes' : 'No') : f.opts && typeof optList(f.opts)[0]?.[0] !== 'undefined' && optList(f.opts).find((o) => String(o[0]) === String(r[f.k])) ? optList(f.opts).find((o) => String(o[0]) === String(r[f.k]))[1] : r[f.k])}</dd>`).join('')}</dl>`);
+  sheet(c.titleOf ? c.titleOf(r) : label(c.one || 'record'), `<dl class="dl">${fields.map((f) => `<dt>${esc(f.label)}</dt><dd>${Array.isArray(r[f.k]) ? r[f.k].map((x) => esc(Object.values(x).join(' · '))).join('<br>') : esc(f.type === 'date' ? fdate(r[f.k]) : f.type === 'check' ? (r[f.k] ? 'Yes' : 'No') : f.opts && typeof optList(f.opts)[0]?.[0] !== 'undefined' && optList(f.opts).find((o) => String(o[0]) === String(r[f.k])) ? optList(f.opts).find((o) => String(o[0]) === String(r[f.k]))[1] : r[f.k])}</dd>`).join('')}</dl>${c.extra ? c.extra(r) : ''}`);
 }
 
 /* ---------------- THEATRES ---------------- */
@@ -234,14 +234,14 @@ function vehicleKm(v) { const t = APP.all('trips').filter((x) => x.vehicle === v
 function vehicleAlerts(v) {
   const s = APP.settings(), out = [];
   const chk = (d, what, warn) => { if (!d) return; const n = daysBetween(today(), d); if (n < 0) out.push([what + ' EXPIRED ' + fdate(d), 'bad']); else if (n <= warn) out.push([what + ' due in ' + n + ' days', 'warn']); };
-  chk(v.service_date, 'Service', s.service_warn_days); chk(v.licence, 'Licence', s.vehicle_warn_days); chk(v.insurance, 'Insurance', s.vehicle_warn_days);
+  chk(v.service_date, 'Service', s.service_warn_days); chk(v.licence, 'Vehicle licence (ZINARA)', s.vehicle_warn_days); chk(v.insurance, 'Vehicle insurance', s.vehicle_warn_days);
   if (num(v.service_km) && vehicleKm(v) >= num(v.service_km) - 500) out.push([`Service at ${fnum(v.service_km)} km (now ${fnum(vehicleKm(v))})`, vehicleKm(v) >= num(v.service_km) ? 'bad' : 'warn']);
   return out;
 }
 const VEHICLES = {
   key: 'vehicles', col: 'vehicles', title: 'Vehicles', one: 'vehicle', ph: 'Search registration, driver', search: ['reg', 'type', 'driver', 'make'],
   sort: (a, b) => (a.reg || '').localeCompare(b.reg || ''),
-  fields: [{ k: 'reg', label: 'Registration number', req: true, half: true }, { k: 'type', label: 'Vehicle type', type: 'datalist', opts: ['Ambulance', 'Utility / pick-up', 'Sedan', 'Minibus', 'Truck', 'Motorbike'], req: true, half: true }, { k: 'make', label: 'Make / model', half: true }, { k: 'driver', label: 'Main driver', type: 'datalist', opts: () => LOOK.employee().map((e) => e[1].split(' · ')[0]), half: true }, { k: 'km', label: 'Current mileage (km)', type: 'number', half: true }, { k: 'service_date', label: 'Next service date', type: 'date', half: true }, { k: 'service_km', label: 'Next service at (km)', type: 'number', half: true }, { k: 'licence', label: 'Licence expiry', type: 'date', half: true }, { k: 'insurance', label: 'Insurance expiry', type: 'date', half: true }, { k: 'notes', label: 'Notes', type: 'textarea', rows: 2 }],
+  fields: [{ k: 'reg', label: 'Registration number', req: true, half: true }, { k: 'type', label: 'Vehicle type', type: 'datalist', opts: ['Ambulance', 'Utility / pick-up', 'Sedan', 'Minibus', 'Truck', 'Motorbike'], req: true, half: true }, { k: 'make', label: 'Make / model', half: true }, { k: 'driver', label: 'Main driver', type: 'datalist', opts: () => LOOK.employee().map((e) => e[1].split(' · ')[0]), half: true }, { k: 'km', label: 'Current mileage (km)', type: 'number', half: true }, { k: 'service_date', label: 'Next service date', type: 'date', half: true }, { k: 'service_km', label: 'Next service at (km)', type: 'number', half: true }, { k: 'licence', label: 'Vehicle licence (ZINARA) expiry', type: 'date', half: true }, { k: 'insurance', label: 'Insurance expiry', type: 'date', half: true }, { k: 'notes', label: 'Notes', type: 'textarea', rows: 2 }],
   cols: [{ h: 'Registration', f: (v) => `<b>${esc(v.reg)}</b><br><span class="muted sm">${esc([v.type, v.make].filter(Boolean).join(' · '))}</span>`, x: (v) => v.reg }, { h: 'Driver', k: 'driver' }, { h: 'Mileage', num: true, f: (v) => fnum(vehicleKm(v)) + ' km', x: (v) => vehicleKm(v) }, { h: 'Fuel this month', num: true, f: (v) => fnum(sum(APP.all('fuel').filter((f) => f.vehicle === v.id && monthOf(f.date) === thisMonth()), 'litres'), 1) + ' L', x: (v) => sum(APP.all('fuel').filter((f) => f.vehicle === v.id && monthOf(f.date) === thisMonth()), 'litres') }, { h: 'Service', f: (v) => fdate(v.service_date), x: (v) => v.service_date }, { h: 'Licence', f: (v) => fdate(v.licence), x: (v) => v.licence }, { h: 'Insurance', f: (v) => fdate(v.insurance), x: (v) => v.insurance }, { h: 'Alerts', f: (v) => vehicleAlerts(v).map((a) => pill(...a)).join(' ') || pill('OK', 'ok'), x: (v) => vehicleAlerts(v).map((a) => a[0]).join('; ') }],
   buttons: [{ t: 'Log a trip', ghost: true, do: () => editDoc(TRIPS, null) }, { t: 'Add fuel', ghost: true, do: () => editDoc(FUEL, null) }],
   top: (rows) => stats([[rows.length, 'vehicles'], [rows.filter((v) => vehicleAlerts(v).length).length, 'need attention', rows.some((v) => vehicleAlerts(v).some((a) => a[1] === 'bad')) ? 'alert' : ''], [fnum(sum(APP.all('fuel').filter((f) => monthOf(f.date) === thisMonth()), 'litres'), 1) + ' L', 'fuel this month'], [fnum(sum(APP.all('trips').filter((t) => monthOf(t.date) === thisMonth()), (t) => Math.max(0, num(t.km_in) - num(t.km_out)))) + ' km', 'driven this month']]),
@@ -393,4 +393,132 @@ function epiSheets(month) {
     ['By area', [['Area', 'Patients'], ...Object.entries(groupBy(E.ps, 'area')).map(([a, arr]) => [a, arr.length]).sort((a, b) => b[1] - a[1])]],
     ['Maternity', [['Measure', 'Number'], ['Deliveries', E.births.length], ['Normal', E.births.filter((b) => /Normal|Breech/.test(b.mode)).length], ['Assisted', E.births.filter((b) => /Assisted/.test(b.mode)).length], ['C-sections', E.births.filter((b) => /Caesarean/.test(b.mode)).length], ['Live births', E.bb.filter((b) => b.outcome === 'Live birth').length], ['Stillbirths', E.bb.filter((b) => /stillbirth/.test(b.outcome)).length], ['Boys', E.bb.filter((b) => b.sex === 'Boy').length], ['Girls', E.bb.filter((b) => b.sex === 'Girl').length], ['Maternal deaths', E.births.filter((b) => b.maternal_death).length], ['Neonatal deaths', E.bb.filter((b) => b.neonatal_death).length], ['Mothers HIV+', E.births.filter((b) => b.hiv === 'Positive').length], ['Nevirapine given', E.births.filter((b) => b.nvp).length]]],
     ['Patients', [['Date', 'Department', 'Age', 'Age unit', 'Sex', 'Area', 'Diagnosis', 'Second diagnosis', 'Case', 'Outcome', 'Payment'], ...E.ps.map((p) => [p.date, p.dept, p.age, p.age_unit || 'years', p.sex, p.area, p.diagnosis, p.diagnosis2 || '', p.case, p.outcome, p.payer])]]];
+}
+
+/* ---------------- LICENCES & COMPLIANCE ---------------- */
+const LIC_COMMON = [
+  ['Pharmacy premises licence', 'MCAZ (Medicines Control Authority of Zimbabwe)', 'Pharmacy'],
+  ['Registration of health institution', 'HPA (Health Professions Authority)', 'Hospital'],
+  ['Operating licence / registration', 'Ministry of Health and Child Care', 'Hospital'],
+  ['Medical waste licence', 'EMA (Environmental Management Agency)', 'Hospital'],
+  ['Effluent discharge licence', 'EMA (Environmental Management Agency)', 'Hospital'],
+  ['Radiation / X-ray licence', 'RPAZ (Radiation Protection Authority of Zimbabwe)', 'X-ray'],
+  ['Medical laboratory licence', 'MLCSCZ (Medical Laboratory & Clinical Scientists Council)', 'Laboratory'],
+  ['Business / shop licence', 'City / town council', 'Hospital'],
+  ['Fire certificate', 'City / town council fire department', 'Hospital'],
+  ['Food handling / kitchen health certificate', 'City / town council health department', 'Kitchen'],
+  ['Tax clearance (ITF263)', 'ZIMRA', 'Hospital'],
+  ['NSSA registration / compliance certificate', 'NSSA', 'Hospital'],
+  ['Medical aid service provider number', 'AHFoZ / medical aid societies', 'Hospital'],
+  ['Practising certificate', 'Nurses Council of Zimbabwe', 'Staff member'],
+  ['Practising certificate', 'Medical & Dental Practitioners Council (MDPCZ)', 'Staff member'],
+  ['Practising certificate', 'Pharmacists Council of Zimbabwe', 'Staff member'],
+];
+function licDays(l) { return l.expiry ? daysBetween(today(), l.expiry) : null; }
+function licState(l) {
+  if (l.status === 'Not needed any more') return ['Not needed', ''];
+  const d = licDays(l); if (d == null) return ['No expiry date', 'warn'];
+  if (d < 0) return [`EXPIRED ${-d} day${d === -1 ? '' : 's'} ago`, 'bad'];
+  if (l.status === 'Renewal in progress') return [`Renewing · ${d} days left`, 'info'];
+  if (d <= 30) return [`Expires in ${d} day${d === 1 ? '' : 's'}`, 'bad'];
+  if (d <= num(l.warn_days || 90)) return [`Expires in ${d} days`, 'warn'];
+  return ['Valid', 'ok'];
+}
+const licDue = (l) => l.status !== 'Not needed any more' && (licDays(l) == null || licDays(l) <= num(l.warn_days || 90));
+function licIcs(ls) {
+  const evs = ls.filter((l) => l.expiry).map((l) => ({ uid: 'lic-' + l.id, start: l.expiry, title: `${l.name} expires (${l.body || ''})`, desc: `${l.name}${l.number ? ' no. ' + l.number : ''}\nIssued by ${l.body || ''}\nResponsible: ${l.responsible || ''}\nStart the renewal now.` }));
+  if (!evs.length) return toast('No expiry dates to add.', true);
+  const T = (d) => d.replace(/-/g, '');
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//CarePoint Admin//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
+  const ev = (s) => String(s || '').replace(/[\;,]/g, (c) => '\\' + c).replace(/\n/g, '\\n');
+  evs.forEach((e) => L.push('BEGIN:VEVENT', 'UID:' + e.uid + '@carepoint', 'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, ''), 'DTSTART;VALUE=DATE:' + T(e.start), 'DTEND;VALUE=DATE:' + T(addDays(e.start, 1)), 'SUMMARY:' + ev(e.title), 'DESCRIPTION:' + ev(e.desc),
+    ...[90, 60, 30, 14, 7].flatMap((n) => ['BEGIN:VALARM', 'TRIGGER:-P' + n + 'D', 'ACTION:DISPLAY', 'DESCRIPTION:' + ev(e.title + ' in ' + n + ' days'), 'END:VALARM']), 'END:VEVENT'));
+  L.push('END:VCALENDAR');
+  downloadFile((evs.length === 1 ? ls[0].name : 'licence-expiry-dates').replace(/[^\w-]+/g, '-') + '.ics', L.join('\r\n'), 'text/calendar');
+  toast('Open the file to add the expiry dates to your phone calendar. It reminds you 90, 60, 30, 14 and 7 days before.');
+}
+/* files: images are shrunk before upload; PDFs go as they are */
+async function shrinkImage(file) {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 700000) return file;
+  const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); });
+  const s = Math.min(1, 2200 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(img.src);
+  const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.82));
+  return new File([blob], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+}
+async function uploadFile(col, docId, file, onp) {
+  if (!navigator.onLine) throw new Error('Attaching files needs network. The licence details are saved; attach the scan when you are online.');
+  if (APP.outbox.some((o) => o.col === col && o.id === docId)) { await APP.sync(); if (APP.outbox.some((o) => o.col === col && o.id === docId)) throw new Error('Still saving the record. Try again in a moment.'); }
+  file = await shrinkImage(file);
+  if (file.size > 15 * 1048576) throw new Error('That file is bigger than 15 MB. Scan it at a lower quality or as a photo.');
+  const buf = new Uint8Array(await file.arrayBuffer()), CH = 700000;
+  const { id } = await api('files/start', { col, doc_id: docId, name: file.name, mime: file.type || 'application/octet-stream', size: buf.length });
+  for (let n = 0, o = 0; o < buf.length; n++, o += CH) {
+    let bin = ''; const part = buf.subarray(o, o + CH); for (let i = 0; i < part.length; i += 8192) bin += String.fromCharCode.apply(null, part.subarray(i, i + 8192));
+    await api(`files/${id}/chunk`, { n, b64: btoa(bin) }); if (onp) onp(Math.min(100, Math.round(((o + CH) * 100) / buf.length)));
+  }
+  return (await api(`files/${id}/finish`, {})).file;
+}
+async function filesBox(box, col, doc, canW) {
+  box.innerHTML = '<p class="muted sm">Loading attachments…</p>';
+  let files = [];
+  try { files = (await api(`files?col=${col}&doc=${encodeURIComponent(doc.id)}`)).files; } catch (e) { box.innerHTML = `<p class="muted sm">${navigator.onLine ? esc(e.message) : 'Attachments show when you are online.'}</p>`; return; }
+  box.innerHTML = `<h3>Scanned copies</h3>${files.length ? `<ul class="files">${files.map((f) => `<li><a href="/api/files/${f.id}" target="_blank" rel="noopener">${/^image\//.test(f.mime) ? '🖼' : '📄'} ${esc(f.name)}</a> <span class="muted sm">${fnum(f.size / 1024)} KB · ${fdate(f.at)} · ${esc(f.by_name || '')}</span>${canW && APP.me.role === 'admin' ? ` <button type="button" class="btn sm ghost danger" data-fdel="${f.id}">Remove</button>` : ''}</li>`).join('')}</ul>` : '<p class="muted sm">No copy attached yet.</p>'}
+    ${canW ? `<label class="btn sm ghost upl">Attach scan or photo<input type="file" accept="application/pdf,image/*" capture="environment" hidden></label> <span class="muted sm" data-prog></span>` : ''}`;
+  const inp = $('input[type=file]', box);
+  if (inp) inp.onchange = async () => { const f = inp.files[0]; if (!f) return; const pr = $('[data-prog]', box); try { pr.textContent = 'Uploading…'; await uploadFile(col, doc.id, f, (p) => (pr.textContent = `Uploading ${p}%`)); toast('Copy attached'); APP.save(col, { ...APP.get(col, doc.id), files_n: files.length + 1 }); filesBox(box, col, doc, canW); } catch (e) { pr.textContent = ''; toast(e.message, true); } };
+  $$('[data-fdel]', box).forEach((b) => (b.onclick = () => confirmBox('Remove this scanned copy?', 'Remove', async () => { try { await api(`files/${b.dataset.fdel}/delete`, {}); APP.save(col, { ...APP.get(col, doc.id), files_n: Math.max(0, files.length - 1) }); filesBox(box, col, doc, canW); } catch (e) { toast(e.message, true); } })));
+}
+const LICENCES = {
+  key: 'licences', col: 'licences', title: 'Licences & compliance', one: 'licence', ph: 'Search licence, authority, number',
+  search: ['name', 'body', 'number', 'covers', 'responsible', (l) => nameOf('employees', l.emp)],
+  filters: [{ k: 'due', label: 'All licences', opts: [['due', 'Expiring or expired'], ['expired', 'Expired'], ['ok', 'Valid']], test: (l, v) => (v === 'due' ? licDue(l) : v === 'expired' ? licDays(l) != null && licDays(l) < 0 : !licDue(l)) }, { k: 'covers', label: 'All areas', opts: () => [...new Set(APP.all('licences').map((l) => l.covers).filter(Boolean))] }],
+  sort: (a, b) => (a.expiry || '0000').localeCompare(b.expiry || '0000'),
+  defaults: () => ({ warn_days: 90, status: 'Valid' }),
+  fields: () => [
+    { k: 'name', label: 'Licence / certificate', req: true, half: true, type: 'datalist', opts: () => [...new Set(LIC_COMMON.map((x) => x[0]))] },
+    { k: 'body', label: 'Issued by (authority)', req: true, half: true, type: 'datalist', opts: () => [...new Set(LIC_COMMON.map((x) => x[1]))] },
+    { k: 'covers', label: 'What it covers', type: 'datalist', opts: () => ['Hospital', 'Pharmacy', 'Theatre', 'Laboratory', 'X-ray', 'Kitchen', 'Maternity', 'Vehicles', 'Staff member', ...APP.settings().departments], half: true, req: true },
+    { k: 'emp', label: 'Staff member', type: 'select', opts: LOOK.employee, half: true, show: (d) => d.covers === 'Staff member' },
+    { k: 'number', label: 'Licence / certificate number', half: true },
+    { k: 'issued', label: 'Date issued', type: 'date', half: true },
+    { k: 'expiry', label: 'Expiry date', type: 'date', half: true, req: true },
+    { k: 'warn_days', label: 'Start warning this many days before', type: 'number', min: 7, half: true, help: 'Renewals can take weeks. 90 days gives time to collect documents and pay.' },
+    { k: 'responsible', label: 'Person responsible for renewal', half: true, type: 'datalist', opts: () => LOOK.employee().map((e) => e[1].split(' · ')[0]) },
+    { k: 'status', label: 'Status', type: 'select', opts: ['Valid', 'Renewal in progress', 'Not needed any more'], half: true },
+    { k: 'renewal_started', label: 'Renewal applied for on', type: 'date', half: true, show: (d) => d.status === 'Renewal in progress' },
+    { k: 'cost', label: 'Renewal fee', type: 'money', half: true, hide: !APP.moneyOK },
+    { k: 'requirements', label: 'What is needed to renew (documents, inspections)', type: 'textarea', rows: 3 },
+    { k: 'notes', label: 'Notes', type: 'textarea', rows: 2 },
+  ],
+  prep: (d) => {
+    const old = d.id && APP.get('licences', d.id);
+    if (old && old.expiry && d.expiry && d.expiry !== old.expiry) { d.history = [...(old.history || []), { expiry: old.expiry, number: old.number || '', replaced: today(), by: APP.me.name }]; if (d.status === 'Renewal in progress' && d.expiry > today()) d.status = 'Valid'; }
+    return d;
+  },
+  cols: () => [
+    { h: 'Licence', f: (l) => `<b>${esc(l.name)}</b>${l.covers === 'Staff member' && l.emp ? ' · ' + esc(nameOf('employees', l.emp)) : ''}<br><span class="muted sm">${esc(l.body || '')}${l.number ? ' · no. ' + esc(l.number) : ''}</span>`, x: (l) => l.name },
+    { h: 'Authority', k: 'body', cls: 'hide-m' }, { h: 'Covers', f: (l) => esc(l.covers === 'Staff member' ? nameOf('employees', l.emp) || 'Staff member' : l.covers || ''), x: (l) => l.covers },
+    { h: 'Expiry', f: (l) => (l.expiry ? fdate(l.expiry) : '<span class="muted">not set</span>'), x: (l) => l.expiry },
+    { h: 'Status', sort: (l) => licDays(l) ?? -9999, f: (l) => pill(...licState(l)), x: (l) => licState(l)[0] },
+    { h: 'Responsible', k: 'responsible' }, { h: 'Copy', f: (l) => (num(l.files_n) ? '📄 ' + l.files_n : '<span class="muted sm">none</span>'), x: (l) => num(l.files_n) },
+  ],
+  rowCls: (l) => (licDays(l) != null && licDays(l) < 0 && l.status !== 'Not needed any more' ? 'hl-bad' : ''),
+  top: (rows) => {
+    const all = APP.all('licences').filter((l) => l.status !== 'Not needed any more'), exp = all.filter((l) => licDays(l) != null && licDays(l) < 0), soon = all.filter((l) => licDue(l) && !(licDays(l) < 0));
+    return `${stats([[all.length, 'licences tracked'], [exp.length, 'expired', exp.length ? 'alert' : ''], [soon.length, 'expiring soon', soon.length ? 'warn' : ''], [all.filter((l) => !num(l.files_n)).length, 'with no scanned copy']])}
+      ${exp.length ? `<div class="note bad"><b>Expired:</b> ${exp.map((l) => `${esc(l.name)} (${esc(l.body || '')}) expired ${fdate(l.expiry)}`).join('; ')}. Operating without these can mean penalties or closure. Renew now.</div>` : ''}
+      ${!APP.all('licences').length ? `<div class="card hi"><h3>Start your licence list</h3><p>Add each licence or certificate the hospital must keep, with its expiry date and a scanned copy. You get warnings on the dashboard before anything expires, and can add the dates to your phone calendar.</p>${APP.can('licences', true) ? '<button class="btn" id="licCommon">Add from the common list</button>' : ''}</div>` : ''}`;
+  },
+  buttons: [{ t: 'Add expiry dates to my calendar', ghost: true, do: (rows) => licIcs(rows.filter((l) => l.status !== 'Not needed any more')) }],
+  addText: '+ Licence', wide: true, titleOf: (l) => l.name,
+  extra: (l) => `<div class="card mt" data-files></div>${(l.history || []).length ? `<h3 class="mt">Renewal history</h3>${table([{ h: 'Old expiry', f: (h) => fdate(h.expiry) }, { h: 'Number', k: 'number' }, { h: 'Renewed on', f: (h) => fdate(h.replaced) }, { h: 'By', k: 'by' }], l.history.slice().reverse())}` : ''}<p class="mt"><button type="button" class="btn sm ghost" data-lics>Add this expiry to my calendar</button></p>`,
+  after: (el) => { const b = $('#licCommon', el); if (b) b.onclick = licCommonForm; },
+  open: (l) => { editDoc(LICENCES, l); setTimeout(() => { const s = $('#sheet'); const fb = $('[data-files]', s); if (fb) filesBox(fb, 'licences', l, APP.can('licences', true)); const c = $('[data-lics]', s); if (c) c.onclick = () => licIcs([l]); }, 40); },
+};
+function licCommonForm() {
+  const s = sheet('Common licences', `<p class="muted">Tick the ones your hospital holds, then fill in the expiry dates. This list is a starting point; check which apply to you, and add any others with “+ Licence”.</p>
+    <form class="form">${LIC_COMMON.map(([n, b, c], i) => `<label class="check"><input type="checkbox" name="c${i}" ${c !== 'Staff member' ? 'checked' : ''}> <span><b>${esc(n)}</b> · ${esc(b)}${c === 'Staff member' ? ' (one per staff member)' : ''}</span></label>`).join('')}
+    <div class="actions"><span class="sp"></span><button type="button" class="btn ghost" data-close>Cancel</button><button class="btn">Add ticked licences</button></div></form>`);
+  $('form', s).onsubmit = (e) => { e.preventDefault(); let n = 0; APP.bulk(() => LIC_COMMON.forEach(([name, body, covers], i) => { if (e.target.elements['c' + i].checked) { APP.save('licences', { name, body, covers, warn_days: 90, status: 'Valid' }); n++; } })); closeSheet(); toast(n + ' licences added. Open each one to enter the expiry date and attach a scan.'); };
 }
