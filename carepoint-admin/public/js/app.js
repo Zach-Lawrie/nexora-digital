@@ -22,18 +22,26 @@ const PAGES = {
   licences: { t: 'Licences & compliance', r: (el) => crud(el, LICENCES) }, assets: { t: 'Assets', r: (el) => crud(el, ASSETS) }, repairs: { t: 'Maintenance & repairs', r: (el) => crud(el, REPAIRS) }, vehicles: { t: 'Vehicles', r: (el) => crud(el, VEHICLES) },
   attendance: { t: 'Attendance register', r: attendancePage }, employees: { t: 'Employees', r: (el) => crud(el, EMPLOYEES) }, leave: { t: 'Leave', r: (el) => crud(el, LEAVE) },
   meetings: { t: 'Meetings & minutes', r: (el) => crud(el, MEETINGS) }, goals: { t: 'Strategic plan', r: (el) => crud(el, GOALS) },
-  patients: { t: 'Patients seen / admitted', r: (el) => crud(el, PATIENTS) }, births: { t: 'Deliveries', r: (el) => crud(el, BIRTHS) }, epi: { t: 'Disease patterns', r: epiPage },
+  patients: { t: 'Patients seen / admitted', r: (el) => crud(el, PATIENTS) }, births: { t: 'Deliveries', r: (el) => crud(el, BIRTHS) }, epi: { t: 'Disease patterns', r: epiPage }, dept: { t: 'Department', r: deptPage },
   reports: { t: 'Monthly report', r: reportsPage }, settings: { t: 'Settings', r: settingsPage }, users: { t: 'Users & logins', r: usersPage }, backup: { t: 'Backup & restore', r: backupPage }, audit: { t: 'Activity log', r: auditPage }, account: { t: 'My account', r: accountPage },
 };
 let ROUTE = 'dashboard';
-function allowed(k) { for (const [, items] of NAV) for (const it of items) if (it[0] === k) return it[3](); return k === 'account'; }
+// the menu: fixed sections plus one link per department (from Settings)
+function navHtml() {
+  const ds = deptList();
+  const depts = ds.length ? `<div class="ng"><span>Departments</span>${ds.map((n) => `<a href="${deptHref(n)}" data-k="dept/${esc(n)}"><i>${deptIcon(n)}</i>${esc(n)}<em data-badge="d:${esc(n)}"></em></a>`).join('')}</div>` : '';
+  return NAV.map(([g, items], gi) => { const vis = items.filter((i) => i[3]()); return (vis.length ? `<div class="ng"><span>${esc(g)}</span>${vis.map(([k, t, ic]) => `<a href="#/${k}" data-k="${k}"><i>${ic}</i>${esc(t)}<em data-badge="${k}"></em></a>`).join('')}</div>` : '') + (gi === 0 ? depts : ''); }).join('');
+}
+let NAVSIG = '';
+function allowed(k) { if (k === 'dept') return deptList().length > 0; for (const [, items] of NAV) for (const it of items) if (it[0] === k) return it[3](); return k === 'account'; }
 function go(k) { location.hash = '#/' + k; }
 function rerender() { const el = $('#main'); if (!el) return; const y = el.scrollTop; try { PAGES[ROUTE].r(el); } catch (e) { console.error(e); el.innerHTML = `<div class="empty">This page hit a problem: ${esc(e.message)}</div>`; } el.scrollTop = y; }
 function route() {
   const k = (location.hash.match(/^#\/([a-z]+)/) || [])[1] || 'dashboard';
   ROUTE = PAGES[k] && allowed(k) ? k : 'dashboard';
   $('#title').textContent = PAGES[ROUTE].t;
-  $$('#nav a').forEach((a) => a.setAttribute('aria-current', a.dataset.k === ROUTE ? 'page' : 'false'));
+  const cur = ROUTE === 'dept' ? 'dept/' + currentDept() : ROUTE;
+  $$('#nav a').forEach((a) => a.setAttribute('aria-current', a.dataset.k === cur ? 'page' : 'false'));
   document.body.classList.remove('navopen');
   $('#main').scrollTop = 0; rerender();
 }
@@ -44,7 +52,7 @@ function shell() {
   const s = APP.settings();
   document.title = s.hospital + ' · CarePoint Admin';
   $('#app').innerHTML = `<aside id="side"><div class="brand">${brandMark()}<div><b>${esc(s.hospital)}</b><span>CarePoint Admin</span></div></div>
-    <nav id="nav">${NAV.map(([g, items]) => { const vis = items.filter((i) => i[3]()); return vis.length ? `<div class="ng"><span>${esc(g)}</span>${vis.map(([k, t, ic]) => `<a href="#/${k}" data-k="${k}"><i>${ic}</i>${esc(t)}<em data-badge="${k}"></em></a>`).join('')}</div>` : ''; }).join('')}</nav>
+    <nav id="nav">${navHtml()}</nav>
     <div class="me-i">${installBtn('sm ghost light')}</div><div class="me"><a href="#/account"><b>${esc(APP.me.name)}</b><span>${esc(APP.roles[APP.me.role])}${APP.me.dept ? ' · ' + esc(APP.me.dept) : ''}</span></a><button class="btn sm ghost" id="logout">Sign out</button></div></aside>
     <div id="shade"></div>
     <section id="page"><header id="top"><button id="menu" aria-label="Menu">☰</button><h1 id="title"></h1><span class="sp"></span><input id="gsearch" type="search" placeholder="Search item, patient, vehicle, staff" aria-label="Search"><span id="sync" class="sync"></span></header><main id="main"></main></section>`;
@@ -52,13 +60,14 @@ function shell() {
   $('#shade').onclick = () => document.body.classList.remove('navopen');
   $('#logout').onclick = async () => { if (APP.outbox.length && !confirm(APP.outbox.length + ' changes are not saved to the server yet. Sign out anyway? They will be lost.')) return; try { await api('logout', {}); } catch (e) {} indexedDB.deleteDatabase('cp-' + APP.me.id); location.reload(); };
   $('#gsearch').onkeydown = (e) => { if (e.key === 'Enter') { PS('search', {}).q = e.target.value; go('search'); if (ROUTE === 'search') rerender(); } };
-  syncBadge(); route(); badges();
+  NAVSIG = JSON.stringify(deptList()); syncBadge(); route(); badges();
 }
 function badges() {
   const b = { requests: APP.can('requests') ? APP.all('requests').filter((r) => r.status === 'pending').length : 0, medical: APP.can('items') ? lowItems(['drug', 'sundry']).length : 0, repairs: APP.all('repairs').filter(repairLate).length, orders: APP.can('orders') ? APP.all('orders').filter((o) => ['Late', 'Closed short'].includes(orderStatus(o)[0])).length : 0, licences: APP.can('licences') ? APP.all('licences').filter(licDue).length : 0, meetings: APP.can('meetings') ? openActions().filter((a) => a.due && a.due < today()).length : 0 };
+  if (APP.can('requests')) APP.all('requests').filter((r) => r.status === 'pending' && r.dept).forEach((r) => { b['d:' + r.dept] = (b['d:' + r.dept] || 0) + 1; });
   $$('[data-badge]').forEach((e) => { const n = b[e.dataset.badge]; e.textContent = n ? n : ''; e.hidden = !n; });
 }
-APP.listeners.push(() => { if (APP.me && $('#main')) { const h = APP.settings().hospital, b = $('#side .brand b'); if (b && b.textContent !== h) { b.textContent = h; document.title = h + ' · CarePoint Admin'; } rerender(); badges(); } });
+APP.listeners.push(() => { if (APP.me && $('#main')) { const sig = JSON.stringify(deptList()); if (sig !== NAVSIG) { NAVSIG = sig; $('#nav').innerHTML = navHtml(); const cur = ROUTE === 'dept' ? 'dept/' + currentDept() : ROUTE; $$('#nav a').forEach((x) => x.setAttribute('aria-current', x.dataset.k === cur ? 'page' : 'false')); } const h = APP.settings().hospital, b = $('#side .brand b'); if (b && b.textContent !== h) { b.textContent = h; document.title = h + ' · CarePoint Admin'; } rerender(); badges(); } });
 
 /* ---------------- dashboard ---------------- */
 function alertsList() {
