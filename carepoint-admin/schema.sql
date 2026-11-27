@@ -1,0 +1,19 @@
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY, name TEXT NOT NULL, username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  pass TEXT NOT NULL, salt TEXT NOT NULL, role TEXT NOT NULL, dept TEXT, emp TEXT,
+  active INTEGER NOT NULL DEFAULT 1, must_change INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')), last_login TEXT
+);
+CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id TEXT NOT NULL, expires INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS docs (
+  col TEXT NOT NULL, id TEXT NOT NULL, data TEXT NOT NULL, seq INTEGER NOT NULL,
+  deleted INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL, updated_by TEXT,
+  PRIMARY KEY (col, id)
+);
+CREATE INDEX IF NOT EXISTS docs_seq ON docs(seq);
+CREATE TABLE IF NOT EXISTS audit (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
+  user_id TEXT, user_name TEXT, action TEXT NOT NULL, col TEXT, doc_id TEXT, detail TEXT
+);
+CREATE INDEX IF NOT EXISTS audit_at ON audit(at);
+CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT);
