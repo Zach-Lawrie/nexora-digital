@@ -314,5 +314,21 @@ function setupView(app) {
   app.innerHTML = `<div class="auth"><div class="card"><h1>Set up CarePoint Admin</h1><p>Create the administrator login. You need the setup code from Nexora Digital.</p><form class="form" id="sf"><div class="fld full"><label>Setup code</label><input name="code" required></div><div class="fld full"><label>Your full name</label><input name="name" required></div><div class="fld half"><label>Username</label><input name="username" autocapitalize="none" required></div><div class="fld half"><label>Password (8+)</label><input type="password" name="password" minlength="8" required></div><p class="err"></p><button class="btn full">Create administrator</button></form></div></div>`;
   $('#sf').onsubmit = async (e) => { e.preventDefault(); const f = e.target; try { await api('setup', Object.fromEntries(new FormData(f))); await api('login', { username: f.elements.username.value, password: f.elements.password.value }); location.reload(); } catch (x) { $('.err', f).textContent = x.message; } };
 }
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js').catch(() => {});
+// updates: check for a new version whenever the app is opened or brought back, then offer a refresh
+function showUpdate() {
+  if ($('#upd')) return;
+  const d = document.createElement('div'); d.id = 'upd'; d.className = 'upd'; d.setAttribute('role', 'status');
+  d.innerHTML = '<span>A new version of CarePoint is ready.</span><button class="btn sm">Refresh</button>';
+  $('button', d).onclick = async () => { try { if (APP.outbox && APP.outbox.length && APP.online) await APP.sync(); } catch (e) {} location.reload(); };
+  document.body.appendChild(d);
+}
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  let had = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!had) { had = true; return; } showUpdate(); });
+  navigator.serviceWorker.register('/sw.js').then((reg) => {
+    const check = () => reg.update().catch(() => {});
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+    addEventListener('online', check); setInterval(check, 20 * 60e3);
+  }).catch(() => {});
+}
 start();
